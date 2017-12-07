@@ -1,0 +1,25 @@
+/*
+ * menu.h
+ *
+ *  Created on: Jan 8, 2017
+ *      Author: dave
+ */
+
+#ifndef MENUS_H_
+#define MENUS_H_
+
+//extern const uint8_t DISP_VERSION[];
+//extern const uint8_t OOPS[];
+
+void clearLine(uint8_t row);
+void dispBoot(uint8_t stage);
+void dispMainDARD(uint8_t* value);
+void dispDateTime(void);
+void dispArmedType(void);
+void dispIntLight(void);
+void dispExtLight(void);
+void dispTimeChange(uint8_t);
+void dispStatus(uint8_t item);
+void dispInputBuffers(void);
+void displayReadyToArm(void);
+#endif /* MENUS_H_ */
