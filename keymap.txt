@@ -1,0 +1,45 @@
+keymap.txt
+ Created on: Jan 10, 2017
+     Author: dave
+
+     [MRC][ M-][ M+][ CE][ON/C]
+     [ 7 ][ 8 ][ 9 ][ % ][sqrt]
+     [ 4 ][ 5 ][ 6 ][ X ][  / ]
+     [ 1 ][ 2 ][ 3 ]| + |[  - ]
+     [ 0 ][ . ][+/-]| + |[  = ]
+     
+     ALARM ARMED
+     	[ON/C] = DISARM PASSWORD
+     	[NUMBERS] = PASSWORD INPUT
+     	
+     ALARM DISARMED
+     	[M+] = ARM MENU
+     		[M+] = ARM AWAY
+     		[sqrt] = ARM AWAY (NO INT AUTOMATION)
+     		[  / ] = ARM AWAY (NO EXT AUTOMATION)
+     		[  - ] = ARM AWAY (NO AUTOMATION)
+     		[  = ] = ARM STAY
+     		
+     	[MRC] = INTERIOR LIGHT MENU
+     		[ 7/4 ] = MAIN LIGHTS			|
+     		[ 8/5 ] = SUPPLEMENT LIGHTS	} [0][1] = ON/OFF
+     		[ 1/0 ] = ALL LIGHTS
+     		[ %/* ] = FAN					|
+     	
+     	[M-] = EXTERIOR LIGHTS MENU
+     		[ 1 ] = EAST LIGHT
+     		[ 2 ] = SOUTH LIGHT
+     		[ 3 ] = NORTH LIGHT
+     		[ 4 ] = WEST LIGHT
+     		[ 1 ] = ALL ON
+     		[ 0 ] = ALL OFF
+     		
+     	[%] = INPUT BUFFERS
+     	
+     	[X] = ALARM TEST
+     	
+     	[SQRT] = CHANGE TIME
+     	
+     	[=] = SYSTEM STATUS
+     		[=] = ALL
+     		[KEYPAD] = SELECTION
