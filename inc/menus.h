@@ -2,11 +2,14 @@
  * menu.h
  *
  *  Created on: Jan 8, 2017
+ *  Updated on: Dec 7, 2017
  *      Author: dave
  */
 
 #ifndef MENUS_H_
 #define MENUS_H_
+
+#include <stdint.h>
 
 //extern const uint8_t DISP_VERSION[];
 //extern const uint8_t OOPS[];
