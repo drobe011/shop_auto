@@ -8,6 +8,7 @@
 #include "menus.h"
 #include "sys_config.h"
 #include "stdio.h"
+#include <string.h>
 
 /*
  * SCREENS
@@ -93,9 +94,9 @@ void dispDateTime(void)
 	sprintf(timeStr, "%02d:%02d",cTime.time[RTC_TIMETYPE_HOUR], cTime.time[RTC_TIMETYPE_MINUTE]);
 	sprintf(dateStr, "%02d/%02d/%04d", cTime.time[RTC_TIMETYPE_MONTH], cTime.time[RTC_TIMETYPE_DAYOFMONTH], cTime.time[RTC_TIMETYPE_YEAR]);
 	struct MSG_S time_tmp = {0,0, ""};
-	*time_tmp.msg = *timeStr;
+	strcpy((char*)time_tmp.msg, (char*)timeStr);
 	struct MSG_S date_tmp = {0,10, ""};
-	*date_tmp.msg = *dateStr;
+	strcpy((char*)date_tmp.msg, (char*)dateStr);
 	sendDisplay(0, &time_tmp);
 	//setCursor(0, 10);
 	sendDisplay(0, &date_tmp);
@@ -121,7 +122,8 @@ void dispMainDARD(uint8_t* value)
 	//sendDisplay(0, DISP_DARMD);
 	//setCursor(1,0);
 	struct MSG_S user = {1,0, ""};
-	*user.msg = *c_user->name;
+	strcpy ((char*)user.msg, (char*)c_user->name);
+	//user.msg = c_user->name;
 	sendDisplay(1, &user);
 	sendDisplay(0, &DISP_TEMP_CONST);
 	//SET NOT READY TO ARM
