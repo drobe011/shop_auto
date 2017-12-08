@@ -13,6 +13,7 @@
 #include <sys_config.h>
 #include "menus.h"
 #include <stdio.h>
+#include <string.h>
 
 volatile uint32_t systemTick;
 volatile uint8_t updateTime = 0;
@@ -452,8 +453,10 @@ void checkStatus(void)
 		if (value > 15) return;
 
 		//TODO: MAKE INTO FUNCTION
-		setCursor(0,15);
-		sendDisplay(1, alarm_system_I[value].name);
+		//setCursor(0,15);
+		struct MSG_S sensor = {0, 15, ""};
+		strcpy((char*)sensor.msg, (char*)alarm_system_I[value].name);
+		sendDisplay(0, &sensor);
 		clearLine(1);
 		setCursor(1,0);
 		dispStatus((alarm_system_I[value].active ? 1 : 2));
