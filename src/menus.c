@@ -124,7 +124,7 @@ void dispMainDARD(uint8_t* value)
 	struct MSG_S user = {1,0, ""};
 	strcpy ((char*)user.msg, (char*)c_user->name);
 	//user.msg = c_user->name;
-	sendDisplay(1, &user);
+	sendDisplay(0, &user);
 	sendDisplay(0, &DISP_TEMP_CONST);
 	//SET NOT READY TO ARM
 	//setCursor(1,9);
