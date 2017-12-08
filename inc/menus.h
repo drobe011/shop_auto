@@ -14,6 +14,12 @@
 //extern const uint8_t DISP_VERSION[];
 //extern const uint8_t OOPS[];
 
+//struct MSG_S {
+//	uint8_t row;
+//	uint8_t column;
+//	uint8_t msg[];
+//};
+
 void clearLine(uint8_t row);
 void dispBoot(uint8_t stage);
 void dispMainDARD(uint8_t* value);

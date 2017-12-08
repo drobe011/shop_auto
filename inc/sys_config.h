@@ -221,6 +221,12 @@ struct users_S
 //
 // END USER DATA
 
+struct MSG_S {
+	uint8_t row;
+	uint8_t column;
+	uint8_t msg[21];
+};
+
 // RTC DEFINES
 //
 #define RTC_OSCF 4
@@ -282,8 +288,9 @@ struct users_S
 
 // FUNCTION DECLARATIONS
 //
+
 void setUpSystem(void);
-void sendDisplay(uint8_t startAtCursor, uint8_t *dispData);
+void sendDisplay(uint8_t startAtCursor, struct MSG_S*);
 void sendCMD(uint8_t cmdByte);
 void sendData(uint8_t dataByte);
 void sendChar(uint8_t data);

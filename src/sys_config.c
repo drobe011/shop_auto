@@ -189,24 +189,25 @@ void sendChar(uint8_t data)
 {
 	sendData(data);
 }
-void sendDisplay(uint8_t startAtCursor, uint8_t *dispData)
+void sendDisplay(uint8_t startAtCursor, struct MSG_S *msg)
 {
 	uint8_t row = 0;
 	uint8_t column = 0;
 	uint8_t DDRAM_address = 0;
+	uint8_t *msg_tmp = msg->msg;
 
 	if(!startAtCursor)
 	{
-		row = *dispData++;
-		column = *dispData++;
+		row = msg->row;
+		column = msg->column;
 		DDRAM_address = column;
 		if (row) DDRAM_address += 0x40;
 		column = 0;  //reuse variable to ensure array stays in bounds
 		sendCMD(DDRAM_address | 0b10000000);
 	}
-	while (*dispData != '\0' && column < 20)
+	while (*msg_tmp != '\0' && column < 20)
 	{
-		sendData(*dispData++);
+		sendData(*msg_tmp++);
 		column++;
 	}
 }
