@@ -8,8 +8,8 @@
 #ifndef SYS_CONFIG_H_
 #define SYS_CONFIG_H_
 
-#define VERSION_MAJOR '1'
-#define VERSION_MINOR 'a'
+#define VERSION_MAJOR "1"
+#define VERSION_MINOR "a"
 
 // ALARM SYSTEMS GLOBALS AND DEFINES
 //
@@ -267,6 +267,7 @@ struct MSG_S {
 #define MAIN_STATE_LOOP_FX 25
 #define DIM_OLED_TIME 10000
 #define OFF_OLED_TIME (1000 * 20)
+#define ARM_DELAY (1000 * 10)
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)
 #define CHECK_OFF_TIMER() systemTick > (dimTimer + OFF_OLED_TIME)

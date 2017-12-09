@@ -31,4 +31,5 @@ void dispTimeChange(uint8_t);
 void dispStatus(uint8_t item);
 void dispInputBuffers(void);
 void displayReadyToArm(void);
+void displayArming(void);
 #endif /* MENUS_H_ */

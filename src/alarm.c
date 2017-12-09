@@ -8,6 +8,10 @@
 ===============================================================================
 */
 
+//TODO: SAVE ALARM STATE TO EEPROM IN EVENT OF RESET
+//TODO: SAVE USER DATA EEPROM
+//TODO: SAVE GLOBAL PARAMETERS TO EEPROM
+
 #include "chip.h"
 #include <cr_section_macros.h>
 #include <sys_config.h>
@@ -25,6 +29,7 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 
 enum ALARMSTATE_T {
 	ARM,
+	ARMING,
 	ARMED,
 	DISARM,
 	DISARMED,
@@ -63,6 +68,7 @@ void checkExtLightSubMenu(void);
 void changeTimeMenu(void);
 void checkStatus(void);
 void inputBuffers(void);
+void armingDelay(void);
 uint8_t pollAlarmSensors(void);
 uint8_t checkReadyToArm(void);
 
@@ -85,6 +91,10 @@ int main(void) {
 				ENABLE_ON_PWR();
 				ALARMSTATE = ARMED;
 				ENABLE_ERR_LED();
+				break;
+			case ARMING:
+				armingDelay();
+				ALARMSTATE = ARM;
 				break;
 			case ARMED:
 				//checkSensors(ARMEDSTATE);
@@ -234,26 +244,27 @@ void checkAlarmSubMenu(void)
 		switch (selection)
 		{
 		case KP_Mplus:
-			ALARMSTATE = ARM;
+			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY;
 			break;
 		case KP_root:
-			ALARMSTATE = ARM;
+			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY_NO_INT_AUTO;
 			break;
 		case KP_div:
-			ALARMSTATE = ARM;
+			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY_NO_EXT_AUTO;
 			break;
 		case KP_minus:
-			ALARMSTATE = ARM;
+			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY_NO_AUTO;
 			break;
 		case KP_equal:
-			ALARMSTATE = ARM;
+			//ALARMSTATE = ARM;
 			ARMEDSTATE = STAY;
 			break;
 		}
+		ALARMSTATE = ARMING;
 	}
 }
 
@@ -524,4 +535,15 @@ uint8_t checkReadyToArm(void)
 	}
 	if (!SYSCK_GOOD()) return 0;
 	return 1;
+}
+
+void armingDelay(void)
+{
+	uint32_t armingTimer = systemTick;
+
+	displayArming();
+	while (systemTick < armingTimer + ARM_DELAY)
+	{
+		//TODO:MAYBE BLINK SOMETHING WHILE ARM DELAY
+	}
 }
