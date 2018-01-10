@@ -77,7 +77,7 @@ int main(void) {
 				dispClear();
 				ENABLE_ON_PWR();
 				ALARMSTATE = ARMED;
-				ENABLE_ERR_LED();
+				//ENABLE_ERR_LED();
 				break;
 			case ARMING:
 				armingDelay();
