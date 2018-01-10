@@ -283,7 +283,7 @@ struct MSG_S {
 #define DISABLE_ERR_LED() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, ERR1_p0_O)
 #define PIN_TRIES_EXCEEDED() pinAttempts > MAX_PIN_TRIES
 #define OE_INPUT_ON() (Chip_GPIO_GetPinState(LPC_GPIO, 3, IN_BUFF_OE_p3_O) ^ 1)
-#define SYSCK_GOOD() (Chip_GPIO_GetPinState(LPC_GPIO, 2, 12) ^ 1)
+#define SYSCK_GOOD() (Chip_GPIO_GetPinState(LPC_GPIO, 1, 18) ^ 1)
 //
 // END PROGRAM DEFINES
 
