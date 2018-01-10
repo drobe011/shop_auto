@@ -31,7 +31,7 @@ struct ALARM_SYSTEM_S {
 	uint8_t req_to_arm;
 	uint8_t armedstate;
 	uint8_t sig_active_level;
-	uint8_t delay;
+	uint32_t delay;
 };
 
 //

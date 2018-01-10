@@ -1,0 +1,32 @@
+
+////ALAARM INPUTS
+    PGM CONSTANTS				PORT	PIN		TERMINAL
+#define PWR_SENSE 0				1		18		20
+#define VIB1 1					1		19		19
+#define MTN_EXT_S 2				1		20		14
+#define MTN_INT1 3				1		21		16
+#define MTN_EXT_N 4				1		22		15
+#define MTN_EXT_E 5				1		23		13
+#define SPAR2 6					1		24		11
+#define DOOR_MAIN 7				1		25		8
+#define MTN_EXT_W 8				1		26		12
+#define WDW_E 9					1		27		5
+#define SPAR1 10				1		28		3
+#define WDW_S 11				1		29		4
+#define DOOR_N 12				1		30		6
+#define DOOR_E 13				1		31		7
+#define SPAR3 14				2		8		10
+#define SPAR4 15				2		11		9
+#define MTN_INT2 16				2		12		18
+#define VIB2 17					4		29		17
+
+
+////OUTPUTS
+#define INDCT 0					0		17		7
+#define L_X_N 1					0		18		8
+#define L_I_M 2					0		24		6
+#define L_X_S 3					2		3		4
+#define L_X_E 4					2		4		3
+#define L_X_W 5					2		5		2
+#define FAN 6					2		6		1
+#define L_I_S 7					3		25		5
