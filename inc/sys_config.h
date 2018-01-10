@@ -21,6 +21,7 @@
 #define A_S_SIG_LEVEL_HIGH 1
 #define A_S_ARM_ST_AWAY 0
 #define A_S_ARM_ST_STAY 4
+#define NONE 0 //for ALARM_SYSTEM_S::delay
 
 struct ALARM_SYSTEM_S {
 	uint8_t name[6];
@@ -30,6 +31,7 @@ struct ALARM_SYSTEM_S {
 	uint8_t req_to_arm;
 	uint8_t armedstate;
 	uint8_t sig_active_level;
+	uint8_t delay;
 };
 
 //
@@ -138,23 +140,25 @@ struct ALARM_SYSTEM_S {
 // GPIO DEFINES
 //
 ////ALAARM INPUTS
-#define SYSCK 0
+#define PWR_SENSE 0
 #define VIB1 1
-#define VIB2 2
-#define MTN_EXT_S 3
-#define MTN_INT 4
-#define MTN_EXT_N 5
-#define MTN_EXT_E 6
-#define LT_MN 7
-#define DOOR_ENTRY 8
-#define MTN_EXT_W 9
-#define WDW_E 10
+#define MTN_EXT_S 2
+#define MTN_INT1 3
+#define MTN_EXT_N 4
+#define MTN_EXT_E 5
+#define SPAR2 6
+#define DOOR_MAIN 7
+#define MTN_EXT_W 8
+#define WDW_E 9
+#define SPAR1 10
 #define WDW_S 11
 #define DOOR_N 12
 #define DOOR_E 13
-#define LT_SP 14
-#define FAN_I 15
-#define NUM_OF_SYSTEMS 16
+#define SPAR3 14
+#define SPAR4 15
+#define MTN_INT2 16
+#define VIB2 17
+#define NUM_OF_SYSTEMS 18
 
 ////OUTPUTS
 #define INDCT 0
@@ -168,8 +172,8 @@ struct ALARM_SYSTEM_S {
 #define NUM_OF_AUTO_O 8
 
 
-#define TACH1_p2_I 12
-#define TACH2_p4_I 29
+//#define TACH1_p2_I 12
+//#define TACH2_p4_I 29
 
 ////TEMP IO
 #define TMP_ALM_LO_p2_I 13
@@ -182,6 +186,7 @@ struct ALARM_SYSTEM_S {
 
 
 #define ERR1_p0_O 1
+#define ERR2_p0_O 0
 // optional, pin not broke out  #define ALARM_STATE_IND_p0_O 29
 
 #define IN_BUFF_OE_p3_O 26
@@ -268,6 +273,7 @@ struct MSG_S {
 #define DIM_OLED_TIME 10000
 #define OFF_OLED_TIME (1000 * 20)
 #define ARM_DELAY (1000 * 10)
+#define ENTRY_DELAY (1000 * 30)
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)
 #define CHECK_OFF_TIMER() systemTick > (dimTimer + OFF_OLED_TIME)

@@ -7,7 +7,7 @@
 #include "chip.h"
 #include "menus.h"
 #include "sys_config.h"
-#include "stdio.h"
+#include <stdio.h>
 #include <string.h>
 
 /*

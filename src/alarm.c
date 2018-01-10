@@ -26,12 +26,10 @@ extern struct users_S users[];
 extern struct ALARM_SYSTEM_S automation_O[];
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 
-enum ALARMSTATE_T
-{
+enum ALARMSTATE_T {
 	ARM, ARMING, ARMED, DISARM, DISARMED, ACTIVATE_SIREN
 };
-enum ARMEDSTATE_T
-{
+enum ARMEDSTATE_T {
 	AWAY, AWAY_NO_INT_AUTO, AWAY_NO_EXT_AUTO, AWAY_NO_AUTO, STAY
 };
 
@@ -45,13 +43,11 @@ uint8_t intLightsState;
 uint8_t extLightsState;
 uint8_t activeSensors[17];
 
-STATIC INLINE void updateDisplayTime(void)
-{
+STATIC INLINE void updateDisplayTime(void) {
 	dispDateTime();
 	updateTime = 0;
 }
 
-void checkSensors(enum ARMEDSTATE_T armState);
 uint8_t getPIN(void);
 void checkMenu(void);
 void checkAlarmSubMenu(void);
@@ -63,9 +59,9 @@ void inputBuffers(void);
 void armingDelay(void);
 uint8_t pollAlarmSensors(void);
 uint8_t checkReadyToArm(void);
+uint8_t entryDelay(uint8_t active);
 
-int main(void)
-{
+int main(void) {
 
 	setUpSystem();
 	IN_BUFF_ON();
@@ -74,12 +70,9 @@ int main(void)
 	dimTimer = systemTick;
 	uint8_t sensorsActive = 0;
 
-	while (1)
-	{
-		if (CHECK_STATE_TIMER())
-		{
-			switch (ALARMSTATE)
-			{
+	while (1) {
+		if (CHECK_STATE_TIMER()) {
+			switch (ALARMSTATE) {
 			case ARM:
 				dispClear();
 				ENABLE_ON_PWR();
@@ -94,14 +87,10 @@ int main(void)
 				//checkSensors(ARMEDSTATE);
 				//checkAutomation(ARMEDSTATE)
 				sensorsActive = pollAlarmSensors();
-				if (onPressed)
-				{
-					getPIN();
-					if (PIN_TRIES_EXCEEDED())
-						ALARMSTATE = ACTIVATE_SIREN;
-				}
+
 				if (sensorsActive)
-					ALARMSTATE = ACTIVATE_SIREN;
+					if (!entryDelay(sensorsActive))
+						ALARMSTATE = ACTIVATE_SIREN;
 				break;
 			case DISARM:
 				RESET_PIN_ATTEMPTS();
@@ -136,63 +125,46 @@ int main(void)
 	}
 }
 
-void checkSensors(enum ARMEDSTATE_T armState)
-{
-
-}
-
-uint8_t getPIN(void)
-{
+uint8_t getPIN(void) {
 	uint32_t on_pressed_time = systemTick;
-	uint32_t kpData[4] =
-	{ 0, 0, 0, 0 };
+	uint32_t kpData[4] = { 0, 0, 0, 0 };
 	uint8_t match = 0;
 
-	while (ON_PRESSED())
-	{
-		if (systemTick > (on_pressed_time + ON_PRESSED_TIMEOUT))
-		{
+	while (ON_PRESSED()) {
+		if (systemTick > (on_pressed_time + ON_PRESSED_TIMEOUT)) {
 			ALARMSTATE = ACTIVATE_SIREN;
 			return 0;
 		}
 	}
 	onPressed = 0;
 	DISABLE_ON_PWR();
-	for (uint8_t keys = 0; keys < 4; keys++)
-	{
+	for (uint8_t keys = 0; keys < 4; keys++) {
 
 		kpData[keys] = getKP(KP_TIMEOUT_DEFAULT_MS);
 		on_pressed_time = systemTick;
-		while (getKP(200))
-		{
-			if (systemTick > (on_pressed_time + KP_TIMEOUT_DEFAULT_MS))
-			{
+		while (getKP(200)) {
+			if (systemTick > (on_pressed_time + KP_TIMEOUT_DEFAULT_MS)) {
 				ENABLE_ON_PWR();
 				pinAttempts++;
 				return 0;
 			}
 		}
-		if (!kpData[keys])
-		{
+		if (!kpData[keys]) {
 			ENABLE_ON_PWR();
 			pinAttempts++;
 			return 1;
 		}
 	}
-	for (uint8_t usersLoop = 1; usersLoop < 5; usersLoop++)
-	{
-		for (uint8_t pinLoop = 0; pinLoop < 4; pinLoop++)
-		{
+	for (uint8_t usersLoop = 1; usersLoop < 5; usersLoop++) {
+		for (uint8_t pinLoop = 0; pinLoop < 4; pinLoop++) {
 			if (kpData[pinLoop] == users[usersLoop].pin[pinLoop])
 				match++;
 		}
-		if (match == 4)
-		{
+		if (match == 4) {
 			c_user = &users[usersLoop];
 			ALARMSTATE = DISARM;
 			return 2;
-		}
-		else
+		} else
 			match = 0;
 	}
 	ENABLE_ON_PWR();
@@ -200,22 +172,18 @@ uint8_t getPIN(void)
 	return 0;
 }
 
-void checkMenu(void)
-{
+void checkMenu(void) {
 	uint32_t selection = 0;
 
 	selection = getKP(KP_TIMEOUT_DEFAULT_MS);
-	while (getKP(100))
-	{
+	while (getKP(100)) {
 	} //TODO: check time holding button
 
-	if (selection)
-	{
+	if (selection) {
 		if (dispDimmed)
 			displayNormal();
 		ALARMSTATE = DISARM;
-		switch (selection)
-		{
+		switch (selection) {
 		case KP_Mplus:
 			if (!readyToArm || !OE_INPUT_ON())
 				return;
@@ -239,19 +207,15 @@ void checkMenu(void)
 		}
 	}
 }
-void checkAlarmSubMenu(void)
-{
+void checkAlarmSubMenu(void) {
 	uint32_t selection = 0;
 
 	dispArmedType();
 	selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-	while (getKP(100))
-	{
+	while (getKP(100)) {
 	}
-	if (selection)
-	{
-		switch (selection)
-		{
+	if (selection) {
+		switch (selection) {
 		case KP_Mplus:
 			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY;
@@ -277,8 +241,7 @@ void checkAlarmSubMenu(void)
 	}
 }
 
-void checkIntLightSubMenu(void)
-{
+void checkIntLightSubMenu(void) {
 	//0 = Main Lights
 	//1 = Supp Lights
 	//2 = All Lights
@@ -290,14 +253,11 @@ void checkIntLightSubMenu(void)
 
 	dispIntLight();
 	selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-	while (getKP(100))
-	{
+	while (getKP(100)) {
 	}
 
-	if (selection)
-	{
-		switch (selection)
-		{
+	if (selection) {
+		switch (selection) {
 		case KP_7: //MAIN LIGHTS ON
 			lightBit = 0;
 			lightState = 1;
@@ -339,8 +299,7 @@ void checkIntLightSubMenu(void)
 		setIOpin(&automation_O[L_I_M], 1);
 		pause(2); //light controller waits until LT_MAIN goes low to read
 
-		switch (lightBit)
-		{
+		switch (lightBit) {
 		case 0:
 			setIOpin(&automation_O[L_I_M], lightState);
 			break;
@@ -363,18 +322,15 @@ void checkIntLightSubMenu(void)
 	}
 }
 
-void checkExtLightSubMenu(void)
-{
+void checkExtLightSubMenu(void) {
 	uint32_t selection = 0;
 
 	dispExtLight();
 	selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-	while (getKP(100))
-	{
+	while (getKP(100)) {
 	}
 
-	if (selection)
-	{/*
+	if (selection) {/*
 	 switch (selection)
 	 {
 	 case KP_7: //MAIN LIGHTS ON
@@ -415,10 +371,8 @@ void checkExtLightSubMenu(void)
 	}
 }
 
-void changeTimeMenu(void)
-{
-	uint32_t selection[2] =
-	{ 0, 0 };
+void changeTimeMenu(void) {
+	uint32_t selection[2] = { 0, 0 };
 	uint32_t value = 0;
 	RTC_TIME_T tempTime;
 
@@ -473,10 +427,8 @@ void changeTimeMenu(void)
 	Chip_RTC_SetFullTime(LPC_RTC, &tempTime);
 }
 
-void checkStatus(void)
-{
-	uint32_t selection[2] =
-	{ 0, 0 };
+void checkStatus(void) {
+	uint32_t selection[2] = { 0, 0 };
 	uint32_t value = 0;
 
 	dispStatus(0);
@@ -493,8 +445,7 @@ void checkStatus(void)
 
 		//TODO: MAKE INTO FUNCTION
 		//setCursor(0,15);
-		struct MSG_S sensor =
-		{ 0, 15, "" };
+		struct MSG_S sensor = { 0, 15, "" };
 		strcpy((char*) sensor.msg, (char*) alarm_system_I[value].name);
 		sendDisplay(0, &sensor);
 		clearLine(1);
@@ -508,19 +459,16 @@ void checkStatus(void)
 
 }
 
-void SysTick_Handler(void)
-{
+void SysTick_Handler(void) {
 	systemTick++;
 }
 
-void RTC_IRQHandler(void)
-{
+void RTC_IRQHandler(void) {
 	Chip_RTC_ClearIntPending(LPC_RTC, RTC_INT_COUNTER_INCREASE);
 	updateTime = 1;
 }
 
-void inputBuffers(void)
-{
+void inputBuffers(void) {
 	uint32_t selection[1];
 	selection[0] = 0;
 	dispInputBuffers();
@@ -528,26 +476,19 @@ void inputBuffers(void)
 		return;
 	if (selection[0] > 1)
 		return;
-	if (!selection[0])
-	{
+	if (!selection[0]) {
 		IN_BUFF_OFF();
-	}
-	else
+	} else
 		IN_BUFF_ON();
 }
 
-uint8_t pollAlarmSensors(void)
-{
+uint8_t pollAlarmSensors(void) {
 	uint8_t sensor = 0;
 	uint8_t numActiveSensors = 0;
-	if (OE_INPUT_ON())
-	{
-		for (sensor = 0; sensor < NUM_OF_SYSTEMS; sensor++)
-		{
-			if (alarm_system_I[sensor].active)
-			{
-				if (getIOpin(&alarm_system_I[sensor]))
-				{
+	if (OE_INPUT_ON()) {
+		for (sensor = 0; sensor < NUM_OF_SYSTEMS; sensor++) {
+			if (alarm_system_I[sensor].active) {
+				if (getIOpin(&alarm_system_I[sensor])) {
 					activeSensors[numActiveSensors] = sensor;
 					numActiveSensors++;
 				}
@@ -557,31 +498,26 @@ uint8_t pollAlarmSensors(void)
 	return numActiveSensors;
 }
 
-uint8_t checkReadyToArm(void)
-{
+uint8_t checkReadyToArm(void) {
 	uint8_t trippedSensors = 0;
 	trippedSensors = pollAlarmSensors();
 
-	if (!OE_INPUT_ON())
-	{
-		ENABLE_ERR_LED();
-	return 0;
-	}
-		else
-		DISABLE_ERR_LED();
-	/*
-	if (!SYSCK_GOOD())
-	{
+	if (!OE_INPUT_ON()) {
 		ENABLE_ERR_LED();
 		return 0;
-	}
-	else
-		DISABLE_ERR_LED();*/
+	} else
+		DISABLE_ERR_LED();
+	/*
+	 if (!SYSCK_GOOD())
+	 {
+	 ENABLE_ERR_LED();
+	 return 0;
+	 }
+	 else
+	 DISABLE_ERR_LED();*/
 
-	for (uint8_t t_s = 0; t_s < trippedSensors; t_s++)
-	{
-		if (alarm_system_I[activeSensors[t_s]].req_to_arm)
-		{
+	for (uint8_t t_s = 0; t_s < trippedSensors; t_s++) {
+		if (alarm_system_I[activeSensors[t_s]].req_to_arm) {
 			ENABLE_ERR_LED();
 			return 0;
 		}
@@ -590,13 +526,28 @@ uint8_t checkReadyToArm(void)
 	return 1;
 }
 
-void armingDelay(void)
-{
+void armingDelay(void) {
 	uint32_t armingTimer = systemTick;
 
 	displayArming();
-	while (systemTick < armingTimer + ARM_DELAY)
-	{
+	while (systemTick < armingTimer + ARM_DELAY) {
 		//TODO:MAYBE BLINK SOMETHING WHILE ARM DELAY
 	}
+}
+
+uint8_t entryDelay(uint8_t active) {
+	if (activeSensors[0] == DOOR_MAIN) {
+		uint32_t entrytime = systemTick;
+		ENABLE_ERR_LED();
+		while (systemTick < entrytime + ENTRY_DELAY) {
+			if (onPressed) {
+				if (getPIN() == 2)
+					return 1;
+				if (PIN_TRIES_EXCEEDED())
+					return 0;
+			}
+		}
+
+	}
+	return 0;
 }

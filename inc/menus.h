@@ -9,7 +9,7 @@
 #ifndef MENUS_H_
 #define MENUS_H_
 
-#include <stdint.h>
+//#include <stdint.h>
 
 //extern const uint8_t DISP_VERSION[];
 //extern const uint8_t OOPS[];
