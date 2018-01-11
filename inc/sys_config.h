@@ -274,7 +274,7 @@ struct MSG_S {
 #define MAIN_STATE_LOOP_FX 25
 #define DIM_OLED_TIME 10000
 #define OFF_OLED_TIME (1000 * 20)
-#define ARM_DELAY (1000 * 10)
+#define ARM_DELAY (1000 * 1)
 #define ENTRY_DELAY (1000 * 30)
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)

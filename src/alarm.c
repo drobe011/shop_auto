@@ -12,10 +12,6 @@
 //TODO: SAVE USER DATA EEPROM
 //TODO: SAVE GLOBAL PARAMETERS TO EEPROM
 
-//COMM: CHANGE LIGHT MOTION DETECTORS TO automation_I[] XXXXX
-//COMM: TURN DISPLAY ON FOR PIN XXXX
-//COMM: DISPLAY '*' FOR PIN ENTRY XXXX
-
 #include "chip.h"
 #include <cr_section_macros.h>
 #include <sys_config.h>
@@ -158,9 +154,9 @@ uint8_t getPIN(void)
 	for (uint8_t keys = 0; keys < 4; keys++)
 	{
 
-		kpData[keys] = getKP(KP_TIMEOUT_DEFAULT_MS);
+		kpData[keys] = getKP(KP_TIMEOUT_DEFAULT_MS + 1000);
 		on_pressed_time = systemTick;
-		while (getKP(200))
+		while (getKP(150))
 		{
 			if (systemTick > (on_pressed_time + KP_TIMEOUT_DEFAULT_MS))
 			{
@@ -169,13 +165,14 @@ uint8_t getPIN(void)
 				return 0;
 			}
 		}
+		sendData('*');
 		if (!kpData[keys])
 		{
 			ENABLE_ON_PWR();
 			pinAttempts++;
 			return 1;
 		}
-		sendData('*');
+
 	}
 	for (uint8_t usersLoop = 1; usersLoop < 5; usersLoop++)
 	{
@@ -604,7 +601,6 @@ uint8_t entryDelay(uint8_t active)
 	if (activeSensors[0] == DOOR_MAIN)
 	{
 		uint32_t entrytime = systemTick;
-		//ENABLE_ERR_LED();
 		dispClear();
 		displayNormal();
 		displayON();
@@ -615,11 +611,12 @@ uint8_t entryDelay(uint8_t active)
 				displayPIN();
 				if (getPIN() == 2)
 					return 1;
+				else
+					dispClear();
 				if (PIN_TRIES_EXCEEDED())
 					return 0;
 			}
 		}
-
 	}
 	return 0;
 }
