@@ -11,6 +11,11 @@
 //TODO: SAVE ALARM STATE TO EEPROM IN EVENT OF RESET
 //TODO: SAVE USER DATA EEPROM
 //TODO: SAVE GLOBAL PARAMETERS TO EEPROM
+
+//COMM: CHANGE LIGHT MOTION DETECTORS TO automation_I[] XXXXX
+//COMM: TURN DISPLAY ON FOR PIN XXXX
+//COMM: DISPLAY '*' FOR PIN ENTRY XXXX
+
 #include "chip.h"
 #include <cr_section_macros.h>
 #include <sys_config.h>
@@ -24,6 +29,7 @@ volatile uint8_t onPressed = 0;
 extern struct users_S *c_user;
 extern struct users_S users[];
 extern struct ALARM_SYSTEM_S automation_O[];
+extern struct ALARM_SYSTEM_S automation_I[];
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 
 enum ALARMSTATE_T
@@ -169,6 +175,7 @@ uint8_t getPIN(void)
 			pinAttempts++;
 			return 1;
 		}
+		sendData('*');
 	}
 	for (uint8_t usersLoop = 1; usersLoop < 5; usersLoop++)
 	{
@@ -597,11 +604,15 @@ uint8_t entryDelay(uint8_t active)
 	if (activeSensors[0] == DOOR_MAIN)
 	{
 		uint32_t entrytime = systemTick;
-		ENABLE_ERR_LED();
+		//ENABLE_ERR_LED();
+		dispClear();
+		displayNormal();
+		displayON();
 		while (systemTick < entrytime + ENTRY_DELAY)
 		{
 			if (onPressed)
 			{
+				displayPIN();
 				if (getPIN() == 2)
 					return 1;
 				if (PIN_TRIES_EXCEEDED())

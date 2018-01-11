@@ -13,7 +13,7 @@
 #define WDW_E 9					1		27		5
 #define SPAR1 10				1		28		3
 #define WDW_S 11				1		29		4
-#define DOOR_N 12				1		30		6
+#define DOOR_N 12				1		30		6	<----Showing activated!!!
 #define DOOR_E 13				1		31		7
 #define SPAR3 14				2		8		10
 #define SPAR4 15				2		11		9

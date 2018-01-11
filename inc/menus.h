@@ -32,4 +32,5 @@ void dispStatus(uint8_t item);
 void dispInputBuffers(void);
 void displayReadyToArm(void);
 void displayArming(void);
+void displayPIN(void);
 #endif /* MENUS_H_ */

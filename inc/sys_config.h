@@ -139,27 +139,29 @@ struct ALARM_SYSTEM_S {
 
 // GPIO DEFINES
 //
-////ALAARM INPUTS
+////ALARM INPUTS
 #define PWR_SENSE 0
 #define VIB1 1
-#define MTN_EXT_S 2
-#define MTN_INT1 3
-#define MTN_EXT_N 4
-#define MTN_EXT_E 5
-#define SPAR2 6
-#define DOOR_MAIN 7
-#define MTN_EXT_W 8
-#define WDW_E 9
-#define SPAR1 10
-#define WDW_S 11
-#define DOOR_N 12
-#define DOOR_E 13
-#define SPAR3 14
-#define SPAR4 15
-#define MTN_INT2 16
-#define VIB2 17
-#define NUM_OF_SYSTEMS 18
+#define MTN_INT1 2
+#define SPAR2 3
+#define DOOR_MAIN 4
+#define WDW_E 5
+#define SPAR1 6
+#define WDW_S 7
+#define DOOR_N 8
+#define DOOR_E 9
+#define SPAR3 10
+#define SPAR4 11
+#define MTN_INT2 12
+#define VIB2 13
+#define NUM_OF_SYSTEMS 14
 
+////AUTOMATION INPUTS
+#define MTN_EXT_S 1
+#define MTN_EXT_N 2
+#define MTN_EXT_E 3
+#define MTN_EXT_W 4
+#define NUM_OF_AUTO_I 4
 ////OUTPUTS
 #define INDCT 0
 #define L_X_N 1

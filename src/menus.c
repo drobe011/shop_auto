@@ -53,6 +53,7 @@ struct MSG_S DISP_TEMP_CONST = {1,12,"000F/00%"};
 struct MSG_S DISP_RDY_ARM = {1,9,{42,'\0'}};
 struct MSG_S DISP_NOTRDY_ARM = {1,9,{219,'\0'}};
 struct MSG_S DISP_ARMING = {0,0,{"ARMING...."}};
+struct MSG_S DISP_PIN = {0,0,"ENTER PIN: "};
 
 void clearLine(uint8_t row)
 {
@@ -207,4 +208,9 @@ void displayArming(void)
 {
 	dispClear();
 	sendDisplay(0, &DISP_ARMING);
+}
+
+void displayPIN(void)
+{
+	sendDisplay(0, &DISP_PIN);
 }
