@@ -7,7 +7,7 @@
 #define ARM_DELAY (1000 * 1)
 #define ENTRY_DELAY (1000 * 30)
 #define MAX_PIN_TRIES 3
-#define DARK_THRESHOLD_DEFAULT 127
+#define DARK_THRESHOLD_DEFAULT 27
 
 #define no_of_turnon_times 3
 #define turnon1_hr 11

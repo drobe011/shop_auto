@@ -515,11 +515,20 @@ void checkStatus(void)
 
 void changeDarkTH(void)
 {
-	uint32_t selection[1];
+	uint32_t selection[3];
+	uint32_t thValue = 0;
 
 	dispDarkTH();
-	if (!getKPInput(selection, 1))
+	if (!getKPInput(selection, 3))
 			return;
+
+	thValue = selection[0] * 100;
+	thValue += selection[1] * 10;
+	thValue += selection[2];
+
+	if (thValue > 255) return;
+
+	darkTH = (uint8_t)thValue;
 }
 
 void SysTick_Handler(void)

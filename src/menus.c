@@ -25,6 +25,7 @@
 extern struct users_S *c_user;
 extern RTC_TIME_T cTime;
 extern uint8_t readyToArm;
+extern uint8_t darkTH;
 
 //uint8_t DISP_BOOT0[] = {0,0,'S','n','a','p','p','e','r','T','r','o','n',' ','v',VERSION_MAJOR,VERSION_MINOR,'\0'};
 struct MSG_S DISP_BOOT0 = {0,0,"SnapperTron v" VERSION_MAJOR "." VERSION_MINOR}; //1.0"};
@@ -54,7 +55,8 @@ struct MSG_S DISP_RDY_ARM = {1,9,{42,'\0'}};
 struct MSG_S DISP_NOTRDY_ARM = {1,9,{219,'\0'}};
 struct MSG_S DISP_ARMING = {0,0,{"ARMING...."}};
 struct MSG_S DISP_PIN = {0,0,"ENTER PIN: "};
-struct MSG_S DISP_DARK = {0,0,"Dark TH [   ]:"};
+struct MSG_S DISP_DARK1 = {0,0,"[0=DARK/255=BRIGHT]"};
+struct MSG_S DISP_DARK2 = {1,0,"Dark TH [   ]:"};
 
 void clearLine(uint8_t row)
 {
@@ -219,12 +221,14 @@ void displayPIN(void)
 void dispDarkTH(void)
 {
 	char THStr[4];
-	uint8_t lightVal = isDark(0);
+	//uint8_t lightVal = isDark(0);
 
 	dispClear();
-	sendDisplay(0, &DISP_DARK);
-	sprintf(THStr, "%03d",lightVal);
-	struct MSG_S darkth_tmp = {0,9, ""};
+	sendDisplay(0, &DISP_DARK1);
+	sendDisplay(0, &DISP_DARK2);
+	sprintf(THStr, "%03d",darkTH);
+	struct MSG_S darkth_tmp = {1,9, ""};
 	strcpy((char*)darkth_tmp.msg, (char*)THStr);
 	sendDisplay(0, &darkth_tmp);
+	setCursor(1,15);
 }
