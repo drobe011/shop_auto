@@ -34,6 +34,23 @@ struct ALARM_SYSTEM_S {
 	uint32_t delay;
 };
 
+struct ACTIVE_AUTOMATION_S {
+	uint8_t system;
+	uint32_t time_active;
+	uint8_t output_device;
+};
+
+struct LIGHT_AUTO_S {
+	uint8_t hour;
+	uint8_t min;
+	uint8_t duration;
+	uint8_t active;
+};
+
+struct X_LIGHT_AUTO_S {
+	uint8_t hour;
+	uint8_t min;
+};
 //
 // END ALARM SYSTEMS GLOBALS AND DEFINES
 
@@ -162,6 +179,10 @@ struct ALARM_SYSTEM_S {
 #define MTN_EXT_E 3
 #define MTN_EXT_W 4
 #define NUM_OF_AUTO_I 4
+#define LIM_AUTO 5
+#define LIS_AUTO 6
+#define FAN_AUTO 7
+
 ////OUTPUTS
 #define INDCT 0
 #define L_X_N 1
@@ -271,11 +292,7 @@ struct MSG_S {
 
 // PROGRAM DEFINES
 //
-#define MAIN_STATE_LOOP_FX 25
-#define DIM_OLED_TIME 10000
-#define OFF_OLED_TIME (1000 * 20)
-#define ARM_DELAY (1000 * 1)
-#define ENTRY_DELAY (1000 * 30)
+
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)
 #define CHECK_OFF_TIMER() systemTick > (dimTimer + OFF_OLED_TIME)
@@ -286,7 +303,6 @@ struct MSG_S {
 #define DISABLE_ON_PWR() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, K5)
 #define ON_PRESSED_TIMEOUT 1000
 #define ON_PRESSED() Chip_GPIO_GetPinState(LPC_GPIO, 0, ON_)
-#define MAX_PIN_TRIES 3
 #define ENABLE_ERR_LED() Chip_GPIO_SetPinOutHigh(LPC_GPIO, 0, ERR1_p0_O)
 #define DISABLE_ERR_LED() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, ERR1_p0_O)
 #define PIN_TRIES_EXCEEDED() pinAttempts > MAX_PIN_TRIES
@@ -315,6 +331,8 @@ void displayDim(void);
 void displayNormal(void);
 void setIOpin(struct ALARM_SYSTEM_S *sys, uint8_t level);
 uint8_t getIOpin(struct ALARM_SYSTEM_S *sys);
+uint8_t isDark(uint8_t mode);
+
 //
 // END FUNCTION DECLARATIONS
 

@@ -54,6 +54,7 @@ struct MSG_S DISP_RDY_ARM = {1,9,{42,'\0'}};
 struct MSG_S DISP_NOTRDY_ARM = {1,9,{219,'\0'}};
 struct MSG_S DISP_ARMING = {0,0,{"ARMING...."}};
 struct MSG_S DISP_PIN = {0,0,"ENTER PIN: "};
+struct MSG_S DISP_DARK = {0,0,"Dark TH [   ]:"};
 
 void clearLine(uint8_t row)
 {
@@ -213,4 +214,17 @@ void displayArming(void)
 void displayPIN(void)
 {
 	sendDisplay(0, &DISP_PIN);
+}
+
+void dispDarkTH(void)
+{
+	char THStr[4];
+	uint8_t lightVal = isDark(0);
+
+	dispClear();
+	sendDisplay(0, &DISP_DARK);
+	sprintf(THStr, "%03d",lightVal);
+	struct MSG_S darkth_tmp = {0,9, ""};
+	strcpy((char*)darkth_tmp.msg, (char*)THStr);
+	sendDisplay(0, &darkth_tmp);
 }

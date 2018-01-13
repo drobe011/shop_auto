@@ -1,11 +1,13 @@
 #include "chip.h"
 #include "sys_config.h"
 #include "menus.h"
+#include "alarm_settings.h"
 
 extern uint32_t systemTick;
 extern uint8_t onPressed;
 extern uint8_t dispDimmed;
 extern uint32_t dimTimer;
+extern uint8_t darkTH;
 
 I2C_XFER_T DISPLAYxfer;
 RTC_TIME_T cTime;
@@ -52,6 +54,26 @@ struct ALARM_SYSTEM_S automation_O[] = {
 		{"FAN", 2, 6, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
 		{"L_I_S", 3, 25, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
 		};
+struct ACTIVE_AUTOMATION_S active_automation[] = {
+		{MTN_EXT_S, 0, L_X_S},
+		{MTN_EXT_N, 0, L_X_N},
+		{MTN_EXT_E, 0, L_X_E},
+		{MTN_EXT_W, 0, L_X_W},
+		{LIM_AUTO, 0, L_I_M},
+		{LIS_AUTO, 0, L_I_S},
+		{FAN_AUTO, 0, FAN},
+};
+
+struct LIGHT_AUTO_S light_auto[] = {
+		{turnon1_hr, turnon1_min, turnon1_dur, 0},
+		{turnon2_hr, turnon2_min, turnon2_dur, 0},
+		{turnon3_hr, turnon3_min, turnon3_dur, 0},
+};
+
+struct X_LIGHT_AUTO_S x_light_auto[] = {
+		{flash1_hr, flash1_min},
+		{flash2_hr, flash2_min},
+};
 
 static void setUpGPIO(void);
 static void setUpRTC(void);
@@ -121,6 +143,11 @@ void setUpGPIO(void)
 	{
 		Chip_GPIO_SetPinDIR(LPC_GPIO, automation_O[o_p].port, automation_O[o_p].pin, true);
 	}
+
+	//SET ADC FOR LIGHT SENSE
+	ADC_CLOCK_SETUP_T adc_clock;
+	Chip_ADC_Init(LPC_ADC, &adc_clock);
+	Chip_ADC_EnableChannel(LPC_ADC, ADC_CH7, ENABLE);
 
 	//SET KP OUTPUTS
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, K2, true);
@@ -444,6 +471,19 @@ uint8_t getIOpin(struct ALARM_SYSTEM_S *sys)
 	else return (pinValue ^ 1);
 	return 255;
 }
+
+uint8_t isDark(uint8_t mode)
+{
+	uint8_t lightLevel = 0;
+	Chip_ADC_ReadByte(LPC_ADC, ADC_CH7, &lightLevel);
+	if (mode)
+	{
+		if (lightLevel >= darkTH) return 0;
+		else return 1;
+	}
+	else return lightLevel;
+}
+
 void EINT3_IRQHandler(void)
 {
 	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, GPIOINT_PORT0, (1 << ON_));

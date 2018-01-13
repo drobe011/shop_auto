@@ -14,7 +14,8 @@
 
 #include "chip.h"
 #include <cr_section_macros.h>
-#include <sys_config.h>
+#include "sys_config.h"
+#include "alarm_settings.h"
 #include "menus.h"
 #include <stdio.h>
 #include <string.h>
@@ -27,6 +28,9 @@ extern struct users_S users[];
 extern struct ALARM_SYSTEM_S automation_O[];
 extern struct ALARM_SYSTEM_S automation_I[];
 extern struct ALARM_SYSTEM_S alarm_system_I[];
+extern struct ACTIVE_AUTOMATION_S active_automation[];
+extern struct LIGHT_AUTO_S light_auto[];
+extern struct X_LIGHT_AUTO_S x_light_auto[];
 
 enum ALARMSTATE_T
 {
@@ -46,6 +50,7 @@ uint32_t dimTimer;
 uint8_t intLightsState;
 uint8_t extLightsState;
 uint8_t activeSensors[17];
+uint8_t darkTH = DARK_THRESHOLD_DEFAULT;
 
 STATIC INLINE void updateDisplayTime(void)
 {
@@ -61,8 +66,10 @@ void checkExtLightSubMenu(void);
 void changeTimeMenu(void);
 void checkStatus(void);
 void inputBuffers(void);
+void changeDarkTH(void);
 void armingDelay(void);
 uint8_t pollAlarmSensors(void);
+uint8_t pollAutomation(void);
 uint8_t checkReadyToArm(void);
 uint8_t entryDelay(uint8_t active);
 
@@ -230,6 +237,9 @@ void checkMenu(void)
 			break;
 		case KP_pcnt:
 			inputBuffers();
+			break;
+		case KP_div:
+			changeDarkTH();
 			break;
 		}
 	}
@@ -503,6 +513,15 @@ void checkStatus(void)
 
 }
 
+void changeDarkTH(void)
+{
+	uint32_t selection[1];
+
+	dispDarkTH();
+	if (!getKPInput(selection, 1))
+			return;
+}
+
 void SysTick_Handler(void)
 {
 	systemTick++;
@@ -619,4 +638,41 @@ uint8_t entryDelay(uint8_t active)
 		}
 	}
 	return 0;
+}
+
+uint8_t pollAutomation(void)
+{
+	uint8_t sensor = 0;
+	uint8_t numActiveSensors = 0;
+	RTC_TIME_T checkTime;
+
+	if (OE_INPUT_ON() && isDark(1))
+	{
+		for (sensor = 0; sensor < NUM_OF_AUTO_I; sensor++)
+		{
+			if ((automation_I[sensor].active) && (active_automation[sensor].time_active == 0))
+			{
+				setIOpin(&automation_O[active_automation[sensor].output_device], 1);
+				active_automation[sensor].time_active = systemTick;
+			}
+			//check if time to turn off
+			if (active_automation[sensor].time_active > 0)
+			{
+				if (systemTick > active_automation[sensor].time_active + automation_I[sensor].delay)
+				{
+					setIOpin(&automation_O[active_automation[sensor].output_device], 0);
+					active_automation[sensor].time_active = 0;
+				}
+			}
+		}
+		Chip_RTC_GetFullTime(LPC_RTC, &checkTime);
+		//check if time to turn on interior lights
+		for (uint8_t iLights = 0; iLights < no_of_turnon_times; iLights++)
+		{
+
+		}
+
+		//check if time to strobe exterior lights
+	}
+	return numActiveSensors;
 }

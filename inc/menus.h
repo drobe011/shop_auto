@@ -30,7 +30,9 @@ void dispExtLight(void);
 void dispTimeChange(uint8_t);
 void dispStatus(uint8_t item);
 void dispInputBuffers(void);
+void dispDarkTH(void);
 void displayReadyToArm(void);
 void displayArming(void);
 void displayPIN(void);
+
 #endif /* MENUS_H_ */
