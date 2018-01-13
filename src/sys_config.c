@@ -475,7 +475,13 @@ uint8_t getIOpin(struct ALARM_SYSTEM_S *sys)
 uint8_t isDark(uint8_t mode)
 {
 	uint8_t lightLevel = 0;
+
+	Chip_ADC_SetStartMode(LPC_ADC, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+
+	while (Chip_ADC_ReadStatus(LPC_ADC, ADC_CH7, ADC_DR_DONE_STAT) != SET) {}
+
 	Chip_ADC_ReadByte(LPC_ADC, ADC_CH7, &lightLevel);
+
 	if (mode)
 	{
 		if (lightLevel >= darkTH) return 0;
