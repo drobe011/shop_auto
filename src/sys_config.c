@@ -2,6 +2,7 @@
 #include "sys_config.h"
 #include "menus.h"
 #include "alarm_settings.h"
+#include "eeprom.h"
 
 extern uint32_t systemTick;
 extern uint8_t onPressed;
@@ -11,7 +12,7 @@ extern uint8_t darkTH;
 
 I2C_XFER_T DISPLAYxfer;
 RTC_TIME_T cTime;
-//volatile uint32_t kpMatrixTimer;
+
 
 uint8_t DISPLAY_txbuffer[DISPLAY_TXBUFFER_SZ]; //[row][column][data]
 
@@ -21,13 +22,13 @@ struct users_S users[] = {{0,"System",{KP_0,KP_0,KP_0,KP_0},0},
 						  {3,"Aaron",{KP_2,KP_3,KP_1,KP_8},4},
 						  {4,"Donny",{KP_3,KP_3,KP_1,KP_8},4}};
 struct users_S *c_user;
-//{{"WAKE", 0, 25, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW},
+
 struct ALARM_SYSTEM_S alarm_system_I[] = {
 		{"PWR_S", 1, 18, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
 		{"VIB_1", 1, 19, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_1", 1, 21, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY},
+		{"MTN_1", 1, 21, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"SPAR2", 1, 24, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, ENTRY_DELAY},
+		{"DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
 		{"WDW_E", 1, 27, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"SPAR1", 1, 28, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"WDW_S", 1, 29, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
@@ -35,7 +36,7 @@ struct ALARM_SYSTEM_S alarm_system_I[] = {
 		{"DOR_E", 1, 31, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"SPAR3", 2, 8, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"SPAR4", 2, 11, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY},
+		{"MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"VIB_2", 4, 29, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		};
 struct ALARM_SYSTEM_S automation_I[] = {

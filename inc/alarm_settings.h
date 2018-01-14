@@ -4,10 +4,7 @@
 #define MAIN_STATE_LOOP_FX 25
 #define DIM_OLED_TIME 10000
 #define OFF_OLED_TIME (1000 * 20)
-#define ARM_DELAY (1000 * 1)
-#define ENTRY_DELAY (1000 * 30)
 #define MAX_PIN_TRIES 3
-#define DARK_THRESHOLD_DEFAULT 127
 
 #define no_of_turnon_times 3
 #define turnon1_hr 11
@@ -25,5 +22,9 @@
 #define flash1_min 5
 #define flash2_hr 3
 #define flash2_min 0
+
+#define ARM_DELAY_D 1  //ee
+#define ENTRY_DELAY_D 30  //ee
+#define DARK_THRESHOLD_DEFAULT_D 127 //ee
 
 #endif

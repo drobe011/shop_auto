@@ -41,6 +41,10 @@ enum ARMEDSTATE_T
 	AWAY, AWAY_NO_INT_AUTO, AWAY_NO_EXT_AUTO, AWAY_NO_AUTO, STAY
 };
 
+uint8_t ARM_DELAY = ARM_DELAY_D;  //ee
+uint8_t ENTRY_DELAY = ENTRY_DELAY_D;  //ee
+uint8_t DARK_THRESHOLD_DEFAULT = DARK_THRESHOLD_DEFAULT_D; //ee
+
 enum ALARMSTATE_T ALARMSTATE = DISARM;
 enum ARMEDSTATE_T ARMEDSTATE = STAY;
 uint8_t readyToArm = 2;
@@ -50,7 +54,7 @@ uint32_t dimTimer;
 uint8_t intLightsState;
 uint8_t extLightsState;
 uint8_t activeSensors[17];
-uint8_t darkTH = DARK_THRESHOLD_DEFAULT;
+uint8_t darkTH = DARK_THRESHOLD_DEFAULT_D;
 
 STATIC INLINE void updateDisplayTime(void)
 {
@@ -609,7 +613,7 @@ void armingDelay(void)
 	uint32_t armingTimer = systemTick;
 
 	displayArming();
-	while (systemTick < armingTimer + ARM_DELAY)
+	while (systemTick < armingTimer + (ARM_DELAY * 1000))
 	{
 		//TODO:MAYBE BLINK SOMETHING WHILE ARM DELAY
 	}
@@ -623,7 +627,7 @@ uint8_t entryDelay(uint8_t active)
 		dispClear();
 		displayNormal();
 		displayON();
-		while (systemTick < entrytime + ENTRY_DELAY)
+		while (systemTick < entrytime + (ENTRY_DELAY * 1000))
 		{
 			if (onPressed)
 			{

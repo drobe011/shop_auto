@@ -1,0 +1,12 @@
+int		name
+1		Signature 1 = 27
+1		Signature 2 = 201
+1		ARM_DELAY
+1		ENTRY_DELAY
+1		DARK_THRESHOLD
+1		BOOT SEC
+1		BOOT MIN
+1		BOOT HR
+1		BOOT DAY
+1		BOOT MONTH
+2		BOOT YEAR
