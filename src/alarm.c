@@ -500,8 +500,7 @@ void checkStatus(void)
 
 	uint32_t menuTimer = systemTick;
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
-	{
+
 		//TODO: MAKE INTO FUNCTION
 		//setCursor(0,15);
 		struct MSG_S sensor = { 0, 15, "" };
@@ -514,7 +513,11 @@ void checkStatus(void)
 		dispStatus((alarm_system_I[value].armedstate ? 3 : 4));
 		setCursor(1, 19);
 		sendChar(getIOpin(&alarm_system_I[value]) + 48);
-	}
+
+		while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+		{
+
+		}
 }
 
 void changeDarkTH(void)

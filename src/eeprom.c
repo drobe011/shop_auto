@@ -13,7 +13,13 @@ extern uint8_t DARK_THRESHOLD;
 
 EEPROM_STATUS initEEPROM(void)
 {
-	I2C_XFER_T EEPROMxfer;
+	//Chip_IOCON_SetI2CPad(LPC_IOCON, I2CPADCFG_STD_MODE);
+	Chip_IOCON_EnableOD(LPC_IOCON, EEPROM_SDA1_port, EEPROM_SDA1_pin);
+	Chip_IOCON_EnableOD(LPC_IOCON, EEPROM_SCL1_port, EEPROM_SCL1_pin);
+	Chip_I2C_Init(EEPROM_DEV);
+	Chip_I2C_SetClockRate(EEPROM_DEV, 100000);
+	Chip_I2C_SetMasterEventHandler(EEPROM_DEV, Chip_I2C_EventHandlerPolling);
+	//I2C_XFER_T EEPROMxfer;
 	EEPROMxfer.slaveAddr = EEPROM_ADDRESS;
 	EEPROMxfer.slaveAddr &= 0xFF;
 	uint8_t eeAddress[2] = {0,0};

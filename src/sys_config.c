@@ -102,6 +102,7 @@ void setUpSystem(void)
 	dispBoot(0);
 	pause(1000);
 	setUpRTC();
+	setUpEEPROM();
 	setUpUsers();
 	//dispMainDARD(c_user->name);
 }
@@ -502,7 +503,7 @@ uint8_t isDark(uint8_t mode)
 
 void saveByte(uint8_t offset, uint8_t *ebyte)
 {
-	setEEPROMbyte(offset, *ebyte);
+	setEEPROMbyte(offset, ebyte);
 }
 
 void EINT3_IRQHandler(void)
