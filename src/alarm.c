@@ -514,10 +514,26 @@ void checkStatus(void)
 		setCursor(1, 19);
 		sendChar(getIOpin(&alarm_system_I[value]) + 48);
 
+		selection[0] = 0;
+
 		while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
 		{
-
+			selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+				while (getKP(100))
+				{
+				}
+			if (selection[0]) break;
 		}
+
+		if (selection[0] == KP_equal)
+		{
+			dispClear();
+		}
+
+		menuTimer = systemTick;
+
+		while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+				{}
 }
 
 void changeDarkTH(void)

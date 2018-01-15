@@ -265,11 +265,11 @@ uint8_t initDisplay(void)
 	DISPLAYxfer.rxSz = 0;
 
 	Chip_IOCON_SetI2CPad(LPC_IOCON, I2CPADCFG_STD_MODE);
-	Chip_IOCON_EnableOD(LPC_IOCON, 0, 27);
-	Chip_IOCON_EnableOD(LPC_IOCON, 0, 28);
-	Chip_I2C_Init(I2C0);
-	Chip_I2C_SetClockRate(I2C0, 100000);
-	Chip_I2C_SetMasterEventHandler(I2C0, Chip_I2C_EventHandlerPolling);
+	Chip_IOCON_EnableOD(LPC_IOCON, SDA0_port, SDA0_pin);
+	Chip_IOCON_EnableOD(LPC_IOCON, SCL0_port, SCL0_pin);
+	Chip_I2C_Init(DISPLAY_DEV);
+	Chip_I2C_SetClockRate(DISPLAY_DEV, 100000);
+	Chip_I2C_SetMasterEventHandler(DISPLAY_DEV, Chip_I2C_EventHandlerPolling);
 
 	DISPLAY_RESET_INACTIVE();
 
