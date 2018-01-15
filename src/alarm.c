@@ -76,6 +76,7 @@ uint8_t pollAlarmSensors(void);
 uint8_t pollAutomation(void);
 uint8_t checkReadyToArm(void);
 uint8_t entryDelay(uint8_t active);
+void editSensor(uint8_t sensorid);
 
 int main(void)
 {
@@ -527,7 +528,7 @@ void checkStatus(void)
 
 		if (selection[0] == KP_equal)
 		{
-			dispClear();
+			editSensor(value);
 		}
 
 		menuTimer = systemTick;
@@ -700,4 +701,50 @@ uint8_t pollAutomation(void)
 		//check if time to strobe exterior lights
 	}
 	return numActiveSensors;
+}
+
+void editSensor(uint8_t sensorid)
+{
+	uint32_t menuTimer = systemTick;
+	uint32_t selection[3] = {0, 0, 0};
+	uint32_t value;
+
+	dispSensorEdit(sensorid);
+
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		while (getKP(100))
+		{
+		}
+		switch (selection[0])
+		{
+		case KP_1:
+			alarm_system_I[sensorid].active = (alarm_system_I[sensorid].active ? 0 : 1);
+			break;
+		case KP_2:
+			alarm_system_I[sensorid].req_to_arm  = (alarm_system_I[sensorid].req_to_arm ? 0 : 1);
+			break;
+		case KP_3:
+			alarm_system_I[sensorid].armedstate = (alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
+			break;
+		case KP_4:
+			alarm_system_I[sensorid].sig_active_level = (alarm_system_I[sensorid].sig_active_level ? 0 : 1);
+			break;
+		case KP_5:
+			setCursor(0, 16);
+			selection[0] = 0;
+			if (!getKPInput(selection, 3))
+				break;
+			if (selection[0] == 255)
+				break;
+			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
+			if (value <= 999) alarm_system_I[sensorid].delay = value;
+		}
+		dispSensorEdit(sensorid);
+	}
+
+
+
 }

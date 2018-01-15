@@ -23,6 +23,7 @@
  * 		Disarmed by
  */
 extern struct users_S *c_user;
+extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern RTC_TIME_T cTime;
 extern uint8_t readyToArm;
 extern uint8_t DARK_THRESHOLD;
@@ -57,6 +58,7 @@ struct MSG_S DISP_ARMING = {0,0,{"ARMING...."}};
 struct MSG_S DISP_PIN = {0,0,"ENTER PIN: "};
 struct MSG_S DISP_DARK1 = {0,0,"[0-255]"};
 struct MSG_S DISP_DARK2 = {1,0,"Dark TH [   ]:"};
+struct MSG_S DISP_SENS_EDIT = {1,0,"[1] [2] [3] [4] [5]"};
 
 void clearLine(uint8_t row)
 {
@@ -237,4 +239,24 @@ void dispDarkTH(void)
 	strcpy((char*)adcval_tmp.msg, (char*)currentADCvalStr);
 	sendDisplay(0, &adcval_tmp);
 	setCursor(1,15);
+}
+
+void dispSensorEdit(uint8_t sensorid)
+{
+	dispClear();
+	setCursor(0, 1);
+	sendChar(alarm_system_I[sensorid].active ? 'Y' : 'N');
+	setCursor(0, 5);
+	sendChar(alarm_system_I[sensorid].req_to_arm ? 'Y' : 'N');
+	setCursor(0, 9);
+	sendChar((alarm_system_I[sensorid].armedstate == 0 ? 'A' : 'S'));
+	setCursor(0, 13);
+	sendChar(alarm_system_I[sensorid].sig_active_level ? 'H' : 'L');
+
+	char delay_tmp[4];
+	sprintf(delay_tmp,"%03d", alarm_system_I[sensorid].delay);
+	struct MSG_S delay_msg = { 0, 16, "" };
+	strcpy((char*) delay_msg.msg, (char*) delay_tmp);
+	sendDisplay(0, &delay_msg);
+	sendDisplay(0, &DISP_SENS_EDIT);
 }

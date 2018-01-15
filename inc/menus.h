@@ -29,6 +29,7 @@ void dispIntLight(void);
 void dispExtLight(void);
 void dispTimeChange(uint8_t);
 void dispStatus(uint8_t item);
+void dispSensorEdit(uint8_t sensorid);
 void dispInputBuffers(void);
 void dispDarkTH(void);
 void displayReadyToArm(void);
