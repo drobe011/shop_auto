@@ -225,7 +225,9 @@ struct X_LIGHT_AUTO_S {
 // DISPLAY DEFINES AND GLOBALS
 //
 #define DISPLAY_DEV I2C0
+#define EEPROM_DEV I2C1
 #define DISPLAY_ADDRESS 0B0111100
+#define EEPROM_ADDRESS 0B1010000
 #define DISPLAY_PACKET_SZ 2
 #define DISPLAY_RESET_ACTIVE() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, DSP_RST_p0_O)
 #define DISPLAY_RESET_INACTIVE() Chip_GPIO_SetPinOutHigh(LPC_GPIO, 0, DSP_RST_p0_O)
@@ -292,6 +294,9 @@ struct MSG_S {
 
 // PROGRAM DEFINES
 //
+#define ARM_DELAY_OFFSET 2
+#define ENTRY_DELAY_OFFSET 3
+#define DARK_THRESHOLD_OFFSET 4
 
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)
@@ -332,6 +337,7 @@ void displayNormal(void);
 void setIOpin(struct ALARM_SYSTEM_S *sys, uint8_t level);
 uint8_t getIOpin(struct ALARM_SYSTEM_S *sys);
 uint8_t isDark(uint8_t mode);
+void saveByte(uint8_t offset, uint8_t *ebyte);
 
 //
 // END FUNCTION DECLARATIONS

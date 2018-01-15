@@ -5,10 +5,6 @@
 #define DIM_OLED_TIME 10000
 #define OFF_OLED_TIME (1000 * 20)
 #define MAX_PIN_TRIES 3
-<<<<<<< HEAD
-=======
-#define DARK_THRESHOLD_DEFAULT 27
->>>>>>> f5b98405bd0b260c5f8e88d3a7d2d9704acddc90
 
 #define no_of_turnon_times 3
 #define turnon1_hr 11
@@ -29,6 +25,6 @@
 
 #define ARM_DELAY_D 1  //ee
 #define ENTRY_DELAY_D 30  //ee
-#define DARK_THRESHOLD_DEFAULT_D 127 //ee
+#define DARK_THRESHOLD_D 127 //ee
 
 #endif

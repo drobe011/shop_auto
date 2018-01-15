@@ -43,7 +43,7 @@ enum ARMEDSTATE_T
 
 uint8_t ARM_DELAY = ARM_DELAY_D;  //ee
 uint8_t ENTRY_DELAY = ENTRY_DELAY_D;  //ee
-uint8_t DARK_THRESHOLD_DEFAULT = DARK_THRESHOLD_DEFAULT_D; //ee
+uint8_t DARK_THRESHOLD = DARK_THRESHOLD_D; //ee
 
 enum ALARMSTATE_T ALARMSTATE = DISARM;
 enum ARMEDSTATE_T ARMEDSTATE = STAY;
@@ -54,7 +54,7 @@ uint32_t dimTimer;
 uint8_t intLightsState;
 uint8_t extLightsState;
 uint8_t activeSensors[17];
-uint8_t darkTH = DARK_THRESHOLD_DEFAULT_D;
+//uint8_t darkTH = DARK_THRESHOLD_DEFAULT_D;
 
 STATIC INLINE void updateDisplayTime(void)
 {
@@ -484,26 +484,27 @@ void changeTimeMenu(void)
 
 void checkStatus(void)
 {
-	uint32_t selection[2] =
-	{ 0, 0 };
+	uint32_t selection[2] = { 0, 0 };
+
 	uint32_t value = 0;
 
 	dispStatus(0);
-	while (selection[0] != 255) //TODO: CHANGE TO TIMEOUT
-	{
-		setCursor(0, 9);
-		if (!getKPInput(selection, 2))
-			return;
-		if (selection[0] == 255)
-			return;
-		value = (selection[0] * 10) + selection[1];
-		if (value > 15)
-			return;
+	setCursor(0, 9);
+	if (!getKPInput(selection, 2))
+		return;
+	if (selection[0] == 255)
+		return;
+	value = (selection[0] * 10) + selection[1];
+	if (value > NUM_OF_SYSTEMS)
+		return;
 
+	uint32_t menuTimer = systemTick;
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
 		//TODO: MAKE INTO FUNCTION
 		//setCursor(0,15);
-		struct MSG_S sensor =
-		{ 0, 15, "" };
+		struct MSG_S sensor = { 0, 15, "" };
 		strcpy((char*) sensor.msg, (char*) alarm_system_I[value].name);
 		sendDisplay(0, &sensor);
 		clearLine(1);
@@ -514,7 +515,6 @@ void checkStatus(void)
 		setCursor(1, 19);
 		sendChar(getIOpin(&alarm_system_I[value]) + 48);
 	}
-
 }
 
 void changeDarkTH(void)
@@ -532,7 +532,8 @@ void changeDarkTH(void)
 
 	if (thValue > 255) return;
 
-	darkTH = (uint8_t)thValue;
+	DARK_THRESHOLD = (uint8_t)thValue;
+	saveByte(DARK_THRESHOLD_OFFSET, &DARK_THRESHOLD);
 }
 
 void SysTick_Handler(void)
@@ -596,14 +597,6 @@ uint8_t checkReadyToArm(void)
 	}
 	else
 		DISABLE_ERR_LED();
-	/*
-	 if (!SYSCK_GOOD())
-	 {
-	 ENABLE_ERR_LED();
-	 return 0;
-	 }
-	 else
-	 DISABLE_ERR_LED();*/
 
 	for (uint8_t t_s = 0; t_s < trippedSensors; t_s++)
 	{

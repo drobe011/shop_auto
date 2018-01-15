@@ -43,6 +43,7 @@ keymap.txt
      	[=] = SYSTEM STATUS
      		[=] = ALL
      		[KEYPAD] = SELECTION
+     			[=] = Edit sensor info
      		
      	[/] = DARKNESS THRESHOLD
      		[NUMBERS] = THRESHOLD

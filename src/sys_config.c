@@ -8,7 +8,7 @@ extern uint32_t systemTick;
 extern uint8_t onPressed;
 extern uint8_t dispDimmed;
 extern uint32_t dimTimer;
-extern uint8_t darkTH;
+extern uint8_t DARK_THRESHOLD;
 
 I2C_XFER_T DISPLAYxfer;
 RTC_TIME_T cTime;
@@ -26,9 +26,9 @@ struct users_S *c_user;
 struct ALARM_SYSTEM_S alarm_system_I[] = {
 		{"PWR_S", 1, 18, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
 		{"VIB_1", 1, 19, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_1", 1, 21, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY, A_S_SIG_LEVEL_LOW, NONE},
+		{"MTN_1", 1, 21, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D},
 		{"SPAR2", 1, 24, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
+		{"DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, ENTRY_DELAY_D},
 		{"WDW_E", 1, 27, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"SPAR1", 1, 28, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"WDW_S", 1, 29, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
@@ -36,7 +36,7 @@ struct ALARM_SYSTEM_S alarm_system_I[] = {
 		{"DOR_E", 1, 31, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"SPAR3", 2, 8, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		{"SPAR4", 2, 11, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
+		{"MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D},
 		{"VIB_2", 4, 29, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
 		};
 struct ALARM_SYSTEM_S automation_I[] = {
@@ -79,6 +79,7 @@ struct X_LIGHT_AUTO_S x_light_auto[] = {
 static void setUpGPIO(void);
 static void setUpRTC(void);
 static uint8_t initDisplay(void);
+static void setUpEEPROM(void);
 static void setUpUsers(void);
 
 void setCursor(uint8_t row, uint8_t column)
@@ -194,6 +195,14 @@ void setUpRTC(void)
 //	cTime.time[RTC_TIMETYPE_DAYOFMONTH] = 9;
 //	cTime.time[RTC_TIMETYPE_YEAR] = 2017;
 //	Chip_RTC_SetFullTime(LPC_RTC, &cTime);
+}
+
+static void setUpEEPROM(void)
+{
+	EEPROM_STATUS estat = initEEPROM();
+
+	if (estat == UNSET) setEEPROMdefaults();
+
 }
 
 void pause(uint32_t ps)
@@ -485,10 +494,15 @@ uint8_t isDark(uint8_t mode)
 
 	if (mode)
 	{
-		if (lightLevel >= darkTH) return 0;
+		if (lightLevel >= DARK_THRESHOLD) return 0;
 		else return 1;
 	}
 	else return lightLevel;
+}
+
+void saveByte(uint8_t offset, uint8_t *ebyte)
+{
+	setEEPROMbyte(offset, *ebyte);
 }
 
 void EINT3_IRQHandler(void)
