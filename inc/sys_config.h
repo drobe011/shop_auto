@@ -11,6 +11,8 @@
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR "a"
 
+#define ARRAY_LEN(x)  (sizeof(x) / sizeof((x)[0]))
+
 // ALARM SYSTEMS GLOBALS AND DEFINES
 //
 #define A_S_INACTIVE 0
@@ -297,6 +299,9 @@ struct MSG_S {
 #define ARM_DELAY_OFFSET 2
 #define ENTRY_DELAY_OFFSET 3
 #define DARK_THRESHOLD_OFFSET 4
+#define SENSOR_OFFSET 5
+#define SENSOR_PACKET_SIZE 9
+#define BOOTTIME_OFFSET (NUM_OF_SYSTEMS * SENSOR_PACKET_SIZE) + SENSOR_OFFSET
 
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)
@@ -337,7 +342,7 @@ void displayNormal(void);
 void setIOpin(struct ALARM_SYSTEM_S *sys, uint8_t level);
 uint8_t getIOpin(struct ALARM_SYSTEM_S *sys);
 uint8_t isDark(uint8_t mode);
-void saveByte(uint8_t offset, uint8_t *ebyte);
+void saveByte(uint8_t offset, uint8_t ebyte);
 
 //
 // END FUNCTION DECLARATIONS

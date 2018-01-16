@@ -489,7 +489,7 @@ void checkStatus(void)
 
 	uint32_t value = 0;
 
-	dispStatus(0);
+	dispSensorStatus(0);
 	setCursor(0, 9);
 	if (!getKPInput(selection, 2))
 		return;
@@ -501,42 +501,72 @@ void checkStatus(void)
 
 	uint32_t menuTimer = systemTick;
 
+	dispSensor(value);
 
-		//TODO: MAKE INTO FUNCTION
-		//setCursor(0,15);
-		struct MSG_S sensor = { 0, 15, "" };
-		strcpy((char*) sensor.msg, (char*) alarm_system_I[value].name);
-		sendDisplay(0, &sensor);
-		clearLine(1);
-		setCursor(1, 0);
-		dispStatus((alarm_system_I[value].active ? 1 : 2));
-		setCursor(1, 10);
-		dispStatus((alarm_system_I[value].armedstate ? 3 : 4));
-		setCursor(1, 19);
-		sendChar(getIOpin(&alarm_system_I[value]) + 48);
+	selection[0] = 0;
 
-		selection[0] = 0;
-
-		while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		while (getKP(100))
 		{
-			selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
-				while (getKP(100))
-				{
-				}
-			if (selection[0]) break;
 		}
+		if (selection[0]) break;
+	}
 
-		if (selection[0] == KP_equal)
-		{
-			editSensor(value);
-		}
+	if (selection[0] == KP_equal)
+	{
+		editSensor(value);
+	}
 
-		menuTimer = systemTick;
+	menuTimer = systemTick;
 
-		while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
-				{}
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{}
 }
 
+void editSensor(uint8_t sensorid)
+{
+	uint32_t menuTimer = systemTick;
+	uint32_t selection[3] = {0, 0, 0};
+	uint32_t value;
+
+	dispSensorEdit(sensorid);
+
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		while (getKP(100))
+		{
+		}
+		switch (selection[0])
+		{
+		case KP_1:
+			alarm_system_I[sensorid].active = (alarm_system_I[sensorid].active ? 0 : 1);
+			break;
+		case KP_2:
+			alarm_system_I[sensorid].req_to_arm  = (alarm_system_I[sensorid].req_to_arm ? 0 : 1);
+			break;
+		case KP_3:
+			alarm_system_I[sensorid].armedstate = (alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
+			break;
+		case KP_4:
+			alarm_system_I[sensorid].sig_active_level = (alarm_system_I[sensorid].sig_active_level ? 0 : 1);
+			break;
+		case KP_5:
+			setCursor(0, 16);
+			selection[0] = 0;
+			if (!getKPInput(selection, 3))
+				break;
+			if (selection[0] == 255)
+				break;
+			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
+			if (value <= 999) alarm_system_I[sensorid].delay = value;
+		}
+		dispSensorEdit(sensorid);
+	}
+}
 void changeDarkTH(void)
 {
 	uint32_t selection[3];
@@ -553,7 +583,7 @@ void changeDarkTH(void)
 	if (thValue > 255) return;
 
 	DARK_THRESHOLD = (uint8_t)thValue;
-	saveByte(DARK_THRESHOLD_OFFSET, &DARK_THRESHOLD);
+	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
 }
 
 void SysTick_Handler(void)
@@ -703,48 +733,4 @@ uint8_t pollAutomation(void)
 	return numActiveSensors;
 }
 
-void editSensor(uint8_t sensorid)
-{
-	uint32_t menuTimer = systemTick;
-	uint32_t selection[3] = {0, 0, 0};
-	uint32_t value;
 
-	dispSensorEdit(sensorid);
-
-
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
-	{
-		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
-		while (getKP(100))
-		{
-		}
-		switch (selection[0])
-		{
-		case KP_1:
-			alarm_system_I[sensorid].active = (alarm_system_I[sensorid].active ? 0 : 1);
-			break;
-		case KP_2:
-			alarm_system_I[sensorid].req_to_arm  = (alarm_system_I[sensorid].req_to_arm ? 0 : 1);
-			break;
-		case KP_3:
-			alarm_system_I[sensorid].armedstate = (alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
-			break;
-		case KP_4:
-			alarm_system_I[sensorid].sig_active_level = (alarm_system_I[sensorid].sig_active_level ? 0 : 1);
-			break;
-		case KP_5:
-			setCursor(0, 16);
-			selection[0] = 0;
-			if (!getKPInput(selection, 3))
-				break;
-			if (selection[0] == 255)
-				break;
-			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
-			if (value <= 999) alarm_system_I[sensorid].delay = value;
-		}
-		dispSensorEdit(sensorid);
-	}
-
-
-
-}

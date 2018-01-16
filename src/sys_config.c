@@ -79,7 +79,7 @@ struct X_LIGHT_AUTO_S x_light_auto[] = {
 static void setUpGPIO(void);
 static void setUpRTC(void);
 static uint8_t initDisplay(void);
-static void setUpEEPROM(void);
+static EEPROM_STATUS setUpEEPROM(void);
 static void setUpUsers(void);
 
 void setCursor(uint8_t row, uint8_t column)
@@ -102,7 +102,7 @@ void setUpSystem(void)
 	dispBoot(0);
 	pause(1000);
 	setUpRTC();
-	setUpEEPROM();
+	if (setUpEEPROM()) setBootStamp();
 	setUpUsers();
 	//dispMainDARD(c_user->name);
 }
@@ -198,11 +198,11 @@ void setUpRTC(void)
 //	Chip_RTC_SetFullTime(LPC_RTC, &cTime);
 }
 
-static void setUpEEPROM(void)
+static EEPROM_STATUS setUpEEPROM(void)
 {
-	EEPROM_STATUS estat = initEEPROM();
+	return initEEPROM();
 
-	if (estat == UNSET) setEEPROMdefaults();
+	//if (estat == UNSET) setEEPROMdefaults();
 
 }
 
@@ -501,7 +501,7 @@ uint8_t isDark(uint8_t mode)
 	else return lightLevel;
 }
 
-void saveByte(uint8_t offset, uint8_t *ebyte)
+void saveByte(uint8_t offset, uint8_t ebyte)
 {
 	setEEPROMbyte(offset, ebyte);
 }

@@ -1,12 +1,19 @@
-int		name
-1		Signature 1 = 27
-1		Signature 2 = 201
-1		ARM_DELAY
-1		ENTRY_DELAY
-1		DARK_THRESHOLD
-1		BOOT SEC
-1		BOOT MIN
-1		BOOT HR
-1		BOOT DAY
-1		BOOT MONTH
-2		BOOT YEAR
+bytes	name						offset	
+1		Signature 1 = 27			0
+1		Signature 2 = 201			1
+1		ARM_DELAY					2
+1		ENTRY_DELAY					3
+1		DARK_THRESHOLD				4
+9		alarm_system_I (x 14)		5
+(126)	1	sensorID				(14) (59) (104)
+		1	active					(23) (68) (113)
+		1	req_to_arm				(32) (77) (122)
+		1	armedstate				(41) (86)
+		1	sig_active_level		(50) (95)
+		4	delay
+1		BOOT SEC					(131)
+1		BOOT MIN					(132)
+1		BOOT HR						(133)
+1		BOOT DAY					(134)
+1		BOOT MONTH					(135)
+2		BOOT YEAR					(136)

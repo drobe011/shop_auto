@@ -164,7 +164,21 @@ void dispTimeChange(uint8_t mode)
 	}
 }
 
-void dispStatus(uint8_t item)
+void dispSensor(uint8_t item)
+{
+	struct MSG_S sensor = { 0, 15, "" };
+	strcpy((char*) sensor.msg, (char*) alarm_system_I[item].name);
+	sendDisplay(0, &sensor);
+	clearLine(1);
+	setCursor(1, 0);
+	dispSensorStatus((alarm_system_I[item].active ? 1 : 2));
+	setCursor(1, 10);
+	dispSensorStatus((alarm_system_I[item].armedstate ? 3 : 4));
+	setCursor(1, 19);
+	sendChar(getIOpin(&alarm_system_I[item]) + 48);
+}
+
+void dispSensorStatus(uint8_t item)
 {
 	switch (item)
 	{
