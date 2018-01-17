@@ -28,7 +28,7 @@ EEPROM_STATUS initEEPROM(void)
 	EEPROMxfer.txSz = 2;
 	EEPROMxfer.rxBuff = eepromRXbuffer;
 	EEPROMxfer.txBuff = eepromTXbuffer;
-	uint8_t *eeAddress = eepromTXbuffer;//[2] = { 0, 0 };
+	uint8_t *eeAddress = eepromTXbuffer;
 	eeAddress[0] = 0;
 	eeAddress[1] = 0;
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) == I2C_STATUS_DONE)
@@ -74,17 +74,14 @@ EEPROM_STATUS getEEPROMdata(void)
 	{
 		rcvbuff = eepromRXbuffer;
 		tdata_ptr = eepromTXbuffer;
+				tdata_ptr[0] = 0;
+		tdata_ptr[1] = SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE);
 		EEPROMxfer.txBuff = tdata_ptr;
 		EEPROMxfer.rxBuff = rcvbuff;
-		//addr_ptr = eeAddress;
-		//rdata_ptr = rcvdata;
-		tdata_ptr[0] = 0;
-		tdata_ptr[1] = SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE);
 		EEPROMxfer.rxSz = SENSOR_PACKET_SIZE;
 		EEPROMxfer.txSz = 2;
 
-		uint8_t bytes[4];
-		uint32_t *lval; // = (unsigned long *)in;
+		uint32_t lval; // = (unsigned long *)in;
 
 		pause(50);
 
@@ -99,12 +96,11 @@ EEPROM_STATUS getEEPROMdata(void)
 			alarm_system_I[sensorid].req_to_arm = rcvbuff[2];
 			alarm_system_I[sensorid].armedstate = rcvbuff[3];
 			alarm_system_I[sensorid].sig_active_level = rcvbuff[4];
-			bytes[0] = rcvbuff[5];
-			bytes[1] = rcvbuff[6];
-			bytes[2] = rcvbuff[7];
-			bytes[3] = rcvbuff[8];
-			lval = (uint32_t *) bytes;
-			alarm_system_I[sensorid].delay = *lval;
+			lval = (uint32_t) rcvbuff[5] << 24;
+			lval += (uint32_t) rcvbuff[6] << 16;
+			lval += (uint32_t) rcvbuff[7] << 8;
+			lval += (uint32_t) rcvbuff[8];
+			alarm_system_I[sensorid].delay = lval;
 		}
 		else
 		{
