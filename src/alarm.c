@@ -583,7 +583,7 @@ void changeDarkTH(void)
 	if (thValue > 255) return;
 
 	DARK_THRESHOLD = (uint8_t)thValue;
-	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
+	//saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
 }
 
 void SysTick_Handler(void)
