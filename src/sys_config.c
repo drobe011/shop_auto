@@ -100,10 +100,15 @@ void setUpSystem(void)
 	SysTick_Config(SystemCoreClock / 1000);
 	initDisplay();
 	dispBoot(0);
-	pause(1000);
+
 	setUpRTC();
-	if (setUpEEPROM()) setBootStamp();
+	if (setUpEEPROM())
+		{
+		ENABLE_ERR_LED();
+		setBootStamp();
+		}
 	setUpUsers();
+	pause(1000);
 	//dispMainDARD(c_user->name);
 }
 void setUpGPIO(void)

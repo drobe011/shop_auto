@@ -2,7 +2,7 @@
 #include "sys_config.h"
 #include "eeprom.h"
 
-const uint8_t EEPROM_SIG1 = 27;
+const uint8_t EEPROM_SIG1 = 29;
 const uint8_t EEPROM_SIG2 = 201;
 
 I2C_XFER_T EEPROMxfer;
@@ -31,7 +31,7 @@ EEPROM_STATUS initEEPROM(void)
 
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) == I2C_STATUS_DONE)
 	{
-		if ((sigs[0] == 27) && (sigs[1] == 201))
+		if ((sigs[0] == EEPROM_SIG1) && (sigs[1] == EEPROM_SIG1))
 			return getEEPROMdata();
 		else
 			return setEEPROMdefaults();
@@ -44,6 +44,7 @@ EEPROM_STATUS getEEPROMdata(void)
 {
 	uint8_t eeAddress[2] = { 0, ARM_DELAY_OFFSET };
 	uint8_t rcvdata[SENSOR_PACKET_SIZE];
+	uint8_t *data_ptr;
 	EEPROMxfer.rxSz = 3;
 	EEPROMxfer.txSz = ARRAY_LEN(eeAddress);
 	EEPROMxfer.rxBuff = rcvdata;
@@ -60,11 +61,12 @@ EEPROM_STATUS getEEPROMdata(void)
 
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 	{
-		eeAddress[1] = SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE);
+		data_ptr = eeAddress;
+		data_ptr[1] = SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE);
 		EEPROMxfer.rxSz = SENSOR_PACKET_SIZE;
 		EEPROMxfer.txSz = 2;
 		EEPROMxfer.rxBuff = rcvdata;
-		EEPROMxfer.txBuff = eeAddress;
+		EEPROMxfer.txBuff = data_ptr;
 		uint8_t bytes[4];
 		uint32_t *lval; // = (unsigned long *)in;
 
@@ -94,6 +96,7 @@ EEPROM_STATUS setEEPROMdefaults(void)
 {
 	uint8_t globals[] = { 0, 0, EEPROM_SIG1, EEPROM_SIG2, ARM_DELAY,
 			ENTRY_DELAY, DARK_THRESHOLD };
+	//uint8_t *data_ptr;
 	EEPROMxfer.rxSz = 0;
 	EEPROMxfer.txSz = ARRAY_LEN(globals);
 	EEPROMxfer.txBuff = globals;
