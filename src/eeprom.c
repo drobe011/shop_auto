@@ -168,6 +168,8 @@ EEPROM_STATUS setEEPROMbyte(uint8_t offset, uint8_t ebyte)
 	EEPROMxfer.txSz = 3;
 	EEPROMxfer.txBuff = tdata_ptr;
 
+	pause(50);
+
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) == I2C_STATUS_DONE)
 	{
 		return GOOD;
