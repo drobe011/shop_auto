@@ -147,11 +147,11 @@ struct X_LIGHT_AUTO_S {
 #define XB_RTS1_mode IOCON_MODE_INACT
 #define EEPROM_SDA1_port 0
 #define EEPROM_SDA1_pin 19
-#define EEPROM_SDA1_func IOCON_FUNC3
+#define EEPROM_SDA1_func IOCON_FUNC2
 #define EEPROM_SDA1_mode IOCON_MODE_INACT
 #define EEPROM_SCL1_port 0
 #define EEPROM_SCL1_pin 20
-#define EEPROM_SCL1_func IOCON_FUNC3
+#define EEPROM_SCL1_func IOCON_FUNC2
 #define EEPROM_SCL1_mode IOCON_MODE_INACT
 //
 // END SYSTEM I/O DEFINES
