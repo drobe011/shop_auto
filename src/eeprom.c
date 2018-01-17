@@ -16,11 +16,11 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 
 EEPROM_STATUS initEEPROM(void)
 {
-	Chip_IOCON_SetI2CPad(LPC_IOCON, I2CPADCFG_STD_MODE);
+	//Chip_IOCON_SetI2CPad(LPC_IOCON, I2CPADCFG_STD_MODE);
 	Chip_IOCON_EnableOD(LPC_IOCON, EEPROM_SDA1_port, EEPROM_SDA1_pin);
 	Chip_IOCON_EnableOD(LPC_IOCON, EEPROM_SCL1_port, EEPROM_SCL1_pin);
 	Chip_I2C_Init(EEPROM_DEV);
-	Chip_I2C_SetClockRate(EEPROM_DEV, 100000);
+	Chip_I2C_SetClockRate(EEPROM_DEV, 40000);
 	Chip_I2C_SetMasterEventHandler(EEPROM_DEV, Chip_I2C_EventHandlerPolling);
 
 	EEPROMxfer.slaveAddr = EEPROM_ADDRESS;
@@ -31,7 +31,7 @@ EEPROM_STATUS initEEPROM(void)
 	EEPROMxfer.txBuff = eepromTXbuffer;
 	uint8_t *eeAddress = eepromTXbuffer;//[2] = { 0, 0 };
 	eeAddress[0] = 0;
-	eeAddress[1] = 1;
+	eeAddress[1] = 0;
 	I2C_STATUS_T i2cresponse = I2C_STATUS_BUSY;
 
 	i2cresponse = Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
