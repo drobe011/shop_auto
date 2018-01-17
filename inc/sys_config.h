@@ -343,6 +343,8 @@ void setIOpin(struct ALARM_SYSTEM_S *sys, uint8_t level);
 uint8_t getIOpin(struct ALARM_SYSTEM_S *sys);
 uint8_t isDark(uint8_t mode);
 void saveByte(uint8_t offset, uint8_t ebyte);
+uint32_t bytesToint(uint8_t *bytes);
+void intTobytes(uint8_t *bytes, uint32_t intVal);
 
 //
 // END FUNCTION DECLARATIONS

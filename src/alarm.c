@@ -530,6 +530,7 @@ void editSensor(uint8_t sensorid)
 	uint32_t menuTimer = systemTick;
 	uint32_t selection[3] = {0, 0, 0};
 	uint32_t value;
+	uint8_t byteStorage[4];
 
 	dispSensorEdit(sensorid);
 
@@ -544,15 +545,19 @@ void editSensor(uint8_t sensorid)
 		{
 		case KP_1:
 			alarm_system_I[sensorid].active = (alarm_system_I[sensorid].active ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+1), alarm_system_I[sensorid].active);
 			break;
 		case KP_2:
 			alarm_system_I[sensorid].req_to_arm  = (alarm_system_I[sensorid].req_to_arm ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+2), alarm_system_I[sensorid].req_to_arm);
 			break;
 		case KP_3:
 			alarm_system_I[sensorid].armedstate = (alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+3), alarm_system_I[sensorid].armedstate);
 			break;
 		case KP_4:
 			alarm_system_I[sensorid].sig_active_level = (alarm_system_I[sensorid].sig_active_level ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+4), alarm_system_I[sensorid].sig_active_level);
 			break;
 		case KP_5:
 			setCursor(0, 16);
@@ -563,6 +568,11 @@ void editSensor(uint8_t sensorid)
 				break;
 			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
 			if (value <= 999) alarm_system_I[sensorid].delay = value;
+			intTobytes(byteStorage, value);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+5), byteStorage[0]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+6), byteStorage[1]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+7), byteStorage[2]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+8), byteStorage[3]);
 		}
 		dispSensorEdit(sensorid);
 	}
@@ -583,7 +593,7 @@ void changeDarkTH(void)
 	if (thValue > 255) return;
 
 	DARK_THRESHOLD = (uint8_t)thValue;
-	//saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
+	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
 }
 
 void SysTick_Handler(void)

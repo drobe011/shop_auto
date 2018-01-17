@@ -511,6 +511,25 @@ void saveByte(uint8_t offset, uint8_t ebyte)
 	setEEPROMbyte(offset, ebyte);
 }
 
+uint32_t bytesToint(uint8_t *bytes)
+{
+	uint32_t lval;
+	lval = (uint32_t) bytes[0] << 24;
+	lval += (uint32_t) bytes[1] << 16;
+	lval += (uint32_t) bytes[2] << 8;
+	lval += (uint32_t) bytes[3];
+
+	return lval;
+}
+
+void intTobytes(uint8_t *bytes, uint32_t intVal)
+{
+	bytes[0] = (intVal >> 24) & 0xFF;
+	bytes[1] = (intVal >> 16) & 0xFF;
+	bytes[2] = (intVal >> 8) & 0xFF;
+	bytes[3] = intVal & 0xFF;
+}
+
 void EINT3_IRQHandler(void)
 {
 	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, GPIOINT_PORT0, (1 << ON_));

@@ -33,11 +33,9 @@ EEPROM_STATUS initEEPROM(void)
 	eeAddress[1] = 0;
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) == I2C_STATUS_DONE)
 	{
-		if ((eepromRXbuffer[0] == EEPROM_SIG1) && (eepromRXbuffer[1] == EEPROM_SIG2))
+		if ((eepromRXbuffer[0] == EEPROM_SIG1)
+				&& (eepromRXbuffer[1] == EEPROM_SIG2))
 		{
-			ENABLE_ERR_LED();
-			pause(1250);
-			DISABLE_ERR_LED();
 			return getEEPROMdata();
 		}
 		else
@@ -49,6 +47,7 @@ EEPROM_STATUS initEEPROM(void)
 
 EEPROM_STATUS getEEPROMdata(void)
 {
+	uint8_t bytes[4];
 	uint8_t *tdata_ptr = eepromTXbuffer;
 	tdata_ptr[0] = 0;
 	tdata_ptr[1] = ARM_DELAY_OFFSET;
@@ -57,7 +56,6 @@ EEPROM_STATUS getEEPROMdata(void)
 	EEPROMxfer.txBuff = tdata_ptr;
 	uint8_t *rcvbuff = eepromRXbuffer;
 	EEPROMxfer.rxBuff = rcvbuff;
-
 
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) == I2C_STATUS_DONE)
 	{
@@ -74,14 +72,12 @@ EEPROM_STATUS getEEPROMdata(void)
 	{
 		rcvbuff = eepromRXbuffer;
 		tdata_ptr = eepromTXbuffer;
-				tdata_ptr[0] = 0;
+		tdata_ptr[0] = 0;
 		tdata_ptr[1] = SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE);
 		EEPROMxfer.txBuff = tdata_ptr;
 		EEPROMxfer.rxBuff = rcvbuff;
 		EEPROMxfer.rxSz = SENSOR_PACKET_SIZE;
 		EEPROMxfer.txSz = 2;
-
-		uint32_t lval; // = (unsigned long *)in;
 
 		pause(50);
 
@@ -96,11 +92,11 @@ EEPROM_STATUS getEEPROMdata(void)
 			alarm_system_I[sensorid].req_to_arm = rcvbuff[2];
 			alarm_system_I[sensorid].armedstate = rcvbuff[3];
 			alarm_system_I[sensorid].sig_active_level = rcvbuff[4];
-			lval = (uint32_t) rcvbuff[5] << 24;
-			lval += (uint32_t) rcvbuff[6] << 16;
-			lval += (uint32_t) rcvbuff[7] << 8;
-			lval += (uint32_t) rcvbuff[8];
-			alarm_system_I[sensorid].delay = lval;
+			bytes[0] = rcvbuff[5];
+			bytes[1] = rcvbuff[6];
+			bytes[2] = rcvbuff[7];
+			bytes[3] = rcvbuff[8];
+			alarm_system_I[sensorid].delay = bytesToint(bytes);
 		}
 		else
 		{
@@ -113,6 +109,8 @@ EEPROM_STATUS getEEPROMdata(void)
 EEPROM_STATUS setEEPROMdefaults(void)
 {
 	uint8_t *tdata_ptr = eepromTXbuffer;
+	uint8_t byteStorage[4];
+
 	tdata_ptr[0] = 0;
 	tdata_ptr[1] = 0;
 	tdata_ptr[2] = EEPROM_SIG1;
@@ -125,7 +123,8 @@ EEPROM_STATUS setEEPROMdefaults(void)
 	EEPROMxfer.txSz = 7;
 	EEPROMxfer.txBuff = tdata_ptr;
 
-	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE) return BAD;
+	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+		return BAD;
 
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 	{
@@ -141,26 +140,18 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		tdata_ptr[4] = alarm_system_I[sensorid].req_to_arm;
 		tdata_ptr[5] = alarm_system_I[sensorid].armedstate;
 		tdata_ptr[6] = alarm_system_I[sensorid].sig_active_level;
-		tdata_ptr[7] = (alarm_system_I[sensorid].delay >> 24) & 0xFF;
-		tdata_ptr[8] = (alarm_system_I[sensorid].delay >> 16) & 0xFF;
-		tdata_ptr[9] = (alarm_system_I[sensorid].delay >> 8) & 0xFF;
-		tdata_ptr[10] = alarm_system_I[sensorid].delay & 0xFF;
+		intTobytes(byteStorage, alarm_system_I[sensorid].delay);
+		tdata_ptr[7] = byteStorage[0];
+		tdata_ptr[8] = byteStorage[1];
+		tdata_ptr[9] = byteStorage[2];
+		tdata_ptr[10] = byteStorage[3];
 
 		pause(50);
 		Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
 		if (EEPROMxfer.txSz > 0)
 		{
-			ENABLE_ERR_LED();
-			pause(1000);
-			DISABLE_ERR_LED();
-			pause(1000);
-			ENABLE_ERR_LED();
-			pause(1000);
-			DISABLE_ERR_LED();
 			return BAD;
-			}
-		//&sensordata[0] = holdptr;
-
+		}
 	}
 
 	return GOOD;
@@ -168,10 +159,14 @@ EEPROM_STATUS setEEPROMdefaults(void)
 
 EEPROM_STATUS setEEPROMbyte(uint8_t offset, uint8_t ebyte)
 {
-	uint8_t eeAddress[] = { 0, offset, ebyte };
+	uint8_t *tdata_ptr = eepromTXbuffer;
+	tdata_ptr[0] = 0;
+	tdata_ptr[1] = offset;
+	tdata_ptr[2] = ebyte;
+
 	EEPROMxfer.rxSz = 0;
-	EEPROMxfer.txSz = ARRAY_LEN(eeAddress);
-	EEPROMxfer.txBuff = eeAddress;
+	EEPROMxfer.txSz = 3;
+	EEPROMxfer.txBuff = tdata_ptr;
 
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) == I2C_STATUS_DONE)
 	{
@@ -186,21 +181,23 @@ EEPROM_STATUS setEEPROMbyte(uint8_t offset, uint8_t ebyte)
 EEPROM_STATUS setBootStamp(void)
 {
 	RTC_TIME_T bootTime;
+	uint8_t *tdata_ptr = eepromTXbuffer;
 
 	Chip_RTC_GetFullTime(LPC_RTC, &bootTime);
 
-	uint8_t eeAddress[] = { 0, BOOTTIME_OFFSET,
-			bootTime.time[RTC_TIMETYPE_SECOND],
-			bootTime.time[RTC_TIMETYPE_MINUTE],
-			bootTime.time[RTC_TIMETYPE_HOUR],
-			bootTime.time[RTC_TIMETYPE_DAYOFMONTH],
-			bootTime.time[RTC_TIMETYPE_MONTH],
-			(bootTime.time[RTC_TIMETYPE_YEAR] >> 8) & 0xFF,
-			bootTime.time[RTC_TIMETYPE_YEAR] & 0xFF };
+	tdata_ptr[0] = 0;
+	tdata_ptr[1] = BOOTTIME_OFFSET;
+	tdata_ptr[2] = bootTime.time[RTC_TIMETYPE_SECOND];
+	tdata_ptr[3] = bootTime.time[RTC_TIMETYPE_MINUTE];
+	tdata_ptr[4] = bootTime.time[RTC_TIMETYPE_HOUR];
+	tdata_ptr[5] = bootTime.time[RTC_TIMETYPE_DAYOFMONTH];
+	tdata_ptr[6] = bootTime.time[RTC_TIMETYPE_MONTH];
+	tdata_ptr[7] = (bootTime.time[RTC_TIMETYPE_YEAR] >> 8) & 0xFF;
+	tdata_ptr[8] = bootTime.time[RTC_TIMETYPE_YEAR] & 0xFF;
 
 	EEPROMxfer.rxSz = 0;
-	EEPROMxfer.txSz = ARRAY_LEN(eeAddress);
-	EEPROMxfer.txBuff = eeAddress;
+	EEPROMxfer.txSz = 9;
+	EEPROMxfer.txBuff = tdata_ptr;
 
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
 	{
