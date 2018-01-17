@@ -2,10 +2,12 @@
 #include "sys_config.h"
 #include "eeprom.h"
 
-const uint8_t EEPROM_SIG1 = 17;
-const uint8_t EEPROM_SIG2 = 201;
+#define EEPROM_SIG1 (uint8_t)35
+#define EEPROM_SIG2 (uint8_t)201
 
 I2C_XFER_T EEPROMxfer;
+uint8_t eepromTXbuffer[11];
+uint8_t eepromRXbuffer[11];
 
 extern uint8_t ARM_DELAY;
 extern uint8_t ENTRY_DELAY;
@@ -22,17 +24,25 @@ EEPROM_STATUS initEEPROM(void)
 
 	EEPROMxfer.slaveAddr = EEPROM_ADDRESS;
 	EEPROMxfer.slaveAddr &= 0xFF;
-	uint8_t eeAddress[2] = { 0, 0 };
-	uint8_t sigs[2];
-	EEPROMxfer.rxSz = ARRAY_LEN(eeAddress);
-	EEPROMxfer.txSz = ARRAY_LEN(sigs);
-	EEPROMxfer.rxBuff = sigs;
-	EEPROMxfer.txBuff = eeAddress;
+	EEPROMxfer.rxSz = 2;
+	EEPROMxfer.txSz = 2;
+	EEPROMxfer.rxBuff = eepromRXbuffer;
+	EEPROMxfer.txBuff = eepromTXbuffer;
+	uint8_t *eeAddress = eepromTXbuffer;//[2] = { 0, 0 };
+	eeAddress[0] = 0;
+	eeAddress[1] = 1;
+	I2C_STATUS_T i2cresponse = I2C_STATUS_BUSY;
 
-	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) == I2C_STATUS_DONE)
+	i2cresponse = Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+	if (i2cresponse == I2C_STATUS_DONE)
 	{
-		if ((sigs[0] == EEPROM_SIG1) && (sigs[1] == EEPROM_SIG1))
+		if ((eepromRXbuffer[0] == EEPROM_SIG1) && (eepromRXbuffer[1] == EEPROM_SIG2))
+		{
+			ENABLE_ERR_LED();
+			pause(250);
 			return getEEPROMdata();
+		}
+
 		else
 			return setEEPROMdefaults();
 	}
@@ -48,8 +58,8 @@ EEPROM_STATUS getEEPROMdata(void)
 	uint8_t *rdata_ptr = rcvdata;
 	EEPROMxfer.rxSz = 3;
 	EEPROMxfer.txSz = ARRAY_LEN(eeAddress);
-	EEPROMxfer.rxBuff = rcvdata;
-	EEPROMxfer.txBuff = eeAddress;
+	//EEPROMxfer.rxBuff = rcvdata;
+	//EEPROMxfer.txBuff = eeAddress;
 
 
 
@@ -60,7 +70,10 @@ EEPROM_STATUS getEEPROMdata(void)
 		DARK_THRESHOLD = rdata_ptr[2];
 	}
 	else
+	{
+
 		return BAD;
+	}
 
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 	{
@@ -75,7 +88,9 @@ EEPROM_STATUS getEEPROMdata(void)
 		uint32_t *lval; // = (unsigned long *)in;
 
 		if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+		{
 			return BAD;
+		}
 
 		if (rdata_ptr[0] == sensorid)
 		{
@@ -91,28 +106,43 @@ EEPROM_STATUS getEEPROMdata(void)
 			alarm_system_I[sensorid].delay = *lval;
 		}
 		else
+		{
 			return BAD;
+		}
 	}
 	return GOOD;
 }
 
 EEPROM_STATUS setEEPROMdefaults(void)
 {
-	uint8_t globals[] = { 0, 0, EEPROM_SIG1, EEPROM_SIG2, ARM_DELAY,
-			ENTRY_DELAY, DARK_THRESHOLD };
-	EEPROMxfer.rxSz = 0;
-	EEPROMxfer.txSz = ARRAY_LEN(globals);
-	EEPROMxfer.txBuff = globals;
+	uint8_t *tdata_ptr = eepromTXbuffer;
+	//uint8_t globals[] = { 0, 0, EEPROM_SIG1, EEPROM_SIG2, ARM_DELAY,
+	//		ENTRY_DELAY, DARK_THRESHOLD };
+	tdata_ptr[0] = 0;
+	tdata_ptr[1] = 0;
+	tdata_ptr[2] = EEPROM_SIG1;
+	tdata_ptr[3] = EEPROM_SIG2;
+	tdata_ptr[4] = ARM_DELAY;
+	tdata_ptr[5] = ENTRY_DELAY;
+	tdata_ptr[6] = DARK_THRESHOLD;
 
-	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+	EEPROMxfer.rxSz = 0;
+	EEPROMxfer.txSz = 7;
+	//EEPROMxfer.txBuff = globals;
+
+	pause(50);
+	I2C_STATUS_T i2cresponse = I2C_STATUS_BUSY;
+
+		i2cresponse = Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+		if (i2cresponse != I2C_STATUS_DONE)
+	//if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
 		return BAD;
 
-	uint8_t sensordata[SENSOR_PACKET_SIZE + 2];
-	uint8_t *tdata_ptr = sensordata;
+	//uint8_t sensordata[SENSOR_PACKET_SIZE + 2];
+
 
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 	{
-		tdata_ptr = sensordata;
 		tdata_ptr[0] = 0;
 		tdata_ptr[1] = SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE);
 		tdata_ptr[2] = sensorid;
@@ -125,12 +155,22 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		tdata_ptr[9] = (alarm_system_I[sensorid].delay >> 8) & 0xFF;
 		tdata_ptr[10] = alarm_system_I[sensorid].delay & 0xFF;
 
+		//uint8_t *holdptr = sensordata;
 		EEPROMxfer.rxSz = 0;
 		EEPROMxfer.txSz = SENSOR_PACKET_SIZE + 2;
-		EEPROMxfer.txBuff = tdata_ptr;
+		//EEPROMxfer.txBuff = holdptr;
 
+		pause(50);
 		if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+		//if (EEPROMxfer.txSz > 0)
+		{
+
+			ENABLE_ERR_LED();
+			pause(1000);
 			return BAD;
+			}
+		//&sensordata[0] = holdptr;
+
 	}
 	return GOOD;
 }

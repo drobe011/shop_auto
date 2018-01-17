@@ -104,7 +104,7 @@ void setUpSystem(void)
 	setUpRTC();
 	if (setUpEEPROM())
 		{
-		ENABLE_ERR_LED();
+		//ENABLE_ERR_LED();
 		setBootStamp();
 		}
 	setUpUsers();
