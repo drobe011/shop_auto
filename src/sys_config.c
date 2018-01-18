@@ -99,7 +99,7 @@ void setUpSystem(void)
 	setUpGPIO();
 	SysTick_Config(SystemCoreClock / 1000);
 	initDisplay();
-	dispBoot(0);
+	dispBoot();
 
 	setUpRTC();
 	if (setUpEEPROM())

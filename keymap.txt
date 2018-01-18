@@ -50,3 +50,6 @@ keymap.txt
      		
      	[+] = ARM DELAY
      		[NUMBERS] = DELAY
+     		
+     	[-] = ENTRY DELAY
+     		[NUMBERS] = DELAY

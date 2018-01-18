@@ -73,6 +73,7 @@ void inputBuffers(void);
 void changeDarkTH(void);
 void changeArmDelay(void);
 void armingDelay(void);
+void changeEntryDelay(void);
 uint8_t pollAlarmSensors(void);
 uint8_t pollAutomation(void);
 uint8_t checkReadyToArm(void);
@@ -249,6 +250,9 @@ void checkMenu(void)
 			break;
 		case KP_plus:
 			changeArmDelay();
+			break;
+		case KP_minus:
+			changeEntryDelay();
 			break;
 		}
 	}
@@ -617,6 +621,25 @@ void changeArmDelay(void)
 
 	ARM_DELAY = (uint8_t) adValue;
 	saveByte(ARM_DELAY_OFFSET, ARM_DELAY);
+}
+
+void changeEntryDelay(void)
+{
+	uint32_t selection[3];
+	uint32_t edValue = 0;
+
+	dispEntryDelay();
+	if (!getKPInput(selection, 3))
+		return;
+
+	edValue = selection[0] * 100;
+	edValue += selection[1] * 10;
+	edValue += selection[2];
+
+	if (edValue > 255) return;
+
+	ENTRY_DELAY = (uint8_t) edValue;
+	saveByte(ENTRY_DELAY_OFFSET, ENTRY_DELAY);
 }
 
 void SysTick_Handler(void)

@@ -21,7 +21,7 @@
 //};
 
 void clearLine(uint8_t row);
-void dispBoot(uint8_t stage);
+void dispBoot(void);
 void dispMainDARD(uint8_t* value);
 void dispDateTime(void);
 void dispArmedType(void);
@@ -34,6 +34,7 @@ void dispSensorEdit(uint8_t sensorid);
 void dispInputBuffers(void);
 void dispDarkTH(void);
 void dispArmDelay(void);
+void dispEntryDelay(void);
 void displayReadyToArm(void);
 void displayArming(void);
 void displayPIN(void);

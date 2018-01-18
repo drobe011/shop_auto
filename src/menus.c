@@ -10,29 +10,16 @@
 #include <stdio.h>
 #include <string.h>
 
-/*
- * SCREENS
- * 		BOOT SCREEN (DISP_BOOT)
- * 		********************
- * 		SnapperTron v1a
- * 		  ..initializing..
- *
- * 		DISARMED SCREEN (DISP_DARMD)
- * 		********************
- * 		Date          Time
- * 		Disarmed by
- */
 extern struct users_S *c_user;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern RTC_TIME_T cTime;
 extern uint8_t readyToArm;
 extern uint8_t DARK_THRESHOLD;
 extern uint8_t ARM_DELAY;
+extern uint8_t ENTRY_DELAY;
 
-//uint8_t DISP_BOOT0[] = {0,0,'S','n','a','p','p','e','r','T','r','o','n',' ','v',VERSION_MAJOR,VERSION_MINOR,'\0'};
 struct MSG_S DISP_BOOT0 = {0,0,"SnapperTron v" VERSION_MAJOR "." VERSION_MINOR}; //1.0"};
 struct MSG_S DISP_BOOT1 = {1,2,"..initializing.."};
-//uint8_t DISP_DARMD[] = {1,0,'D','i','s','a','r','m','e','d',' ','b','y',' ','\0'};
 struct MSG_S DISP_SPACE = {0,0,"                    "};
 struct MSG_S DISP_ARMED_TYPE1 = {0,0,"AW1,AW2,AW3,AW4,STY"};
 struct MSG_S DISP_ARMED_TYPE2 = {1,0,"M+  SQR  /   -   ="};
@@ -61,6 +48,7 @@ struct MSG_S DISP_DARK1 = {0,0,"[0-255]"};
 struct MSG_S DISP_DARK2 = {1,0,"Dark TH [   ]:"};
 struct MSG_S DISP_ARM_DELAY = {1,0,"Arm Delay [   ]:"};
 struct MSG_S DISP_SENS_EDIT = {1,0,"[1] [2] [3] [4] [5]"};
+struct MSG_S DISP_ENTRY_DELAY = {1,0,"Ent Delay [   ]:"};
 
 void clearLine(uint8_t row)
 {
@@ -84,37 +72,23 @@ void dispDateTime(void)
 	struct MSG_S date_tmp = {0,10, ""};
 	strcpy((char*)date_tmp.msg, (char*)dateStr);
 	sendDisplay(0, &time_tmp);
-	//setCursor(0, 10);
 	sendDisplay(0, &date_tmp);
 }
 
-void dispBoot(uint8_t stage)
+void dispBoot(void)
 {
-	if (!stage)
-	{
-		sendDisplay(0, &DISP_BOOT0);
-		sendDisplay(0, &DISP_BOOT1);
-	}
-	else
-	{
-
-	}
+	sendDisplay(0, &DISP_BOOT0);
+	sendDisplay(0, &DISP_BOOT1);
 }
 
 void dispMainDARD(uint8_t* value)
 {
 	dispClear();
 	dispDateTime();
-	//sendDisplay(0, DISP_DARMD);
-	//setCursor(1,0);
 	struct MSG_S user = {1,0, ""};
 	strcpy ((char*)user.msg, (char*)c_user->name);
-	//user.msg = c_user->name;
 	sendDisplay(0, &user);
 	sendDisplay(0, &DISP_TEMP_CONST);
-	//SET NOT READY TO ARM
-	//setCursor(1,9);
-	//sendDisplay(0, DISP_NOTRDY_ARM);
 }
 
 void dispArmedType(void)
@@ -288,5 +262,19 @@ void dispArmDelay(void)
 	struct MSG_S armdelay_tmp = {1,11, ""};
 	strcpy((char*)armdelay_tmp.msg, (char*)ADStr);
 	sendDisplay(0, &armdelay_tmp);
+	setCursor(1, 17);
+}
+
+void dispEntryDelay(void)
+{
+	char EDStr[4];
+
+	dispClear();
+	sendDisplay(0, &DISP_DARK1);
+	sendDisplay(0, &DISP_ENTRY_DELAY);
+	sprintf(EDStr, "%03d",ENTRY_DELAY);
+	struct MSG_S entrydelay_tmp = {1,11, ""};
+	strcpy((char*)entrydelay_tmp.msg, (char*)EDStr);
+	sendDisplay(0, &entrydelay_tmp);
 	setCursor(1, 17);
 }
