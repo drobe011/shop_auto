@@ -47,3 +47,6 @@ keymap.txt
      		
      	[/] = DARKNESS THRESHOLD
      		[NUMBERS] = THRESHOLD
+     		
+     	[+] = ARM DELAY
+     		[NUMBERS] = DELAY

@@ -33,6 +33,7 @@ void dispSensorStatus(uint8_t item);
 void dispSensorEdit(uint8_t sensorid);
 void dispInputBuffers(void);
 void dispDarkTH(void);
+void dispArmDelay(void);
 void displayReadyToArm(void);
 void displayArming(void);
 void displayPIN(void);

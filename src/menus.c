@@ -27,6 +27,7 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern RTC_TIME_T cTime;
 extern uint8_t readyToArm;
 extern uint8_t DARK_THRESHOLD;
+extern uint8_t ARM_DELAY;
 
 //uint8_t DISP_BOOT0[] = {0,0,'S','n','a','p','p','e','r','T','r','o','n',' ','v',VERSION_MAJOR,VERSION_MINOR,'\0'};
 struct MSG_S DISP_BOOT0 = {0,0,"SnapperTron v" VERSION_MAJOR "." VERSION_MINOR}; //1.0"};
@@ -58,6 +59,7 @@ struct MSG_S DISP_ARMING = {0,0,{"ARMING...."}};
 struct MSG_S DISP_PIN = {0,0,"ENTER PIN: "};
 struct MSG_S DISP_DARK1 = {0,0,"[0-255]"};
 struct MSG_S DISP_DARK2 = {1,0,"Dark TH [   ]:"};
+struct MSG_S DISP_ARM_DELAY = {1,0,"Arm Delay [   [:"};
 struct MSG_S DISP_SENS_EDIT = {1,0,"[1] [2] [3] [4] [5]"};
 
 void clearLine(uint8_t row)
@@ -273,4 +275,17 @@ void dispSensorEdit(uint8_t sensorid)
 	strcpy((char*) delay_msg.msg, (char*) delay_tmp);
 	sendDisplay(0, &delay_msg);
 	sendDisplay(0, &DISP_SENS_EDIT);
+}
+
+void dispArmDelay(void)
+{
+	char ADStr[4];
+
+	dispClear();
+	sendDisplay(0, &DISP_DARK1);
+	sendDisplay(0, &DISP_ARM_DELAY);
+	sprintf(ADStr, "%03d",ARM_DELAY);
+	struct MSG_S armdelay_tmp = {1,11, ""};
+	strcpy((char*)armdelay_tmp.msg, (char*)ADStr);
+	sendDisplay(0, &armdelay_tmp);
 }

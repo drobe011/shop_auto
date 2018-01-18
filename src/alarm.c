@@ -71,6 +71,7 @@ void changeTimeMenu(void);
 void checkStatus(void);
 void inputBuffers(void);
 void changeDarkTH(void);
+void changeArmDelay(void);
 void armingDelay(void);
 uint8_t pollAlarmSensors(void);
 uint8_t pollAutomation(void);
@@ -246,6 +247,8 @@ void checkMenu(void)
 		case KP_div:
 			changeDarkTH();
 			break;
+		case KP_plus:
+			changeArmDelay();
 		}
 	}
 }
@@ -594,6 +597,11 @@ void changeDarkTH(void)
 
 	DARK_THRESHOLD = (uint8_t)thValue;
 	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
+}
+
+void changeArmDelay(void)
+{
+
 }
 
 void SysTick_Handler(void)
