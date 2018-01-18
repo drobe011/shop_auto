@@ -249,6 +249,7 @@ void checkMenu(void)
 			break;
 		case KP_plus:
 			changeArmDelay();
+			break;
 		}
 	}
 }
@@ -601,7 +602,21 @@ void changeDarkTH(void)
 
 void changeArmDelay(void)
 {
+	uint32_t selection[3];
+	uint32_t adValue = 0;
 
+	dispArmDelay();
+	if (!getKPInput(selection, 3))
+		return;
+
+	adValue = selection[0] * 100;
+	adValue += selection[1] * 10;
+	adValue += selection[2];
+
+	if (adValue > 255) return;
+
+	ARM_DELAY = (uint8_t) adValue;
+	saveByte(ARM_DELAY_OFFSET, ARM_DELAY);
 }
 
 void SysTick_Handler(void)

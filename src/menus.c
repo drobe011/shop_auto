@@ -59,7 +59,7 @@ struct MSG_S DISP_ARMING = {0,0,{"ARMING...."}};
 struct MSG_S DISP_PIN = {0,0,"ENTER PIN: "};
 struct MSG_S DISP_DARK1 = {0,0,"[0-255]"};
 struct MSG_S DISP_DARK2 = {1,0,"Dark TH [   ]:"};
-struct MSG_S DISP_ARM_DELAY = {1,0,"Arm Delay [   [:"};
+struct MSG_S DISP_ARM_DELAY = {1,0,"Arm Delay [   ]:"};
 struct MSG_S DISP_SENS_EDIT = {1,0,"[1] [2] [3] [4] [5]"};
 
 void clearLine(uint8_t row)
@@ -288,4 +288,5 @@ void dispArmDelay(void)
 	struct MSG_S armdelay_tmp = {1,11, ""};
 	strcpy((char*)armdelay_tmp.msg, (char*)ADStr);
 	sendDisplay(0, &armdelay_tmp);
+	setCursor(1, 17);
 }
