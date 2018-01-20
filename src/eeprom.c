@@ -153,7 +153,6 @@ EEPROM_STATUS setEEPROMdefaults(void)
 			return BAD;
 		}
 	}
-
 	return GOOD;
 }
 
@@ -205,6 +204,5 @@ EEPROM_STATUS setBootStamp(void)
 	{
 		return BAD;
 	}
-
 	return GOOD;
 }

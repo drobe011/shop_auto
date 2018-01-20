@@ -41,9 +41,12 @@ keymap.txt
      	[SQRT] = CHANGE TIME
      	
      	[=] = SYSTEM STATUS
-     		[=] = ALL
      		[KEYPAD] = SELECTION
      			[=] = Edit sensor info
+     			
+     	[.] = MOTION SENSOR/LIGHTS MENU
+     		[KEYPAD] = SELECTION
+     			[.] = Edit sensor info
      		
      	[/] = DARKNESS THRESHOLD
      		[NUMBERS] = THRESHOLD

@@ -11,10 +11,11 @@
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR "a"
 
-#define ARRAY_LEN(x)  (sizeof(x) / sizeof((x)[0]))
+//#define ARRAY_LEN(x)  (sizeof(x) / sizeof((x)[0]))
 
 // ALARM SYSTEMS GLOBALS AND DEFINES
 //
+
 #define A_S_INACTIVE 0
 #define A_S_ACTIVE 1
 #define A_S_REQ_TO_ARM 1
@@ -23,9 +24,10 @@
 #define A_S_SIG_LEVEL_HIGH 1
 #define A_S_ARM_ST_AWAY 0
 #define A_S_ARM_ST_STAY 4
-#define NONE 0 //for ALARM_SYSTEM_S::delay
+#define NONE 0
 
-struct ALARM_SYSTEM_S {
+struct ALARM_SYSTEM_S
+{
 	uint8_t name[6];
 	uint8_t port;
 	uint8_t pin;
@@ -36,23 +38,40 @@ struct ALARM_SYSTEM_S {
 	uint32_t delay;
 };
 
-struct ACTIVE_AUTOMATION_S {
+struct MOTION_LIGHT_S
+{
+	uint8_t name[6];
+	uint8_t port;
+	uint8_t pin;
+	uint8_t active;
+	uint8_t light;
+	uint32_t duration;
+	uint32_t timestamp;
+};
+
+/*
+struct ACTIVE_AUTOMATION_S
+{
 	uint8_t system;
 	uint32_t time_active;
 	uint8_t output_device;
 };
+*/
 
-struct LIGHT_AUTO_S {
+struct LIGHT_AUTO_S
+{
 	uint8_t hour;
 	uint8_t min;
 	uint8_t duration;
 	uint8_t active;
 };
 
-struct X_LIGHT_AUTO_S {
+struct X_LIGHT_AUTO_S
+{
 	uint8_t hour;
 	uint8_t min;
 };
+
 //
 // END ALARM SYSTEMS GLOBALS AND DEFINES
 
@@ -175,15 +194,20 @@ struct X_LIGHT_AUTO_S {
 #define VIB2 13
 #define NUM_OF_SYSTEMS 14
 
+/*
 ////AUTOMATION INPUTS
-#define MTN_EXT_S 1
-#define MTN_EXT_N 2
-#define MTN_EXT_E 3
-#define MTN_EXT_W 4
+#define MTN_EXT_S 0
+#define MTN_EXT_N 1
+#define MTN_EXT_E 2
+#define MTN_EXT_W 3
 #define NUM_OF_AUTO_I 4
-#define LIM_AUTO 5
-#define LIS_AUTO 6
-#define FAN_AUTO 7
+#define LIM_AUTO 4
+#define LIS_AUTO 5
+#define FAN_AUTO 6
+#define NUM_OF_TOTAL_AUTO 7
+*/
+
+#define X_MOTION_DETECTORS 4
 
 ////OUTPUTS
 #define INDCT 0
@@ -196,7 +220,6 @@ struct X_LIGHT_AUTO_S {
 #define L_I_S 7
 #define NUM_OF_AUTO_O 8
 
-
 //#define TACH1_p2_I 12
 //#define TACH2_p4_I 29
 
@@ -208,7 +231,6 @@ struct X_LIGHT_AUTO_S {
 
 ////DISPLAY IO
 #define DSP_RST_p0_O 23
-
 
 #define ERR1_p0_O 1
 #define ERR2_p0_O 0
@@ -253,7 +275,8 @@ struct users_S
 //
 // END USER DATA
 
-struct MSG_S {
+struct MSG_S
+{
 	uint8_t row;
 	uint8_t column;
 	uint8_t msg[21];
@@ -348,6 +371,5 @@ void intTobytes(uint8_t *bytes, uint32_t intVal);
 
 //
 // END FUNCTION DECLARATIONS
-
 
 #endif /* SYS_CONFIG_H_ */

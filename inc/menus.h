@@ -9,17 +9,6 @@
 #ifndef MENUS_H_
 #define MENUS_H_
 
-//#include <stdint.h>
-
-//extern const uint8_t DISP_VERSION[];
-//extern const uint8_t OOPS[];
-
-//struct MSG_S {
-//	uint8_t row;
-//	uint8_t column;
-//	uint8_t msg[];
-//};
-
 void clearLine(uint8_t row);
 void dispBoot(void);
 void dispMainDARD(uint8_t* value);
@@ -31,6 +20,7 @@ void dispTimeChange(uint8_t);
 void dispSensor(uint8_t item);
 void dispSensorStatus(uint8_t item);
 void dispSensorEdit(uint8_t sensorid);
+void dispMotionSensor(uint8_t item);
 void dispInputBuffers(void);
 void dispDarkTH(void);
 void dispArmDelay(void);

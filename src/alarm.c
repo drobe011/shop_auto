@@ -8,10 +8,6 @@
  ===============================================================================
  */
 
-//TODO: SAVE ALARM STATE TO EEPROM IN EVENT OF RESET
-//TODO: SAVE USER DATA EEPROM
-//TODO: SAVE GLOBAL PARAMETERS TO EEPROM
-
 #include "chip.h"
 #include <cr_section_macros.h>
 #include "sys_config.h"
@@ -28,7 +24,8 @@ extern struct users_S users[];
 extern struct ALARM_SYSTEM_S automation_O[];
 extern struct ALARM_SYSTEM_S automation_I[];
 extern struct ALARM_SYSTEM_S alarm_system_I[];
-extern struct ACTIVE_AUTOMATION_S active_automation[];
+//extern struct ACTIVE_AUTOMATION_S active_automation[];
+extern struct MOTION_LIGHT_S motion_lights[];
 extern struct LIGHT_AUTO_S light_auto[];
 extern struct X_LIGHT_AUTO_S x_light_auto[];
 
@@ -54,7 +51,6 @@ uint32_t dimTimer;
 uint8_t intLightsState;
 uint8_t extLightsState;
 uint8_t activeSensors[17];
-//uint8_t darkTH = DARK_THRESHOLD_DEFAULT_D;
 
 STATIC INLINE void updateDisplayTime(void)
 {
@@ -79,10 +75,11 @@ uint8_t pollAutomation(void);
 uint8_t checkReadyToArm(void);
 uint8_t entryDelay(uint8_t active);
 void editSensor(uint8_t sensorid);
+void checkMotionLightStatus(void);
+void editcheckMotionLightSensor(uint8_t sensorid);
 
 int main(void)
 {
-
 	setUpSystem();
 	IN_BUFF_ON();
 
@@ -107,8 +104,6 @@ int main(void)
 				ALARMSTATE = ARM;
 				break;
 			case ARMED:
-				//checkSensors(ARMEDSTATE);
-				//checkAutomation(ARMEDSTATE)
 				sensorsActive = pollAlarmSensors();
 
 				if (sensorsActive)
@@ -151,8 +146,7 @@ int main(void)
 uint8_t getPIN(void)
 {
 	uint32_t on_pressed_time = systemTick;
-	uint32_t kpData[4] =
-	{ 0, 0, 0, 0 };
+	uint32_t kpData[4] = { 0, 0, 0, 0 };
 	uint8_t match = 0;
 
 	while (ON_PRESSED())
@@ -186,7 +180,6 @@ uint8_t getPIN(void)
 			pinAttempts++;
 			return 1;
 		}
-
 	}
 	for (uint8_t usersLoop = 1; usersLoop < 5; usersLoop++)
 	{
@@ -216,7 +209,8 @@ void checkMenu(void)
 	selection = getKP(KP_TIMEOUT_DEFAULT_MS);
 	while (getKP(100))
 	{
-	} //TODO: check time holding button
+		__NOP();
+	}
 
 	if (selection)
 	{
@@ -265,29 +259,25 @@ void checkAlarmSubMenu(void)
 	selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 	while (getKP(100))
 	{
+		__NOP();
 	}
 	if (selection)
 	{
 		switch (selection)
 		{
 		case KP_Mplus:
-			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY;
 			break;
 		case KP_root:
-			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY_NO_INT_AUTO;
 			break;
 		case KP_div:
-			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY_NO_EXT_AUTO;
 			break;
 		case KP_minus:
-			//ALARMSTATE = ARM;
 			ARMEDSTATE = AWAY_NO_AUTO;
 			break;
 		case KP_equal:
-			//ALARMSTATE = ARM;
 			ARMEDSTATE = STAY;
 			break;
 		}
@@ -297,11 +287,6 @@ void checkAlarmSubMenu(void)
 
 void checkIntLightSubMenu(void)
 {
-	//0 = Main Lights
-	//1 = Supp Lights
-	//2 = All Lights
-	//3 = Fan
-
 	uint32_t selection = 0;
 	uint32_t lightBit = 0;
 	uint8_t lightState = 0;
@@ -310,6 +295,7 @@ void checkIntLightSubMenu(void)
 	selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 	while (getKP(100))
 	{
+		__NOP();
 	}
 
 	if (selection)
@@ -389,6 +375,7 @@ void checkExtLightSubMenu(void)
 	selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 	while (getKP(100))
 	{
+		__NOP();
 	}
 
 	if (selection)
@@ -435,8 +422,7 @@ void checkExtLightSubMenu(void)
 
 void changeTimeMenu(void)
 {
-	uint32_t selection[2] =
-	{ 0, 0 };
+	uint32_t selection[2] = { 0, 0 };
 	uint32_t value = 0;
 	RTC_TIME_T tempTime;
 
@@ -518,8 +504,10 @@ void checkStatus(void)
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		while (getKP(100))
 		{
+			__NOP();
 		}
-		if (selection[0]) break;
+		if (selection[0])
+			break;
 	}
 
 	if (selection[0] == KP_equal)
@@ -530,42 +518,52 @@ void checkStatus(void)
 	menuTimer = systemTick;
 
 	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
-	{}
+	{
+		__NOP();
+	}
 }
 
 void editSensor(uint8_t sensorid)
 {
 	uint32_t menuTimer = systemTick;
-	uint32_t selection[3] = {0, 0, 0};
+	uint32_t selection[3] = { 0, 0, 0 };
 	uint32_t value;
 	uint8_t byteStorage[4];
 
 	dispSensorEdit(sensorid);
-
 
 	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		while (getKP(100))
 		{
+			__NOP();
 		}
 		switch (selection[0])
 		{
 		case KP_1:
-			alarm_system_I[sensorid].active = (alarm_system_I[sensorid].active ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+1), alarm_system_I[sensorid].active);
+			alarm_system_I[sensorid].active = (
+					alarm_system_I[sensorid].active ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 1),
+					alarm_system_I[sensorid].active);
 			break;
 		case KP_2:
-			alarm_system_I[sensorid].req_to_arm  = (alarm_system_I[sensorid].req_to_arm ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+2), alarm_system_I[sensorid].req_to_arm);
+			alarm_system_I[sensorid].req_to_arm = (
+					alarm_system_I[sensorid].req_to_arm ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 2),
+					alarm_system_I[sensorid].req_to_arm);
 			break;
 		case KP_3:
-			alarm_system_I[sensorid].armedstate = (alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+3), alarm_system_I[sensorid].armedstate);
+			alarm_system_I[sensorid].armedstate = (
+					alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 3),
+					alarm_system_I[sensorid].armedstate);
 			break;
 		case KP_4:
-			alarm_system_I[sensorid].sig_active_level = (alarm_system_I[sensorid].sig_active_level ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+4), alarm_system_I[sensorid].sig_active_level);
+			alarm_system_I[sensorid].sig_active_level = (
+					alarm_system_I[sensorid].sig_active_level ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 4),
+					alarm_system_I[sensorid].sig_active_level);
 			break;
 		case KP_5:
 			setCursor(0, 16);
@@ -575,12 +573,129 @@ void editSensor(uint8_t sensorid)
 			if (selection[0] == 255)
 				break;
 			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
-			if (value <= 999) alarm_system_I[sensorid].delay = value;
+			if (value <= 999)
+				alarm_system_I[sensorid].delay = value;
 			intTobytes(byteStorage, value);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+5), byteStorage[0]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+6), byteStorage[1]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+7), byteStorage[2]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE)+8), byteStorage[3]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 5),
+					byteStorage[0]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 6),
+					byteStorage[1]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 7),
+					byteStorage[2]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 8),
+					byteStorage[3]);
+		}
+		dispSensorEdit(sensorid);
+	}
+}
+//AUTOMATION SENSORS
+void checkMotionLightStatus(void)
+{
+	uint32_t selection[2] = { 0, 0 };
+
+	uint32_t value = 0;
+
+	dispSensorStatus(0);
+	setCursor(0, 9);
+	if (!getKPInput(selection, 2))
+		return;
+	if (selection[0] == 255)
+		return;
+	value = (selection[0] * 10) + selection[1];
+	if (value > X_MOTION_DETECTORS)
+		return;
+
+	uint32_t menuTimer = systemTick;
+
+	dispMotionSensor(value);
+
+	selection[0] = 0;
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		while (getKP(100))
+		{
+			__NOP();
+		}
+		if (selection[0])
+			break;
+	}
+
+	if (selection[0] == KP_equal)
+	{
+		editSensor(value);
+	}
+
+	menuTimer = systemTick;
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		__NOP();
+	}
+}
+
+void editcheckMotionLightSensor(uint8_t sensorid)
+{
+	uint32_t menuTimer = systemTick;
+	uint32_t selection[3] = { 0, 0, 0 };
+	uint32_t value;
+	uint8_t byteStorage[4];
+
+	dispSensorEdit(sensorid);
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		while (getKP(100))
+		{
+			__NOP();
+		}
+		switch (selection[0])
+		{
+		case KP_1:
+			alarm_system_I[sensorid].active = (
+					alarm_system_I[sensorid].active ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 1),
+					alarm_system_I[sensorid].active);
+			break;
+		case KP_2:
+			alarm_system_I[sensorid].req_to_arm = (
+					alarm_system_I[sensorid].req_to_arm ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 2),
+					alarm_system_I[sensorid].req_to_arm);
+			break;
+		case KP_3:
+			alarm_system_I[sensorid].armedstate = (
+					alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 3),
+					alarm_system_I[sensorid].armedstate);
+			break;
+		case KP_4:
+			alarm_system_I[sensorid].sig_active_level = (
+					alarm_system_I[sensorid].sig_active_level ? 0 : 1);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 4),
+					alarm_system_I[sensorid].sig_active_level);
+			break;
+		case KP_5:
+			setCursor(0, 16);
+			selection[0] = 0;
+			if (!getKPInput(selection, 3))
+				break;
+			if (selection[0] == 255)
+				break;
+			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
+			if (value <= 999)
+				alarm_system_I[sensorid].delay = value;
+			intTobytes(byteStorage, value);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 5),
+					byteStorage[0]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 6),
+					byteStorage[1]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 7),
+					byteStorage[2]);
+			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 8),
+					byteStorage[3]);
 		}
 		dispSensorEdit(sensorid);
 	}
@@ -592,15 +707,16 @@ void changeDarkTH(void)
 
 	dispDarkTH();
 	if (!getKPInput(selection, 3))
-			return;
+		return;
 
 	thValue = selection[0] * 100;
 	thValue += selection[1] * 10;
 	thValue += selection[2];
 
-	if (thValue > 255) return;
+	if (thValue > 255)
+		return;
 
-	DARK_THRESHOLD = (uint8_t)thValue;
+	DARK_THRESHOLD = (uint8_t) thValue;
 	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
 }
 
@@ -617,7 +733,8 @@ void changeArmDelay(void)
 	adValue += selection[1] * 10;
 	adValue += selection[2];
 
-	if (adValue > 255) return;
+	if (adValue > 255)
+		return;
 
 	ARM_DELAY = (uint8_t) adValue;
 	saveByte(ARM_DELAY_OFFSET, ARM_DELAY);
@@ -636,7 +753,8 @@ void changeEntryDelay(void)
 	edValue += selection[1] * 10;
 	edValue += selection[2];
 
-	if (edValue > 255) return;
+	if (edValue > 255)
+		return;
 
 	ENTRY_DELAY = (uint8_t) edValue;
 	saveByte(ENTRY_DELAY_OFFSET, ENTRY_DELAY);
@@ -724,6 +842,7 @@ void armingDelay(void)
 	while (systemTick < armingTimer + (ARM_DELAY * 1000))
 	{
 		//TODO:MAYBE BLINK SOMETHING WHILE ARM DELAY
+		__NOP();
 	}
 }
 
@@ -760,20 +879,20 @@ uint8_t pollAutomation(void)
 
 	if (OE_INPUT_ON() && isDark(1))
 	{
-		for (sensor = 0; sensor < NUM_OF_AUTO_I; sensor++)
+		for (sensor = 0; sensor < X_MOTION_DETECTORS; sensor++)
 		{
-			if ((automation_I[sensor].active) && (active_automation[sensor].time_active == 0))
+			if ((motion_lights[sensor].active) && (motion_lights[sensor].timestamp == 0))
 			{
-				setIOpin(&automation_O[active_automation[sensor].output_device], 1);
-				active_automation[sensor].time_active = systemTick;
+				setIOpin(&automation_O[motion_lights[sensor].light], 1);
+				motion_lights[sensor].timestamp = systemTick;
 			}
 			//check if time to turn off
-			if (active_automation[sensor].time_active > 0)
+			if (motion_lights[sensor].timestamp > 0)
 			{
-				if (systemTick > active_automation[sensor].time_active + automation_I[sensor].delay)
+				if (systemTick > motion_lights[sensor].timestamp + (motion_lights[sensor].duration * (1000 * 60)))
 				{
-					setIOpin(&automation_O[active_automation[sensor].output_device], 0);
-					active_automation[sensor].time_active = 0;
+					setIOpin(&automation_O[motion_lights[sensor].light], 0);
+					motion_lights[sensor].timestamp = 0;
 				}
 			}
 		}
@@ -788,5 +907,4 @@ uint8_t pollAutomation(void)
 	}
 	return numActiveSensors;
 }
-
 

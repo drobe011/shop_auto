@@ -13,68 +13,105 @@ extern uint8_t DARK_THRESHOLD;
 I2C_XFER_T DISPLAYxfer;
 RTC_TIME_T cTime;
 
+uint8_t DISPLAY_txbuffer[DISPLAY_TXBUFFER_SZ];
 
-uint8_t DISPLAY_txbuffer[DISPLAY_TXBUFFER_SZ]; //[row][column][data]
+struct users_S users[] = { { 0, "System", { KP_0, KP_0, KP_0, KP_0 }, 0 }, { 1, "David", { KP_1, KP_3, KP_1, KP_8 }, 4 }, { 2, "Christa", { KP_0, KP_3,
+KP_1, KP_8 }, 1 }, { 3, "Aaron", { KP_2, KP_3, KP_1, KP_8 }, 4 }, { 4, "Donny", { KP_3, KP_3, KP_1, KP_8 }, 4 } };
 
-struct users_S users[] = {{0,"System",{KP_0,KP_0,KP_0,KP_0},0},
-						  {1,"David",{KP_1,KP_3,KP_1,KP_8},4},
-						  {2,"Christa",{KP_0,KP_3,KP_1,KP_8},1},
-						  {3,"Aaron",{KP_2,KP_3,KP_1,KP_8},4},
-						  {4,"Donny",{KP_3,KP_3,KP_1,KP_8},4}};
 struct users_S *c_user;
 
-struct ALARM_SYSTEM_S alarm_system_I[] = {
-		{"PWR_S", 1, 18, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		{"VIB_1", 1, 19, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_1", 1, 21, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D},
-		{"SPAR2", 1, 24, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, ENTRY_DELAY_D},
-		{"WDW_E", 1, 27, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"SPAR1", 1, 28, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"WDW_S", 1, 29, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"DOR_N", 1, 30, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"DOR_E", 1, 31, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"SPAR3", 2, 8, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"SPAR4", 2, 11, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D},
-		{"VIB_2", 4, 29, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		};
-struct ALARM_SYSTEM_S automation_I[] = {
-		{"MTN_S", 1, 20, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_N", 1, 22, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_E", 1, 23, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-		{"MTN_W", 1, 26, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE},
-};
-struct ALARM_SYSTEM_S automation_O[] = {
-		{"INDCT", 0, 17, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		{"L_X_N", 0, 18, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		{"L_I_M", 0, 24, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		{"L_X_S", 2, 3, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		{"L_X_E", 2, 4, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		{"L_X_W", 2, 5, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		{"FAN", 2, 6, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		{"L_I_S", 3, 25, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE},
-		};
-struct ACTIVE_AUTOMATION_S active_automation[] = {
-		{MTN_EXT_S, 0, L_X_S},
-		{MTN_EXT_N, 0, L_X_N},
-		{MTN_EXT_E, 0, L_X_E},
-		{MTN_EXT_W, 0, L_X_W},
-		{LIM_AUTO, 0, L_I_M},
-		{LIS_AUTO, 0, L_I_S},
-		{FAN_AUTO, 0, FAN},
+struct ALARM_SYSTEM_S alarm_system_I[] =
+{
+{ "PWR_S", 1, 18, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_HIGH, NONE },
+{ "VIB_1", 1, 19, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "MTN_1", 1, 21, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY,
+		A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D },
+{ "SPAR2", 1, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_HIGH, ENTRY_DELAY_D },
+{ "WDW_E", 1, 27, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "SPAR1", 1, 28, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "WDW_S", 1, 29, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "DOR_N", 1, 30, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "DOR_E", 1, 31, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "SPAR3", 2, 8, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "SPAR4", 2, 11, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D },
+{ "VIB_2", 4, 29, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE }, };
+
+/* struct ALARM_SYSTEM_S automation_I[] =
+{
+{ "MTN_S", 1, 20, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "MTN_N", 1, 22, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "MTN_E", 1, 23, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE },
+{ "MTN_W", 1, 26, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+		A_S_SIG_LEVEL_LOW, NONE }, };
+*/
+
+struct MOTION_LIGHT_S motion_lights[] = {
+		{ "MTN_S", 1, 20, A_S_INACTIVE, L_X_S, X_LIGHT_ON_TIME, 0 },
+		{ "MTN_N", 1, 22, A_S_INACTIVE, L_X_N, X_LIGHT_ON_TIME, 0 },
+		{ "MTN_E", 1, 23, A_S_INACTIVE, L_X_E, X_LIGHT_ON_TIME, 0 },
+		{ "MTN_W", 1, 26, A_S_INACTIVE, L_X_W, X_LIGHT_ON_TIME, 0 },
 };
 
-struct LIGHT_AUTO_S light_auto[] = {
-		{turnon1_hr, turnon1_min, turnon1_dur, 0},
-		{turnon2_hr, turnon2_min, turnon2_dur, 0},
-		{turnon3_hr, turnon3_min, turnon3_dur, 0},
-};
 
-struct X_LIGHT_AUTO_S x_light_auto[] = {
-		{flash1_hr, flash1_min},
-		{flash2_hr, flash2_min},
-};
+struct ALARM_SYSTEM_S automation_O[] =
+{
+		{ "INDCT", 0, 17, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+				A_S_SIG_LEVEL_HIGH, NONE },
+		{ "L_X_N", 0, 18, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+				A_S_SIG_LEVEL_HIGH, NONE },
+		{ "L_I_M", 0, 24, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+				A_S_SIG_LEVEL_HIGH, NONE },
+		{ "L_X_S", 2, 3, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+				A_S_SIG_LEVEL_HIGH, NONE },
+		{ "L_X_E", 2, 4, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+				A_S_SIG_LEVEL_HIGH, NONE },
+		{ "L_X_W", 2, 5, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+				A_S_SIG_LEVEL_HIGH, NONE },
+		{ "FAN", 2, 6, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH,
+				NONE },
+		{ "L_I_S", 3, 25, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
+				A_S_SIG_LEVEL_HIGH, NONE }, };
+
+/*
+struct ACTIVE_AUTOMATION_S active_automation[] =
+{
+{ MTN_EXT_S, 0, L_X_S },
+{ MTN_EXT_N, 0, L_X_N },
+{ MTN_EXT_E, 0, L_X_E },
+{ MTN_EXT_W, 0, L_X_W },
+{ LIM_AUTO, 0, L_I_M },
+{ LIS_AUTO, 0, L_I_S },
+{ FAN_AUTO, 0, FAN }, };
+
+*/
+struct LIGHT_AUTO_S light_auto[] =
+{
+{ turnon1_hr, turnon1_min, turnon1_dur, 0 },
+{ turnon2_hr, turnon2_min, turnon2_dur, 0 },
+{ turnon3_hr, turnon3_min, turnon3_dur, 0 }, };
+
+struct X_LIGHT_AUTO_S x_light_auto[] =
+{
+{ flash1_hr, flash1_min },
+{ flash2_hr, flash2_min }, };
 
 static void setUpGPIO(void);
 static void setUpRTC(void);
@@ -100,28 +137,21 @@ void setUpSystem(void)
 	SysTick_Config(SystemCoreClock / 1000);
 	initDisplay();
 	dispBoot();
-
 	setUpRTC();
 	if (setUpEEPROM())
-		{
-		//ENABLE_ERR_LED();
+	{
 		setBootStamp();
-		}
+	}
 	setUpUsers();
 	pause(1000);
-	//dispMainDARD(c_user->name);
 }
 void setUpGPIO(void)
 {
-	//TURN ON IO CONTROLS
 	Chip_GPIO_Init(LPC_GPIO);
-	//Chip_IOCON_Init(LPC_IOCON);
 
 	//SET FUNCTION|MODE SYSTEM IO
-	//Chip_IOCON_PinMuxSet(LPC_IOCON, TXD3_port,  TXD3_pin,   TXD3_mode | TXD3_func);
-	//Chip_IOCON_PinMuxSet(LPC_IOCON, RXD3_port,  RXD3_pin,   RXD3_mode | RXD3_func);
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0,  ERR2_p0_O,   IOCON_MODE_INACT | IOCON_FUNC0);
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0,  ERR1_p0_O,   IOCON_MODE_INACT | IOCON_FUNC0);
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, ERR2_p0_O, IOCON_MODE_INACT | IOCON_FUNC0);
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, ERR1_p0_O, IOCON_MODE_INACT | IOCON_FUNC0);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, LIGHT_SENSE_port, LIGHT_SENSE_pin, LIGHT_SENSE_mode | LIGHT_SENSE_func);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, SIREN_DAC_port, SIREN_DAC_pin, SIREN_DAC_mode | SIREN_DAC_func);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, SDA0_port, SDA0_pin, SDA0_mode | SDA0_func);
@@ -163,23 +193,22 @@ void setUpGPIO(void)
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, K4, true);
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, K5, true);
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, K6, true);
+
 	//Setup interrupt for ON/C
 	Chip_GPIOINT_Init(LPC_GPIOINT);
-	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, GPIOINT_PORT0, LPC_GPIOINT->IO0.ENR |= (1 << ON_));
+	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, GPIOINT_PORT0,
+	LPC_GPIOINT->IO0.ENR |= (1 << ON_));
 	NVIC_ClearPendingIRQ(EINT3_IRQn);
 	NVIC_EnableIRQ(EINT3_IRQn);
 
 	//SET DEFAULT OUTPUT VALUE
 	Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, K5);
-	//TODO: set to actual pad values
+
 	setIOpin(&automation_O[L_I_M], 0);
 	setIOpin(&automation_O[L_I_S], 0);
 	setIOpin(&automation_O[FAN], 0);
 	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_GPIO);
 }
-
-// DISPLAY FUNCTIONS
-//*
 
 void setUpRTC(void)
 {
@@ -188,51 +217,44 @@ void setUpRTC(void)
 		LPC_RTC->RTC_AUX |= _BIT(RTC_OSCF);
 		Chip_RTC_Enable(LPC_RTC, 1);
 	}
-	LPC_RTC->CCR = 17;  //the new lpcxpresso1769 vD had bit 3 set
+	LPC_RTC->CCR = 17;
 
 	Chip_RTC_CntIncrIntConfig(LPC_RTC, 2, ENABLE);
 	Chip_RTC_ClearIntPending(LPC_RTC, RTC_INT_COUNTER_INCREASE);
 	NVIC_ClearPendingIRQ(RTC_IRQn);
 	NVIC_EnableIRQ(RTC_IRQn);
-//	cTime.time[RTC_TIMETYPE_HOUR] = 21;
-//	cTime.time[RTC_TIMETYPE_MINUTE] = 23;
-//	cTime.time[RTC_TIMETYPE_SECOND] = 0;
-//	cTime.time[RTC_TIMETYPE_MONTH] = 1;
-//	cTime.time[RTC_TIMETYPE_DAYOFMONTH] = 9;
-//	cTime.time[RTC_TIMETYPE_YEAR] = 2017;
-//	Chip_RTC_SetFullTime(LPC_RTC, &cTime);
 }
 
 static EEPROM_STATUS setUpEEPROM(void)
 {
 	return initEEPROM();
-
-	//if (estat == UNSET) setEEPROMdefaults();
-
 }
 
 void pause(uint32_t ps)
 {
 	uint32_t ticks = systemTick + ps;
-	while (systemTick < ticks) {}
+	while (systemTick < ticks)
+	{
+		__NOP();
+	}
 }
 
 void sendCMD(uint8_t cmdByte)
 {
 	DISPLAY_BUFF_RST();
 	DISPLAY_txbuffer[0] = CMD;
-    DISPLAY_txbuffer[1] = cmdByte;
-    DISPLAYxfer.txSz = DISPLAY_PACKET_SZ;
-    Chip_I2C_MasterTransfer(DISPLAY_DEV, &DISPLAYxfer);
+	DISPLAY_txbuffer[1] = cmdByte;
+	DISPLAYxfer.txSz = DISPLAY_PACKET_SZ;
+	Chip_I2C_MasterTransfer(DISPLAY_DEV, &DISPLAYxfer);
 }
 
 void sendData(uint8_t dataByte)
 {
 	DISPLAY_BUFF_RST();
 	DISPLAY_txbuffer[0] = DATA;
-    DISPLAY_txbuffer[1] = dataByte;
-    DISPLAYxfer.txSz = DISPLAY_PACKET_SZ;
-    Chip_I2C_MasterTransfer(DISPLAY_DEV, &DISPLAYxfer);
+	DISPLAY_txbuffer[1] = dataByte;
+	DISPLAYxfer.txSz = DISPLAY_PACKET_SZ;
+	Chip_I2C_MasterTransfer(DISPLAY_DEV, &DISPLAYxfer);
 }
 
 void sendChar(uint8_t data)
@@ -246,12 +268,13 @@ void sendDisplay(uint8_t startAtCursor, struct MSG_S *msg)
 	uint8_t DDRAM_address = 0;
 	uint8_t *msg_tmp = msg->msg;
 
-	if(!startAtCursor)
+	if (!startAtCursor)
 	{
 		row = msg->row;
 		column = msg->column;
 		DDRAM_address = column;
-		if (row) DDRAM_address += 0x40;
+		if (row)
+			DDRAM_address += 0x40;
 		column = 0;  //reuse variable to ensure array stays in bounds
 		sendCMD(DDRAM_address | 0b10000000);
 	}
@@ -280,20 +303,20 @@ uint8_t initDisplay(void)
 
 	pause(PAUSE_AFTER_RESET);
 
-	sendCMD(0x22 | 0x08);//0x2A);				//function set (extended command set)
+	sendCMD(0x22 | 0x08); //0x2A);				//function set (extended command set)
 	sendCMD(0x71);				//disable internal VDD regulator
 	sendData(0x00);
-	sendCMD(0x20 | 0x08);//0x28);				//function set (fundamental command set)
+	sendCMD(0x20 | 0x08);				//0x28);				//function set (fundamental command set)
 	sendCMD(0x08);				//display off, cursor off, blink off
-	sendCMD(0x22 | 0x08);//0x2A);				//function set (extended command set)
+	sendCMD(0x22 | 0x08);				//0x2A);				//function set (extended command set)
 	sendCMD(0x79);				//OLED command set enabled
-	sendCMD(0xD5);				//set display clock divide ratio/oscillator frequency
+	sendCMD(0xD5);		//set display clock divide ratio/oscillator frequency
 	sendCMD(0x70);
 	sendCMD(0x78);				//OLED command set disabled
 	sendCMD(0x08);				//extended function set (2-lines) ?????
 	sendCMD(0x06);				//COM SEG direction
 	sendCMD(0x72);				//function selection B, ROM CGRAM selection
-	sendData(0x0a);//0x00);
+	sendData(0x0a);				//0x00);
 	//sendCMD(0x2A);				//function set (extended command set)
 	sendCMD(0x79);				//OLED command set enabled
 	sendCMD(0xDA);				//set SEG pins hardware configuration
@@ -307,7 +330,7 @@ uint8_t initDisplay(void)
 	sendCMD(0xDB);				//set VCOMH deselect level
 	sendCMD(0x40);
 	sendCMD(0x78);				//OLED command set disabled
-	sendCMD(0x20 | 0x08);//0x28);				//function set (fundamental command set)
+	sendCMD(0x20 | 0x08);				//0x28);				//function set (fundamental command set)
 	sendCMD(0x01);				//clear display
 	pause(2);
 	sendCMD(0x80);				//set DDRAM address to 0x00
@@ -384,8 +407,10 @@ uint32_t getKP(uint32_t timeout)
 			break;
 		case 1:
 			portValue = Chip_GPIO_GetPortValue(LPC_GPIO, 0);
-			if (portValue & KP_MASK_IN) kpState = 2;
-			else kpState = 3;
+			if (portValue & KP_MASK_IN)
+				kpState = 2;
+			else
+				kpState = 3;
 			break;
 		case 2:
 			Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, currentOutput);
@@ -398,7 +423,8 @@ uint32_t getKP(uint32_t timeout)
 				currentOutput = (currentOutput == K6) ? K2 : currentOutput + 1;
 				kpState = 0;
 			}
-			else kpState = 1;
+			else
+				kpState = 1;
 			break;
 		}
 	}
@@ -409,39 +435,39 @@ uint8_t getDigit(uint32_t key)
 {
 	switch (key)
 	{
-	case KP_1:
-		return 1;
-		break;
-	case KP_2:
-		return 2;
-		break;
-	case KP_3:
-		return 3;
-		break;
-	case KP_4:
-		return 4;
-		break;
-	case KP_5:
-		return 5;
-		break;
-	case KP_6:
-		return 6;
-		break;
-	case KP_7:
-		return 7;
-		break;
-	case KP_8:
-		return 8;
-		break;
-	case KP_9:
-		return 9;
-		break;
-	case KP_0:
-		return 0;
-		break;
-	default:
-		return 10;
-		break;
+		case KP_1:
+			return 1;
+			break;
+		case KP_2:
+			return 2;
+			break;
+		case KP_3:
+			return 3;
+			break;
+		case KP_4:
+			return 4;
+			break;
+		case KP_5:
+			return 5;
+			break;
+		case KP_6:
+			return 6;
+			break;
+		case KP_7:
+			return 7;
+			break;
+		case KP_8:
+			return 8;
+			break;
+		case KP_9:
+			return 9;
+			break;
+		case KP_0:
+			return 0;
+			break;
+		default:
+			return 10;
+			break;
 	}
 }
 
@@ -452,7 +478,10 @@ uint8_t getKPInput(uint32_t *p_values, uint8_t length)
 	for (uint8_t posCounter = 0; posCounter < length; posCounter++)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-		while(getKP(100)) {}
+		while (getKP(100))
+		{
+			__NOP();
+		}
 		if (!selection) return 0;
 		if (selection == KP_CE)
 		{
@@ -460,7 +489,7 @@ uint8_t getKPInput(uint32_t *p_values, uint8_t length)
 			return 255;
 		}
 		*p_values = getDigit(selection);
-		sendChar(*p_values+48);
+		sendChar(*p_values + 48);
 		p_values++;
 	}
 	return 1;
@@ -470,21 +499,27 @@ void setIOpin(struct ALARM_SYSTEM_S *sys, uint8_t level)
 {
 	if (level)
 	{
-		if (sys->sig_active_level) Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 1);
-		else Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
+		if (sys->sig_active_level)
+			Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 1);
+		else
+			Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
 	}
 	else
 	{
-		if (sys->sig_active_level) Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
-		else Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
+		if (sys->sig_active_level)
+			Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
+		else
+			Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
 	}
 }
 
 uint8_t getIOpin(struct ALARM_SYSTEM_S *sys)
 {
 	uint8_t pinValue = Chip_GPIO_GetPinState(LPC_GPIO, sys->port, sys->pin);
-	if (sys->sig_active_level) return pinValue;
-	else return (pinValue ^ 1);
+	if (sys->sig_active_level)
+		return pinValue;
+	else
+		return (pinValue ^ 1);
 	return 255;
 }
 
@@ -494,7 +529,10 @@ uint8_t isDark(uint8_t mode)
 
 	Chip_ADC_SetStartMode(LPC_ADC, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
 
-	while (Chip_ADC_ReadStatus(LPC_ADC, ADC_CH7, ADC_DR_DONE_STAT) != SET) {}
+	while (Chip_ADC_ReadStatus(LPC_ADC, ADC_CH7, ADC_DR_DONE_STAT) != SET)
+	{
+		__NOP();
+	}
 
 	Chip_ADC_ReadByte(LPC_ADC, ADC_CH7, &lightLevel);
 

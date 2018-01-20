@@ -5,6 +5,7 @@
 #define DIM_OLED_TIME 10000
 #define OFF_OLED_TIME (1000 * 20)
 #define MAX_PIN_TRIES 3
+#define X_LIGHT_ON_TIME 5
 
 #define no_of_turnon_times 3
 #define turnon1_hr 11
