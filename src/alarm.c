@@ -248,6 +248,9 @@ void checkMenu(void)
 		case KP_minus:
 			changeEntryDelay();
 			break;
+		case KP_dec:
+			checkMotionLightStatus();
+			break;
 		}
 	}
 }
@@ -597,11 +600,11 @@ void checkMotionLightStatus(void)
 
 	dispSensorStatus(0);
 	setCursor(0, 9);
-	if (!getKPInput(selection, 2))
+	if (!getKPInput(selection, 1))
 		return;
 	if (selection[0] == 255)
 		return;
-	value = (selection[0] * 10) + selection[1];
+	value = selection[0];
 	if (value > X_MOTION_DETECTORS)
 		return;
 

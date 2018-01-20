@@ -12,7 +12,7 @@
 
 extern struct users_S *c_user;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
-extern struct ALARM_SYSTEM_S alarm_system_O[];
+extern struct ALARM_SYSTEM_S automation_O[];
 extern struct MOTION_LIGHT_S motion_lights[];
 extern RTC_TIME_T cTime;
 extern uint8_t readyToArm;
@@ -164,16 +164,18 @@ void dispMotionSensor(uint8_t item)
 
 	struct MSG_S sensor = { 0, 0, "" };
 	strcpy((char*) sensor.msg, (char*) motion_lights[item].name);
+	dispClear();
 	sendDisplay(0, &sensor);
 	//clearLine(1);
 	//setCursor(0, 1);
+
 	dispSensorStatus((motion_lights[item].active ? 1 : 2));
 	setCursor(1, 19);
-	sendChar(getIOpin(&alarm_system_O[motion_lights[item].light]) + 48);
+	sendChar(getIOpin(&automation_O[motion_lights[item].light]) + 48);
 	sendDisplay(0, &DISP_MOTION_DUR);
 	//setCursor(1, 13);
 	sprintf(dur, "%03d", motion_lights[item].duration);
-		struct MSG_S dur_tmp = { 1, 13, "" };
+		struct MSG_S dur_tmp = { 0, 13, "" };
 		strcpy((char*) dur_tmp.msg, (char*) dur);
 		sendDisplay(0, &dur_tmp);
 
