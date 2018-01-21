@@ -663,7 +663,7 @@ void editMotionLightSensor(uint8_t sensorid)
 		case KP_2:
 			motion_lights[sensorid].sig_active_level = (
 					motion_lights[sensorid].sig_active_level ? 0 : 1);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 4),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 2),
 					motion_lights[sensorid].sig_active_level);
 			break;
 		case KP_3:
@@ -677,13 +677,13 @@ void editMotionLightSensor(uint8_t sensorid)
 			if (value <= 999)
 				motion_lights[sensorid].delay = value;
 			intTobytes(byteStorage, value);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 5),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 3),
 					byteStorage[0]);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 6),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 4),
 					byteStorage[1]);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 7),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 5),
 					byteStorage[2]);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 8),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 7),
 					byteStorage[3]);
 		}
 		dispMotionSensorEdit(sensorid);

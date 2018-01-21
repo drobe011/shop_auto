@@ -132,7 +132,7 @@ void setUpSystem(void)
 	setUpRTC();
 	if (setUpEEPROM())
 	{
-		setBootStamp();
+		//setBootStamp();
 	}
 	setUpUsers();
 	pause(1000);

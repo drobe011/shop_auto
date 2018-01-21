@@ -2,7 +2,7 @@
 #include "sys_config.h"
 #include "eeprom.h"
 
-#define EEPROM_SIG1 187
+#define EEPROM_SIG1 173
 #define EEPROM_SIG2 201
 
 I2C_XFER_T EEPROMxfer;
@@ -191,6 +191,7 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		}
 	}
 
+
 	for (uint8_t sensorid = 0; sensorid < X_MOTION_DETECTORS; sensorid++)
 	{
 		tdata_ptr = eepromTXbuffer;
@@ -216,6 +217,7 @@ EEPROM_STATUS setEEPROMdefaults(void)
 			return BAD;
 		}
 	}
+
 	return GOOD;
 }
 
