@@ -13,6 +13,7 @@ extern uint8_t ARM_DELAY;
 extern uint8_t ENTRY_DELAY;
 extern uint8_t DARK_THRESHOLD;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
+extern struct ALARM_SYSTEM_S motion_lights[];
 
 EEPROM_STATUS initEEPROM(void)
 {
@@ -103,6 +104,42 @@ EEPROM_STATUS getEEPROMdata(void)
 			return BAD;
 		}
 	}
+
+	for (uint8_t sensorid = 0; sensorid < X_MOTION_DETECTORS; sensorid++)
+	{
+		rcvbuff = eepromRXbuffer;
+		tdata_ptr = eepromTXbuffer;
+		tdata_ptr[0] = 0;
+		tdata_ptr[1] = X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE);
+		EEPROMxfer.txBuff = tdata_ptr;
+		EEPROMxfer.rxBuff = rcvbuff;
+		EEPROMxfer.rxSz = X_MOTION_PACKET_SIZE;
+		EEPROMxfer.txSz = 2;
+
+		pause(50);
+
+		if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+		{
+			return BAD;
+		}
+
+		if (rcvbuff[0] == sensorid)
+		{
+			motion_lights[sensorid].active = rcvbuff[1];
+			motion_lights[sensorid].req_to_arm = rcvbuff[2];
+			motion_lights[sensorid].armedstate = rcvbuff[3];
+			motion_lights[sensorid].sig_active_level = rcvbuff[4];
+			bytes[0] = rcvbuff[5];
+			bytes[1] = rcvbuff[6];
+			bytes[2] = rcvbuff[7];
+			bytes[3] = rcvbuff[8];
+			motion_lights[sensorid].delay = bytesToint(bytes);
+		}
+		else
+		{
+			return BAD;
+		}
+	}
 	return GOOD;
 }
 
@@ -145,6 +182,32 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		tdata_ptr[8] = byteStorage[1];
 		tdata_ptr[9] = byteStorage[2];
 		tdata_ptr[10] = byteStorage[3];
+
+		pause(50);
+		Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+		if (EEPROMxfer.txSz > 0)
+		{
+			return BAD;
+		}
+	}
+
+	for (uint8_t sensorid = 0; sensorid < X_MOTION_DETECTORS; sensorid++)
+	{
+		tdata_ptr = eepromTXbuffer;
+		EEPROMxfer.txBuff = tdata_ptr;
+		EEPROMxfer.rxSz = 0;
+		EEPROMxfer.txSz = X_MOTION_PACKET_SIZE + 2;
+
+		tdata_ptr[0] = 0;
+		tdata_ptr[1] = X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE);
+		tdata_ptr[2] = sensorid;
+		tdata_ptr[3] = motion_lights[sensorid].active;
+		tdata_ptr[4] = motion_lights[sensorid].sig_active_level;
+		intTobytes(byteStorage, motion_lights[sensorid].delay);
+		tdata_ptr[5] = byteStorage[0];
+		tdata_ptr[6] = byteStorage[1];
+		tdata_ptr[7] = byteStorage[2];
+		tdata_ptr[8] = byteStorage[3];
 
 		pause(50);
 		Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);

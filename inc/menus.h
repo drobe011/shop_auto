@@ -21,6 +21,7 @@ void dispSensor(uint8_t item);
 void dispSensorStatus(uint8_t item);
 void dispSensorEdit(uint8_t sensorid);
 void dispMotionSensor(uint8_t item);
+void dispMotionSensorEdit(uint8_t sensorid);
 void dispInputBuffers(void);
 void dispDarkTH(void);
 void dispArmDelay(void);

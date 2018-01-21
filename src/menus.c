@@ -13,7 +13,7 @@
 extern struct users_S *c_user;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S automation_O[];
-extern struct MOTION_LIGHT_S motion_lights[];
+extern struct ALARM_SYSTEM_S motion_lights[];
 extern RTC_TIME_T cTime;
 extern uint8_t readyToArm;
 extern uint8_t DARK_THRESHOLD;
@@ -53,6 +53,7 @@ struct MSG_S DISP_DARK2 = { 1, 0, "Dark TH [   ]:" };
 struct MSG_S DISP_ARM_DELAY = { 1, 0, "Arm Delay [   ]:" };
 struct MSG_S DISP_SENS_EDIT = { 1, 0, "[1] [2] [3] [4] [5]" };
 struct MSG_S DISP_ENTRY_DELAY = { 1, 0, "Ent Delay [   ]:" };
+struct MSG_S DISP_MOTN_EDIT = { 1, 0, "[1] [2] [3]" };
 
 void clearLine(uint8_t row)
 {
@@ -166,19 +167,14 @@ void dispMotionSensor(uint8_t item)
 	strcpy((char*) sensor.msg, (char*) motion_lights[item].name);
 	dispClear();
 	sendDisplay(0, &sensor);
-	//clearLine(1);
-	//setCursor(0, 1);
-
 	dispSensorStatus((motion_lights[item].active ? 1 : 2));
 	setCursor(1, 19);
-	sendChar(getIOpin(&automation_O[motion_lights[item].light]) + 48);
+	sendChar(getIOpin(&automation_O[motion_lights[item].device]) + 48);
 	sendDisplay(0, &DISP_MOTION_DUR);
-	//setCursor(1, 13);
-	sprintf(dur, "%03d", motion_lights[item].duration);
-		struct MSG_S dur_tmp = { 0, 13, "" };
-		strcpy((char*) dur_tmp.msg, (char*) dur);
-		sendDisplay(0, &dur_tmp);
-
+	sprintf(dur, "%03d", motion_lights[item].delay);
+	struct MSG_S dur_tmp = { 0, 13, "" };
+	strcpy((char*) dur_tmp.msg, (char*) dur);
+	sendDisplay(0, &dur_tmp);
 }
 
 void dispSensorStatus(uint8_t item)
@@ -274,6 +270,22 @@ void dispSensorEdit(uint8_t sensorid)
 	strcpy((char*) delay_msg.msg, (char*) delay_tmp);
 	sendDisplay(0, &delay_msg);
 	sendDisplay(0, &DISP_SENS_EDIT);
+}
+
+void dispMotionSensorEdit(uint8_t sensorid)
+{
+	dispClear();
+	setCursor(0, 1);
+	sendChar(motion_lights[sensorid].active ? 'Y' : 'N');
+	setCursor(0, 5);
+	sendChar(alarm_system_I[sensorid].sig_active_level ? 'H' : 'L');
+
+	char delay_tmp[4];
+	sprintf(delay_tmp, "%03d", motion_lights[sensorid].delay);
+	struct MSG_S delay_msg = { 0, 8, "" };
+	strcpy((char*) delay_msg.msg, (char*) delay_tmp);
+	sendDisplay(0, &delay_msg);
+	sendDisplay(0, &DISP_MOTN_EDIT);
 }
 
 void dispArmDelay(void)

@@ -36,27 +36,9 @@ struct ALARM_SYSTEM_S
 	uint8_t armedstate;
 	uint8_t sig_active_level;
 	uint32_t delay;
-};
-
-struct MOTION_LIGHT_S
-{
-	uint8_t name[6];
-	uint8_t port;
-	uint8_t pin;
-	uint8_t active;
-	uint8_t light;
-	uint32_t duration;
 	uint32_t timestamp;
+	uint8_t device;
 };
-
-/*
-struct ACTIVE_AUTOMATION_S
-{
-	uint8_t system;
-	uint32_t time_active;
-	uint8_t output_device;
-};
-*/
 
 struct LIGHT_AUTO_S
 {
@@ -194,29 +176,30 @@ struct X_LIGHT_AUTO_S
 #define VIB2 13
 #define NUM_OF_SYSTEMS 14
 
-/*
+
 ////AUTOMATION INPUTS
 #define MTN_EXT_S 0
 #define MTN_EXT_N 1
 #define MTN_EXT_E 2
 #define MTN_EXT_W 3
-#define NUM_OF_AUTO_I 4
+#define X_MOTION_DETECTORS 4
+
+/*#define NUM_OF_AUTO_I 4
 #define LIM_AUTO 4
 #define LIS_AUTO 5
 #define FAN_AUTO 6
 #define NUM_OF_TOTAL_AUTO 7
 */
 
-#define X_MOTION_DETECTORS 4
 
 ////OUTPUTS
-#define INDCT 0
+#define L_X_S 0
 #define L_X_N 1
-#define L_I_M 2
-#define L_X_S 3
-#define L_X_E 4
-#define L_X_W 5
-#define FAN 6
+#define L_X_E 2
+#define L_X_W 3
+#define INDCT 4
+#define FAN 5
+#define L_I_M 6
 #define L_I_S 7
 #define NUM_OF_AUTO_O 8
 
@@ -325,6 +308,8 @@ struct MSG_S
 #define SENSOR_OFFSET 5
 #define SENSOR_PACKET_SIZE 9
 #define BOOTTIME_OFFSET (NUM_OF_SYSTEMS * SENSOR_PACKET_SIZE) + SENSOR_OFFSET
+#define X_MOTION_OFFSET BOOTTIME_OFFSET + 7
+#define X_MOTION_PACKET_SIZE 7
 
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)

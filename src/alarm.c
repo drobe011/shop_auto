@@ -22,10 +22,8 @@ volatile uint8_t onPressed = 0;
 extern struct users_S *c_user;
 extern struct users_S users[];
 extern struct ALARM_SYSTEM_S automation_O[];
-extern struct ALARM_SYSTEM_S automation_I[];
 extern struct ALARM_SYSTEM_S alarm_system_I[];
-//extern struct ACTIVE_AUTOMATION_S active_automation[];
-extern struct MOTION_LIGHT_S motion_lights[];
+extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct LIGHT_AUTO_S light_auto[];
 extern struct X_LIGHT_AUTO_S x_light_auto[];
 
@@ -76,7 +74,7 @@ uint8_t checkReadyToArm(void);
 uint8_t entryDelay(uint8_t active);
 void editSensor(uint8_t sensorid);
 void checkMotionLightStatus(void);
-void editcheckMotionLightSensor(uint8_t sensorid);
+void editMotionLightSensor(uint8_t sensorid);
 
 int main(void)
 {
@@ -625,9 +623,9 @@ void checkMotionLightStatus(void)
 			break;
 	}
 
-	if (selection[0] == KP_equal)
+	if (selection[0] == KP_dec)
 	{
-		editSensor(value);
+		editMotionLightSensor(value);
 	}
 
 	menuTimer = systemTick;
@@ -638,14 +636,14 @@ void checkMotionLightStatus(void)
 	}
 }
 
-void editcheckMotionLightSensor(uint8_t sensorid)
+void editMotionLightSensor(uint8_t sensorid)
 {
 	uint32_t menuTimer = systemTick;
 	uint32_t selection[3] = { 0, 0, 0 };
 	uint32_t value;
 	uint8_t byteStorage[4];
 
-	dispSensorEdit(sensorid);
+	dispMotionSensorEdit(sensorid);
 
 	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
 	{
@@ -657,31 +655,19 @@ void editcheckMotionLightSensor(uint8_t sensorid)
 		switch (selection[0])
 		{
 		case KP_1:
-			alarm_system_I[sensorid].active = (
-					alarm_system_I[sensorid].active ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 1),
-					alarm_system_I[sensorid].active);
+			motion_lights[sensorid].active = (
+					motion_lights[sensorid].active ? 0 : 1);
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 1),
+					motion_lights[sensorid].active);
 			break;
 		case KP_2:
-			alarm_system_I[sensorid].req_to_arm = (
-					alarm_system_I[sensorid].req_to_arm ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 2),
-					alarm_system_I[sensorid].req_to_arm);
+			motion_lights[sensorid].sig_active_level = (
+					motion_lights[sensorid].sig_active_level ? 0 : 1);
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 4),
+					motion_lights[sensorid].sig_active_level);
 			break;
 		case KP_3:
-			alarm_system_I[sensorid].armedstate = (
-					alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 3),
-					alarm_system_I[sensorid].armedstate);
-			break;
-		case KP_4:
-			alarm_system_I[sensorid].sig_active_level = (
-					alarm_system_I[sensorid].sig_active_level ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 4),
-					alarm_system_I[sensorid].sig_active_level);
-			break;
-		case KP_5:
-			setCursor(0, 16);
+			setCursor(0, 8);
 			selection[0] = 0;
 			if (!getKPInput(selection, 3))
 				break;
@@ -689,18 +675,18 @@ void editcheckMotionLightSensor(uint8_t sensorid)
 				break;
 			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
 			if (value <= 999)
-				alarm_system_I[sensorid].delay = value;
+				motion_lights[sensorid].delay = value;
 			intTobytes(byteStorage, value);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 5),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 5),
 					byteStorage[0]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 6),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 6),
 					byteStorage[1]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 7),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 7),
 					byteStorage[2]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 8),
+			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 8),
 					byteStorage[3]);
 		}
-		dispSensorEdit(sensorid);
+		dispMotionSensorEdit(sensorid);
 	}
 }
 void changeDarkTH(void)
@@ -886,15 +872,18 @@ uint8_t pollAutomation(void)
 		{
 			if ((motion_lights[sensor].active) && (motion_lights[sensor].timestamp == 0))
 			{
-				setIOpin(&automation_O[motion_lights[sensor].light], 1);
-				motion_lights[sensor].timestamp = systemTick;
+				if (getIOpin(&motion_lights[sensor]))
+				{
+					setIOpin(&automation_O[motion_lights[sensor].device], 1);
+					motion_lights[sensor].timestamp = systemTick;
+				}
 			}
 			//check if time to turn off
 			if (motion_lights[sensor].timestamp > 0)
 			{
-				if (systemTick > motion_lights[sensor].timestamp + (motion_lights[sensor].duration * (1000 * 60)))
+				if (systemTick > motion_lights[sensor].timestamp + (motion_lights[sensor].delay * (1000 * 60)))
 				{
-					setIOpin(&automation_O[motion_lights[sensor].light], 0);
+					setIOpin(&automation_O[motion_lights[sensor].device], 0);
 					motion_lights[sensor].timestamp = 0;
 				}
 			}
