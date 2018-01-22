@@ -237,13 +237,19 @@ void setUpTimer(void)
 	Chip_TIMER_Init(LPC_TIMER0);
 	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER0, SYSCTL_CLKDIV_1);
 	Chip_TIMER_PrescaleSet(LPC_TIMER0, SystemCoreClock / 1000);
-	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER0, 0);
+	Chip_TIMER_ResetOnMatchDisable(LPC_TIMER0, 0);
+	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER0, 1);
 	Chip_TIMER_SetMatch(LPC_TIMER0, 0, 500);
+	Chip_TIMER_SetMatch(LPC_TIMER0, 1, 1000);
 	Chip_TIMER_Reset(LPC_TIMER0);
 	Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
+	Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
 	Chip_TIMER_MatchEnableInt(LPC_TIMER0, 0);
+	Chip_TIMER_MatchEnableInt(LPC_TIMER0, 1);
 	NVIC_ClearPendingIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER0_IRQn);
+
+
 
 }
 
@@ -593,8 +599,16 @@ void EINT3_IRQHandler(void)
 
 void TIMER0_IRQHandler(void)
 {
-	Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
+	if (Chip_TIMER_MatchPending(LPC_TIMER0, 0))
+	{
+		ENABLE_ERR_LED();
+		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
+	}
+	else
+	{
+		DISABLE_ERR_LED();
+		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
+	}
+
 	NVIC_ClearPendingIRQ(TIMER0_IRQn);
-	if (Chip_GPIO_GetPinState(LPC_GPIO, 0, 1)) DISABLE_ERR_LED();
-	else ENABLE_ERR_LED();
 }
