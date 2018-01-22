@@ -2,7 +2,7 @@
 #include "sys_config.h"
 #include "eeprom.h"
 
-#define EEPROM_SIG1 163
+#define EEPROM_SIG1 153
 #define EEPROM_SIG2 201
 
 I2C_XFER_T EEPROMxfer;
@@ -20,7 +20,7 @@ EEPROM_STATUS initEEPROM(void)
 	Chip_IOCON_EnableOD(LPC_IOCON, EEPROM_SDA1_port, EEPROM_SDA1_pin);
 	Chip_IOCON_EnableOD(LPC_IOCON, EEPROM_SCL1_port, EEPROM_SCL1_pin);
 	Chip_I2C_Init(EEPROM_DEV);
-	Chip_I2C_SetClockRate(EEPROM_DEV, 40000);
+	Chip_I2C_SetClockRate(EEPROM_DEV, 100000);
 	Chip_I2C_SetMasterEventHandler(EEPROM_DEV, Chip_I2C_EventHandlerPolling);
 
 	EEPROMxfer.slaveAddr = EEPROM_ADDRESS;
@@ -115,7 +115,7 @@ EEPROM_STATUS getEEPROMdata(void)
 	{
 		tbuffer = eepromTXbuffer;
 		rbuffer = eepromRXbuffer;
-		address = (32 * sensorid) + (14 * 32);
+		address = (32 * sensorid) + (15 * 32);
 		tbuffer[0] = (address >> 8) & 0xFF;
 		tbuffer[1] =  address & 0xFF;
 		EEPROMxfer.txBuff = tbuffer;
@@ -173,12 +173,15 @@ EEPROM_STATUS setEEPROMdefaults(void)
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
 		return BAD;
 
+	//return 1;
+
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 	{
 		tbuffer = eepromTXbuffer;
 		address = (32 * sensorid) + (1 * 32);
 		EEPROMxfer.rxSz = 0;
 		EEPROMxfer.txSz = SENSOR_PACKET_SIZE + 2;
+		EEPROMxfer.txBuff = tbuffer;
 
 		tbuffer[0] = (address >> 8) & 0xFF;
 		tbuffer[1] =  address & 0xFF;
@@ -201,10 +204,12 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		}
 	}
 
+	//return 1;
+
 	for (uint8_t sensorid = 0; sensorid < X_MOTION_DETECTORS; sensorid++)
 	{
 		tbuffer = eepromTXbuffer;
-		address = (32 * sensorid) + (14 * 32);
+		address = (32 * sensorid) + (15 * 32);
 
 		EEPROMxfer.txBuff = tbuffer;
 		EEPROMxfer.rxSz = 0;
