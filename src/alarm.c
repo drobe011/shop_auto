@@ -105,7 +105,8 @@ int main(void)
 				break;
 			case ARMED:
 				sensorsActive = pollAlarmSensors();
-
+				Chip_TIMER_Reset(LPC_TIMER0);
+				Chip_TIMER_Enable(LPC_TIMER0);
 				if (sensorsActive)
 					if (!entryDelay(sensorsActive))
 						ALARMSTATE = ACTIVATE_SIREN;
@@ -121,6 +122,7 @@ int main(void)
 				readyToArm = 2;  //SO IT DISPLAYS AFTER WRONG KEYPRESS
 				break;
 			case DISARMED:
+				Chip_TIMER_Disable(LPC_TIMER0);
 				if (updateTime)
 					updateDisplayTime();
 				if (!dispDimmed && CHECK_DIM_TIMER())

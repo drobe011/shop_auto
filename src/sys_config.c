@@ -110,6 +110,7 @@ static void setUpRTC(void);
 static uint8_t initDisplay(void);
 static EEPROM_STATUS setUpEEPROM(void);
 static void setUpUsers(void);
+static void setUpTimer(void);
 
 void setCursor(uint8_t row, uint8_t column)
 {
@@ -135,7 +136,8 @@ void setUpSystem(void)
 		setBootStamp();
 	}
 	setUpUsers();
-	pause(1000);
+	setUpTimer();
+	pause(500);
 }
 void setUpGPIO(void)
 {
@@ -220,6 +222,29 @@ void setUpRTC(void)
 static EEPROM_STATUS setUpEEPROM(void)
 {
 	return initEEPROM();
+}
+
+void setUpTimer(void)
+{
+	//Chip_GPIO_Init(SYSCTL_CLOCK_TIMER0);
+	//
+
+	//
+	//
+
+	Chip_TIMER_Disable(LPC_TIMER0);
+	Chip_TIMER_DeInit(LPC_TIMER0);
+	Chip_TIMER_Init(LPC_TIMER0);
+	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER0, SYSCTL_CLKDIV_8);
+	Chip_TIMER_PrescaleSet(LPC_TIMER0, (SystemCoreClock / 8) / 1000);
+	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER0, 0);
+	Chip_TIMER_SetMatch(LPC_TIMER0, 0, 500);
+	Chip_TIMER_Reset(LPC_TIMER0);
+
+	Chip_TIMER_MatchEnableInt(LPC_TIMER0, 0);
+	NVIC_ClearPendingIRQ(TIMER0_IRQn);
+	NVIC_EnableIRQ(TIMER0_IRQn);
+
 }
 
 void pause(uint32_t ps)
@@ -564,4 +589,11 @@ void EINT3_IRQHandler(void)
 {
 	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, GPIOINT_PORT0, (1 << ON_));
 	onPressed = 1;
+}
+
+void TIMER0_IRQHandler(void)
+{
+	Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
+	if (Chip_GPIO_GetPinState(LPC_GPIO, 0, 0)) DISABLE_ERR_LED();
+	else ENABLE_ERR_LED();
 }
