@@ -848,9 +848,7 @@ uint8_t entryDelay(uint8_t active)
 	if (activeSensors[0] == DOOR_MAIN)
 	{
 		uint32_t entrytime = systemTick;
-		dispClear();
-		//displayNormal();
-		//displayON();
+
 		while (systemTick < entrytime + (ENTRY_DELAY * 1000))
 		{
 			if (onPressed)
@@ -936,7 +934,7 @@ void showAllXMSStat(void)
 
 	while (!getKP(200))
 	{
-		setCursor(0, 2);
+		setCursor(1, 1);
 
 		for (uint8_t sensorid = 0; sensorid < X_MOTION_DETECTORS; sensorid++)
 		{
