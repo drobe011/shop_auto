@@ -105,7 +105,7 @@ int main(void)
 				break;
 			case ARMED:
 				sensorsActive = pollAlarmSensors();
-				Chip_TIMER_Reset(LPC_TIMER0);
+				//Chip_TIMER_Reset(LPC_TIMER0);
 				Chip_TIMER_Enable(LPC_TIMER0);
 				if (sensorsActive)
 					if (!entryDelay(sensorsActive))
