@@ -536,7 +536,7 @@ uint8_t isDark(uint8_t mode)
 	else return lightLevel;
 }
 
-void saveByte(uint8_t offset, uint8_t ebyte)
+void saveByte(uint32_t offset, uint8_t ebyte)
 {
 	setEEPROMbyte(offset, ebyte);
 }

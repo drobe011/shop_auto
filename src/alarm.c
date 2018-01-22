@@ -545,25 +545,25 @@ void editSensor(uint8_t sensorid)
 		case KP_1:
 			alarm_system_I[sensorid].active = (
 					alarm_system_I[sensorid].active ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 1),
+			saveByte((32 * sensorid) + (1 * 32) + 1,
 					alarm_system_I[sensorid].active);
 			break;
 		case KP_2:
 			alarm_system_I[sensorid].req_to_arm = (
 					alarm_system_I[sensorid].req_to_arm ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 2),
+			saveByte(((32 * sensorid) + (1 * 32) + 2),
 					alarm_system_I[sensorid].req_to_arm);
 			break;
 		case KP_3:
 			alarm_system_I[sensorid].armedstate = (
 					alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 3),
+			saveByte(((32 * sensorid) + (1 * 32) + 3),
 					alarm_system_I[sensorid].armedstate);
 			break;
 		case KP_4:
 			alarm_system_I[sensorid].sig_active_level = (
 					alarm_system_I[sensorid].sig_active_level ? 0 : 1);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 4),
+			saveByte(((32 * sensorid) + (1 * 32) + 4),
 					alarm_system_I[sensorid].sig_active_level);
 			break;
 		case KP_5:
@@ -577,13 +577,13 @@ void editSensor(uint8_t sensorid)
 			if (value <= 999)
 				alarm_system_I[sensorid].delay = value;
 			intTobytes(byteStorage, value);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 5),
+			saveByte(((32 * sensorid) + (1 * 32) + 5),
 					byteStorage[0]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 6),
+			saveByte(((32 * sensorid) + (1 * 32) + 6),
 					byteStorage[1]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 7),
+			saveByte(((32 * sensorid) + (1 * 32) + 7),
 					byteStorage[2]);
-			saveByte((SENSOR_OFFSET + (sensorid * SENSOR_PACKET_SIZE) + 8),
+			saveByte(((32 * sensorid) + (1 * 32) + 8),
 					byteStorage[3]);
 		}
 		dispSensorEdit(sensorid);
@@ -657,13 +657,13 @@ void editMotionLightSensor(uint8_t sensorid)
 		case KP_1:
 			motion_lights[sensorid].active = (
 					motion_lights[sensorid].active ? 0 : 1);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 1),
+			saveByte(((32 * sensorid) + (14 * 32) + 1),
 					motion_lights[sensorid].active);
 			break;
 		case KP_2:
 			motion_lights[sensorid].sig_active_level = (
 					motion_lights[sensorid].sig_active_level ? 0 : 1);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 2),
+			saveByte(((32 * sensorid) + (14 * 32) + 2),
 					motion_lights[sensorid].sig_active_level);
 			break;
 		case KP_3:
@@ -677,13 +677,13 @@ void editMotionLightSensor(uint8_t sensorid)
 			if (value <= 999)
 				motion_lights[sensorid].delay = value;
 			intTobytes(byteStorage, value);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 3),
+			saveByte(((32 * sensorid) + (14 * 32) + 3),
 					byteStorage[0]);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 4),
+			saveByte(((32 * sensorid) + (14 * 32) + 4),
 					byteStorage[1]);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 5),
+			saveByte(((32 * sensorid) + (14 * 32) + 5),
 					byteStorage[2]);
-			saveByte((X_MOTION_OFFSET + (sensorid * X_MOTION_PACKET_SIZE) + 7),
+			saveByte(((32 * sensorid) + (14 * 32) + 7),
 					byteStorage[3]);
 		}
 		dispMotionSensorEdit(sensorid);
