@@ -2,7 +2,7 @@
 #include "sys_config.h"
 #include "eeprom.h"
 
-#define EEPROM_SIG1 153
+#define EEPROM_SIG1 149
 #define EEPROM_SIG2 201
 
 I2C_XFER_T EEPROMxfer;

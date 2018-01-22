@@ -489,7 +489,10 @@ void checkStatus(void)
 	dispSensorStatus(0);
 	setCursor(0, 9);
 	if (!getKPInput(selection, 2))
+	{
+		showAllSensorStat();
 		return;
+	}
 	if (selection[0] == 255)
 		return;
 	value = (selection[0] * 10) + selection[1];
@@ -516,10 +519,6 @@ void checkStatus(void)
 	if (selection[0] == KP_equal)
 	{
 		editSensor(value);
-	}
-	if (selection[0] == KP_p_m)
-	{
-		showAllSensorStat();
 	}
 
 	menuTimer = systemTick;
@@ -689,7 +688,7 @@ void editMotionLightSensor(uint8_t sensorid)
 					byteStorage[1]);
 			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 5),
 					byteStorage[2]);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 7),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 6),
 					byteStorage[3]);
 		}
 		dispMotionSensorEdit(sensorid);
@@ -919,7 +918,7 @@ void showAllSensorStat(void)
 
 		for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 		{
-			sendChar(getIOpin(&alarm_system_I[sensorid] + 48));
+			sendChar(getIOpin(&alarm_system_I[sensorid]) + 48);
 		}
 	}
 	while (getKP(100))
