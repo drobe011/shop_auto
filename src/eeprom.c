@@ -58,6 +58,7 @@ EEPROM_STATUS getEEPROMdata(void)
 	uint8_t *rcvbuff = eepromRXbuffer;
 	EEPROMxfer.rxBuff = rcvbuff;
 
+	pause(50);
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) == I2C_STATUS_DONE)
 	{
 		ARM_DELAY = eepromRXbuffer[0];
@@ -160,6 +161,7 @@ EEPROM_STATUS setEEPROMdefaults(void)
 	EEPROMxfer.txSz = 7;
 	EEPROMxfer.txBuff = tdata_ptr;
 
+	pause(50);
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
 		return BAD;
 
