@@ -604,7 +604,10 @@ void checkMotionLightStatus(void)
 	dispSensorStatus(0);
 	setCursor(0, 9);
 	if (!getKPInput(selection, 1))
+	{
+		showAllXMSStat();
 		return;
+	}
 	if (selection[0] == 255)
 		return;
 	value = selection[0];
@@ -929,5 +932,27 @@ void showAllSensorStat(void)
 
 void showAllXMSStat(void)
 {
+	dispAllXMSStat();
 
+	while (!getKP(200))
+	{
+		setCursor(0, 2);
+
+		for (uint8_t sensorid = 0; sensorid < X_MOTION_DETECTORS; sensorid++)
+		{
+			sendChar(getIOpin(&motion_lights[sensorid]) + 48);
+			sendChar('-');
+			sendChar(getIOpin(&automation_O[motion_lights[sensorid].device]) + 48);
+			if (sensorid < 3)
+			{
+				sendChar('|');
+				sendChar(' ');
+			}
+		}
+	}
+	while (getKP(100))
+	{
+		__NOP();
+	}
 }
+

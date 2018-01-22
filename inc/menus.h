@@ -29,5 +29,6 @@ void dispEntryDelay(void);
 void displayReadyToArm(void);
 void displayArming(void);
 void displayPIN(void);
+void dispAllXMSStat(void);
 
 #endif /* MENUS_H_ */
