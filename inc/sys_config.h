@@ -75,7 +75,7 @@ struct X_LIGHT_AUTO_S
 #define ON_ 16
 #define KP_SCAN_RATE_MS 15
 #define KP_TIMEOUT_DEFAULT_MS 1000
-#define KP_TIMEOUT_SUBMENU_MS 5000
+#define KP_TIMEOUT_SUBMENU_MS 2000
 #define KP_MASK_IN ((1 << A2X) | (1 << A3X) | (1 << A4X) | (1 << A5X) | (1 << P2) | (1 << ON_))
 
 #define KP_MRC 516
@@ -106,14 +106,6 @@ struct X_LIGHT_AUTO_S
 
 // SYSTEM I/O DEFINES
 //
-//#define TXD3_port 0
-//#define TXD3_pin 0
-//#define TXD3_func IOCON_FUNC2
-//#define TXD3_mode IOCON_MODE_INACT
-//#define RXD3_port 0
-//#define RXD3_pin 1
-//#define RXD3_func IOCON_FUNC2
-//#define RXD3_mode IOCON_MODE_INACT
 #define LIGHT_SENSE_port 0
 #define LIGHT_SENSE_pin 2
 #define LIGHT_SENSE_func IOCON_FUNC2
@@ -157,8 +149,6 @@ struct X_LIGHT_AUTO_S
 //
 // END SYSTEM I/O DEFINES
 
-// GPIO DEFINES
-//
 ////ALARM INPUTS
 #define PWR_SENSE 0
 #define VIB1 1
@@ -190,7 +180,6 @@ struct X_LIGHT_AUTO_S
 #define FAN_AUTO 6
 #define NUM_OF_TOTAL_AUTO 7
 */
-
 
 ////OUTPUTS
 #define L_X_S 0
@@ -302,13 +291,15 @@ struct MSG_S
 
 // PROGRAM DEFINES
 //
+#define EPROM_PAGE_SZ 32
+#define EPROM_DELAY() pause(10)
 #define ARM_DELAY_OFFSET 2
 #define ENTRY_DELAY_OFFSET 3
 #define DARK_THRESHOLD_OFFSET 4
-#define SENSOR_OFFSET 5
+#define ASI_OFFSET (1 * EPROM_PAGE_SZ)
+#define MS_OFFSET (15 * EPROM_PAGE_SZ)
+#define BOOTTIME_OFFSET (19 * EPROM_PAGE_SZ)
 #define SENSOR_PACKET_SIZE 9
-#define BOOTTIME_OFFSET (NUM_OF_SYSTEMS * SENSOR_PACKET_SIZE) + SENSOR_OFFSET
-#define X_MOTION_OFFSET 138
 #define X_MOTION_PACKET_SIZE 7
 
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)

@@ -75,6 +75,8 @@ uint8_t entryDelay(uint8_t active);
 void editSensor(uint8_t sensorid);
 void checkMotionLightStatus(void);
 void editMotionLightSensor(uint8_t sensorid);
+void showAllSensorStat(void);
+void showAllXMSStat(void);
 
 int main(void)
 {
@@ -515,6 +517,10 @@ void checkStatus(void)
 	{
 		editSensor(value);
 	}
+	if (selection[0] == KP_p_m)
+	{
+		showAllSensorStat();
+	}
 
 	menuTimer = systemTick;
 
@@ -545,25 +551,25 @@ void editSensor(uint8_t sensorid)
 		case KP_1:
 			alarm_system_I[sensorid].active = (
 					alarm_system_I[sensorid].active ? 0 : 1);
-			saveByte((32 * sensorid) + (1 * 32) + 1,
+			saveByte((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 1,
 					alarm_system_I[sensorid].active);
 			break;
 		case KP_2:
 			alarm_system_I[sensorid].req_to_arm = (
 					alarm_system_I[sensorid].req_to_arm ? 0 : 1);
-			saveByte(((32 * sensorid) + (1 * 32) + 2),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 2),
 					alarm_system_I[sensorid].req_to_arm);
 			break;
 		case KP_3:
 			alarm_system_I[sensorid].armedstate = (
 					alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
-			saveByte(((32 * sensorid) + (1 * 32) + 3),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 3),
 					alarm_system_I[sensorid].armedstate);
 			break;
 		case KP_4:
 			alarm_system_I[sensorid].sig_active_level = (
 					alarm_system_I[sensorid].sig_active_level ? 0 : 1);
-			saveByte(((32 * sensorid) + (1 * 32) + 4),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 4),
 					alarm_system_I[sensorid].sig_active_level);
 			break;
 		case KP_5:
@@ -577,13 +583,13 @@ void editSensor(uint8_t sensorid)
 			if (value <= 999)
 				alarm_system_I[sensorid].delay = value;
 			intTobytes(byteStorage, value);
-			saveByte(((32 * sensorid) + (1 * 32) + 5),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 5),
 					byteStorage[0]);
-			saveByte(((32 * sensorid) + (1 * 32) + 6),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 6),
 					byteStorage[1]);
-			saveByte(((32 * sensorid) + (1 * 32) + 7),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 7),
 					byteStorage[2]);
-			saveByte(((32 * sensorid) + (1 * 32) + 8),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 8),
 					byteStorage[3]);
 		}
 		dispSensorEdit(sensorid);
@@ -657,13 +663,13 @@ void editMotionLightSensor(uint8_t sensorid)
 		case KP_1:
 			motion_lights[sensorid].active = (
 					motion_lights[sensorid].active ? 0 : 1);
-			saveByte(((32 * sensorid) + (15 * 32) + 1),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 1),
 					motion_lights[sensorid].active);
 			break;
 		case KP_2:
 			motion_lights[sensorid].sig_active_level = (
 					motion_lights[sensorid].sig_active_level ? 0 : 1);
-			saveByte(((32 * sensorid) + (15 * 32) + 2),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 2),
 					motion_lights[sensorid].sig_active_level);
 			break;
 		case KP_3:
@@ -677,13 +683,13 @@ void editMotionLightSensor(uint8_t sensorid)
 			if (value <= 999)
 				motion_lights[sensorid].delay = value;
 			intTobytes(byteStorage, value);
-			saveByte(((32 * sensorid) + (15 * 32) + 3),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 3),
 					byteStorage[0]);
-			saveByte(((32 * sensorid) + (15 * 32) + 4),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 4),
 					byteStorage[1]);
-			saveByte(((32 * sensorid) + (15 * 32) + 5),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 5),
 					byteStorage[2]);
-			saveByte(((32 * sensorid) + (15 * 32) + 7),
+			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 7),
 					byteStorage[3]);
 		}
 		dispMotionSensorEdit(sensorid);
@@ -841,8 +847,8 @@ uint8_t entryDelay(uint8_t active)
 	{
 		uint32_t entrytime = systemTick;
 		dispClear();
-		displayNormal();
-		displayON();
+		//displayNormal();
+		//displayON();
 		while (systemTick < entrytime + (ENTRY_DELAY * 1000))
 		{
 			if (onPressed)
@@ -900,3 +906,29 @@ uint8_t pollAutomation(void)
 	return numActiveSensors;
 }
 
+void showAllSensorStat(void)
+{
+	dispClear();
+
+	setCursor(1, 2);
+	sendChar('*');
+
+	while (!getKP(200))
+	{
+		setCursor(0, 2);
+
+		for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
+		{
+			sendChar(getIOpin(&alarm_system_I[sensorid] + 48));
+		}
+	}
+	while (getKP(100))
+	{
+		__NOP();
+	}
+}
+
+void showAllXMSStat(void)
+{
+
+}
