@@ -72,6 +72,18 @@ STATIC INLINE void setCountDown(uint32_t secs)
 
 }
 
+STATIC INLINE void disableCountDown(void)
+{
+	Chip_TIMER_Disable(LPC_TIMER0);
+	Chip_TIMER_Disable(LPC_TIMER1);
+	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
+	NVIC_ClearPendingIRQ(TIMER1_IRQn);
+
+	timeOut = DISABLE;
+
+	DISABLE_ERR_LED();
+}
+
 uint8_t getPIN(void);
 void checkMenu(void);
 void checkAlarmSubMenu(void);
@@ -865,9 +877,10 @@ uint8_t entryDelay(uint8_t active)
 {
 	if (activeSensors[0] == DOOR_MAIN)
 	{
-		uint32_t entrytime = systemTick;
+		//uint32_t entrytime = systemTick;
 
-		while (systemTick < entrytime + (ENTRY_DELAY * 1000))
+		setCountDown(ENTRY_DELAY);
+		while (timeOut)
 		{
 			if (onPressed)
 			{

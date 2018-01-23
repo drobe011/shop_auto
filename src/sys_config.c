@@ -236,13 +236,13 @@ void setUpTimer(void)
 
 	//
 	//
-	countDown = ((SystemCoreClock/8) * .001) -1;
+	countDown = (SystemCoreClock * .001) -1;
 
 	//TIMER0 CONTROLS ON/OFF TIME OF COUNTDOWN
 	Chip_TIMER_Disable(LPC_TIMER0);
 	Chip_TIMER_DeInit(LPC_TIMER0);
 	Chip_TIMER_Init(LPC_TIMER0);
-	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER0, SYSCTL_CLKDIV_8);
+	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER0, SYSCTL_CLKDIV_1);
 	Chip_TIMER_PrescaleSet(LPC_TIMER0, countDown);
 	Chip_TIMER_ResetOnMatchDisable(LPC_TIMER0, 0);
 	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER0, 1);
@@ -253,20 +253,22 @@ void setUpTimer(void)
 	Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
 	Chip_TIMER_MatchEnableInt(LPC_TIMER0, 0);
 	Chip_TIMER_MatchEnableInt(LPC_TIMER0, 1);
+	NVIC_ClearPendingIRQ(TIMER0_IRQn);
+	NVIC_EnableIRQ(TIMER0_IRQn);
 
 	//TIMER1 CONTROLS DURATION OF COUNTDOWN
 	Chip_TIMER_Disable(LPC_TIMER1);
 	Chip_TIMER_DeInit(LPC_TIMER1);
 	Chip_TIMER_Init(LPC_TIMER1);
-	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER1, SYSCTL_CLKDIV_8);
+	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER1, SYSCTL_CLKDIV_1);
 	Chip_TIMER_PrescaleSet(LPC_TIMER1, countDown);
 	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER1, 0);
 	Chip_TIMER_SetMatch(LPC_TIMER1, 0, 30000);
 	Chip_TIMER_Reset(LPC_TIMER1);
 	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
 	Chip_TIMER_MatchEnableInt(LPC_TIMER1, 0);
-	NVIC_ClearPendingIRQ(TIMER0_IRQn);
-	NVIC_EnableIRQ(TIMER0_IRQn);
+	NVIC_ClearPendingIRQ(TIMER1_IRQn);
+	NVIC_EnableIRQ(TIMER1_IRQn);
 
 }
 
@@ -627,15 +629,9 @@ void TIMER0_IRQHandler(void)
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
 	}
 
-	LPC_TIMER0->PR -= (100-delayInt);
+	LPC_TIMER0->PR -= (100-delayInt) * 13;
 
-	if (LPC_TIMER0->PR < countDown - (1000 * 60))
-	{
-		ENABLE_ERR_LED();
-
-
-
-	}
+	//if (LPC_TIMER0->PR < 1200) Chip_TIMER_Disable(LPC_TIMER0);
 
 	NVIC_ClearPendingIRQ(TIMER0_IRQn);
 }
