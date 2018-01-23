@@ -5,6 +5,9 @@
 #include "eeprom.h"
 
 volatile uint32_t countDown;
+volatile uint32_t delayInt;
+volatile uint32_t timeOut;
+
 extern uint32_t systemTick;
 extern uint8_t onPressed;
 extern uint8_t dispDimmed;
@@ -112,6 +115,7 @@ static uint8_t initDisplay(void);
 static EEPROM_STATUS setUpEEPROM(void);
 static void setUpUsers(void);
 static void setUpTimer(void);
+
 
 void setCursor(uint8_t row, uint8_t column)
 {
@@ -232,11 +236,13 @@ void setUpTimer(void)
 
 	//
 	//
-	countDown = SystemCoreClock / 1000;
+	countDown = ((SystemCoreClock/8) * .001) -1;
+
+	//TIMER0 CONTROLS ON/OFF TIME OF COUNTDOWN
 	Chip_TIMER_Disable(LPC_TIMER0);
 	Chip_TIMER_DeInit(LPC_TIMER0);
 	Chip_TIMER_Init(LPC_TIMER0);
-	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER0, SYSCTL_CLKDIV_1);
+	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER0, SYSCTL_CLKDIV_8);
 	Chip_TIMER_PrescaleSet(LPC_TIMER0, countDown);
 	Chip_TIMER_ResetOnMatchDisable(LPC_TIMER0, 0);
 	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER0, 1);
@@ -247,10 +253,20 @@ void setUpTimer(void)
 	Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
 	Chip_TIMER_MatchEnableInt(LPC_TIMER0, 0);
 	Chip_TIMER_MatchEnableInt(LPC_TIMER0, 1);
+
+	//TIMER1 CONTROLS DURATION OF COUNTDOWN
+	Chip_TIMER_Disable(LPC_TIMER1);
+	Chip_TIMER_DeInit(LPC_TIMER1);
+	Chip_TIMER_Init(LPC_TIMER1);
+	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER1, SYSCTL_CLKDIV_8);
+	Chip_TIMER_PrescaleSet(LPC_TIMER1, countDown);
+	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER1, 0);
+	Chip_TIMER_SetMatch(LPC_TIMER1, 0, 30000);
+	Chip_TIMER_Reset(LPC_TIMER1);
+	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
+	Chip_TIMER_MatchEnableInt(LPC_TIMER1, 0);
 	NVIC_ClearPendingIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER0_IRQn);
-
-
 
 }
 
@@ -604,25 +620,34 @@ void TIMER0_IRQHandler(void)
 	{
 		ENABLE_ERR_LED();
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
-		//Chip_TIMER_SetMatch(LPC_TIMER0, 0, LPC_TIMER0->MR[0] - 10);
 	}
 	else
 	{
 		DISABLE_ERR_LED();
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
-		//Chip_TIMER_SetMatch(LPC_TIMER0, 0, LPC_TIMER0->MR[1] - 20);
 	}
 
-	LPC_TIMER0->PR -= 1000;
+	LPC_TIMER0->PR -= (100-delayInt);
 
 	if (LPC_TIMER0->PR < countDown - (1000 * 60))
 	{
 		ENABLE_ERR_LED();
 
-		LPC_TIMER0->PR = countDown;
-		Chip_TIMER_Disable(LPC_TIMER0);
+
 
 	}
 
 	NVIC_ClearPendingIRQ(TIMER0_IRQn);
+}
+
+void TIMER1_IRQHandler(void)
+{
+	Chip_TIMER_Disable(LPC_TIMER0);
+	Chip_TIMER_Disable(LPC_TIMER1);
+	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
+	NVIC_ClearPendingIRQ(TIMER1_IRQn);
+
+	timeOut = DISABLE;
+
+	DISABLE_ERR_LED();
 }

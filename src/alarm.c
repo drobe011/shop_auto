@@ -26,6 +26,9 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct LIGHT_AUTO_S light_auto[];
 extern struct X_LIGHT_AUTO_S x_light_auto[];
+extern uint32_t timeOut;
+extern uint32_t countDown;
+extern uint32_t delayInt;
 
 enum ALARMSTATE_T
 {
@@ -54,6 +57,19 @@ STATIC INLINE void updateDisplayTime(void)
 {
 	dispDateTime();
 	updateTime = 0;
+}
+
+STATIC INLINE void setCountDown(uint32_t secs)
+{
+	timeOut = ENABLE;
+	delayInt = secs;
+	Chip_TIMER_Reset(LPC_TIMER0);
+	Chip_TIMER_Reset(LPC_TIMER1);
+	LPC_TIMER0->PR = countDown;
+	Chip_TIMER_SetMatch(LPC_TIMER1, 0, secs * 1000);
+	Chip_TIMER_Enable(LPC_TIMER1);
+	Chip_TIMER_Enable(LPC_TIMER0);
+
 }
 
 uint8_t getPIN(void);
@@ -100,7 +116,6 @@ int main(void)
 				//ENABLE_ERR_LED();
 				break;
 			case ARMING:
-				Chip_TIMER_Enable(LPC_TIMER0);
 				armingDelay();
 				ALARMSTATE = ARM;
 				break;
@@ -836,10 +851,10 @@ uint8_t checkReadyToArm(void)
 
 void armingDelay(void)
 {
-	uint32_t armingTimer = systemTick;
-
+	//uint32_t armingTimer = systemTick;
+	setCountDown(ARM_DELAY);
 	displayArming();
-	while (systemTick < armingTimer + (ARM_DELAY * 1000))
+	while (timeOut)
 	{
 		//TODO:MAYBE BLINK SOMETHING WHILE ARM DELAY
 		__NOP();
