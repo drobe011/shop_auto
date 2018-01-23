@@ -100,13 +100,14 @@ int main(void)
 				//ENABLE_ERR_LED();
 				break;
 			case ARMING:
+				Chip_TIMER_Enable(LPC_TIMER0);
 				armingDelay();
 				ALARMSTATE = ARM;
 				break;
 			case ARMED:
 				sensorsActive = pollAlarmSensors();
 				//Chip_TIMER_Reset(LPC_TIMER0);
-				Chip_TIMER_Enable(LPC_TIMER0);
+
 				if (sensorsActive)
 					if (!entryDelay(sensorsActive))
 						ALARMSTATE = ACTIVATE_SIREN;

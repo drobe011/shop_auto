@@ -4,6 +4,7 @@
 #include "alarm_settings.h"
 #include "eeprom.h"
 
+volatile uint32_t countDown;
 extern uint32_t systemTick;
 extern uint8_t onPressed;
 extern uint8_t dispDimmed;
@@ -231,12 +232,12 @@ void setUpTimer(void)
 
 	//
 	//
-
+	countDown = SystemCoreClock / 1000;
 	Chip_TIMER_Disable(LPC_TIMER0);
 	Chip_TIMER_DeInit(LPC_TIMER0);
 	Chip_TIMER_Init(LPC_TIMER0);
 	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER0, SYSCTL_CLKDIV_1);
-	Chip_TIMER_PrescaleSet(LPC_TIMER0, SystemCoreClock / 1000);
+	Chip_TIMER_PrescaleSet(LPC_TIMER0, countDown);
 	Chip_TIMER_ResetOnMatchDisable(LPC_TIMER0, 0);
 	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER0, 1);
 	Chip_TIMER_SetMatch(LPC_TIMER0, 0, 500);
@@ -603,11 +604,24 @@ void TIMER0_IRQHandler(void)
 	{
 		ENABLE_ERR_LED();
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
+		//Chip_TIMER_SetMatch(LPC_TIMER0, 0, LPC_TIMER0->MR[0] - 10);
 	}
 	else
 	{
 		DISABLE_ERR_LED();
-		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
+		Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
+		//Chip_TIMER_SetMatch(LPC_TIMER0, 0, LPC_TIMER0->MR[1] - 20);
+	}
+
+	LPC_TIMER0->PR -= 1000;
+
+	if (LPC_TIMER0->PR < countDown - (1000 * 60))
+	{
+		ENABLE_ERR_LED();
+
+		LPC_TIMER0->PR = countDown;
+		Chip_TIMER_Disable(LPC_TIMER0);
+
 	}
 
 	NVIC_ClearPendingIRQ(TIMER0_IRQn);
