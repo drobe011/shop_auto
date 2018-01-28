@@ -174,8 +174,6 @@ EEPROM_STATUS setEEPROMdefaults(void)
 	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
 		return BAD;
 
-	//return 1;
-
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 	{
 		tbuffer = eepromTXbuffer;

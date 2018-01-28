@@ -20,8 +20,7 @@ extern uint8_t DARK_THRESHOLD;
 extern uint8_t ARM_DELAY;
 extern uint8_t ENTRY_DELAY;
 
-struct MSG_S DISP_BOOT0 = { 0, 0,
-		"SnapperTron v" VERSION_MAJOR "." VERSION_MINOR }; //1.0"};
+struct MSG_S DISP_BOOT0 = { 0, 0, "SnapperTron v" VERSION_MAJOR "." VERSION_MINOR };
 struct MSG_S DISP_BOOT1 = { 1, 2, "..initializing.." };
 struct MSG_S DISP_SPACE = { 0, 0, "                    " };
 struct MSG_S DISP_ARMED_TYPE1 = { 0, 0, "AW1,AW2,AW3,AW4,STY" };
@@ -62,6 +61,7 @@ void clearLine(uint8_t row)
 	sendDisplay(1, &DISP_SPACE);
 	setCursor(row, 0);
 }
+
 void dispDateTime(void)
 {
 	char timeStr[5];
@@ -69,10 +69,8 @@ void dispDateTime(void)
 
 	Chip_RTC_GetFullTime(LPC_RTC, &cTime);
 
-	sprintf(timeStr, "%02d:%02d", cTime.time[RTC_TIMETYPE_HOUR],
-			cTime.time[RTC_TIMETYPE_MINUTE]);
-	sprintf(dateStr, "%02d/%02d/%04d", cTime.time[RTC_TIMETYPE_MONTH],
-			cTime.time[RTC_TIMETYPE_DAYOFMONTH], cTime.time[RTC_TIMETYPE_YEAR]);
+	sprintf(timeStr, "%02d:%02d", cTime.time[RTC_TIMETYPE_HOUR], cTime.time[RTC_TIMETYPE_MINUTE]);
+	sprintf(dateStr, "%02d/%02d/%04d", cTime.time[RTC_TIMETYPE_MONTH], cTime.time[RTC_TIMETYPE_DAYOFMONTH], cTime.time[RTC_TIMETYPE_YEAR]);
 	struct MSG_S time_tmp = { 0, 0, "" };
 	strcpy((char*) time_tmp.msg, (char*) timeStr);
 	struct MSG_S date_tmp = { 0, 10, "" };
@@ -323,6 +321,5 @@ void dispEntryDelay(void)
 void dispAllXMSStat(void)
 {
 	dispClear();
-
 	sendDisplay(0, &DISP_XMTN_ALL);
 }

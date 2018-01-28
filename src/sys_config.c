@@ -24,48 +24,22 @@ KP_1, KP_8 }, 1 }, { 3, "Aaron", { KP_2, KP_3, KP_1, KP_8 }, 4 }, { 4, "Donny", 
 
 struct users_S *c_user;
 
-struct ALARM_SYSTEM_S alarm_system_I[] =
-{
-{ "PWR_S", 1, 18, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
-{ "VIB_1", 1, 19, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "MTN_1", 1, 21, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY,
-		A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D, NONE, NONE },
-{ "SPAR2", 1, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_HIGH, ENTRY_DELAY_D, NONE, NONE },
-{ "WDW_E", 1, 27, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "SPAR1", 1, 28, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "WDW_S", 1, 29, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "DOR_N", 1, 30, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "DOR_E", 1, 31, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "SPAR3", 2, 8, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "SPAR4", 2, 11, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-{ "MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D, NONE, NONE },
-{ "VIB_2", 4, 29, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE, NONE, NONE }, };
-
-/* struct ALARM_SYSTEM_S automation_I[] =
-{
-{ "MTN_S", 1, 20, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE },
-{ "MTN_N", 1, 22, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE },
-{ "MTN_E", 1, 23, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE },
-{ "MTN_W", 1, 26, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY,
-		A_S_SIG_LEVEL_LOW, NONE }, };
-*/
+struct ALARM_SYSTEM_S alarm_system_I[] = {
+		{ "PWR_S", 1, 18, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
+		{ "VIB_1", 1, 19, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "MTN_1", 1, 21, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D, NONE, NONE },
+		{ "SPAR2", 1, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, ENTRY_DELAY_D, NONE, NONE },
+		{ "WDW_E", 1, 27, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "SPAR1", 1, 28, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "WDW_S", 1, 29, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "DOR_N", 1, 30, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "DOR_E", 1, 31, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "SPAR3", 2, 8, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "SPAR4", 2, 11, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D, NONE, NONE },
+		{ "VIB_2", 4, 29, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+};
 
 struct ALARM_SYSTEM_S motion_lights[] = {
 		{ "MTN_S", 1, 20, A_S_INACTIVE, NONE, NONE, A_S_SIG_LEVEL_LOW, X_LIGHT_ON_TIME, 0, L_X_S },
@@ -81,33 +55,23 @@ struct ALARM_SYSTEM_S automation_O[] =
 		{ "L_X_N", 0, 18, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
 		{ "L_X_E", 2, 4, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
 		{ "L_X_W", 2, 5, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
-		{ "INDCT", 0, 17, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
+		{ "INDCT", 0, 17, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE },
 		{ "FAN", 2, 6, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
 		{ "L_I_M", 0, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE },
-		{ "L_I_S", 3, 25, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE }, };
+		{ "L_I_S", 3, 25, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
+};
 
-/*
-struct ACTIVE_AUTOMATION_S active_automation[] =
-{
-{ MTN_EXT_S, 0, L_X_S },
-{ MTN_EXT_N, 0, L_X_N },
-{ MTN_EXT_E, 0, L_X_E },
-{ MTN_EXT_W, 0, L_X_W },
-{ LIM_AUTO, 0, L_I_M },
-{ LIS_AUTO, 0, L_I_S },
-{ FAN_AUTO, 0, FAN }, };
-
-*/
 struct LIGHT_AUTO_S light_auto[] =
 {
-{ turnon1_hr, turnon1_min, turnon1_dur, 0 },
-{ turnon2_hr, turnon2_min, turnon2_dur, 0 },
-{ turnon3_hr, turnon3_min, turnon3_dur, 0 }, };
+		{ turnon1_hr, turnon1_min, turnon1_dur, 0 },
+		{ turnon2_hr, turnon2_min, turnon2_dur, 0 },
+		{ turnon3_hr, turnon3_min, turnon3_dur, 0 },
+};
 
-struct X_LIGHT_AUTO_S x_light_auto[] =
-{
-{ flash1_hr, flash1_min },
-{ flash2_hr, flash2_min }, };
+struct X_LIGHT_AUTO_S x_light_auto[] = {
+		{ flash1_hr, flash1_min },
+		{ flash2_hr, flash2_min },
+};
 
 static void setUpGPIO(void);
 static void setUpRTC(void);
@@ -149,7 +113,7 @@ void setUpGPIO(void)
 	Chip_GPIO_Init(LPC_GPIO);
 
 	//SET FUNCTION|MODE SYSTEM IO
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, ERR2_p0_O, IOCON_MODE_INACT | IOCON_FUNC0);
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, ARM_INDICATOR_p0_O, IOCON_MODE_INACT | IOCON_FUNC0);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, ERR1_p0_O, IOCON_MODE_INACT | IOCON_FUNC0);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, LIGHT_SENSE_port, LIGHT_SENSE_pin, LIGHT_SENSE_mode | LIGHT_SENSE_func);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, SIREN_DAC_port, SIREN_DAC_pin, SIREN_DAC_mode | SIREN_DAC_func);
@@ -170,7 +134,7 @@ void setUpGPIO(void)
 
 	//SET OUTPUT GPIO
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, DSP_RST_p0_O, true);
-	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, ERR2_p0_O, true);
+	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, ARM_INDICATOR_p0_O, true);
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, ERR1_p0_O, true);
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 3, IN_BUFF_OE_p3_O, true);
 	IN_BUFF_OFF();
@@ -231,11 +195,6 @@ static EEPROM_STATUS setUpEEPROM(void)
 
 void setUpTimer(void)
 {
-	//Chip_GPIO_Init(SYSCTL_CLOCK_TIMER0);
-	//
-
-	//
-	//
 	countDown = (SystemCoreClock * .001) -1;
 
 	//TIMER0 CONTROLS ON/OFF TIME OF COUNTDOWN
@@ -269,7 +228,6 @@ void setUpTimer(void)
 	Chip_TIMER_MatchEnableInt(LPC_TIMER1, 0);
 	NVIC_ClearPendingIRQ(TIMER1_IRQn);
 	NVIC_EnableIRQ(TIMER1_IRQn);
-
 }
 
 void pause(uint32_t ps)
@@ -630,10 +588,7 @@ void TIMER0_IRQHandler(void)
 	}
 
 	LPC_TIMER0->PR -= (100-delayInt) * 13;
-
-	//if (LPC_TIMER0->PR < 1200) Chip_TIMER_Disable(LPC_TIMER0);
-
-	NVIC_ClearPendingIRQ(TIMER0_IRQn);
+	//NVIC_ClearPendingIRQ(TIMER0_IRQn);
 }
 
 void TIMER1_IRQHandler(void)
@@ -641,7 +596,7 @@ void TIMER1_IRQHandler(void)
 	Chip_TIMER_Disable(LPC_TIMER0);
 	Chip_TIMER_Disable(LPC_TIMER1);
 	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
-	NVIC_ClearPendingIRQ(TIMER1_IRQn);
+	//NVIC_ClearPendingIRQ(TIMER1_IRQn);
 
 	timeOut = DISABLE;
 

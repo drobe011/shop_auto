@@ -192,9 +192,6 @@ struct X_LIGHT_AUTO_S
 #define L_I_S 7
 #define NUM_OF_AUTO_O 8
 
-//#define TACH1_p2_I 12
-//#define TACH2_p4_I 29
-
 ////TEMP IO
 #define TMP_ALM_LO_p2_I 13
 #define TMP_ALM_HI_p0_I 21
@@ -205,8 +202,7 @@ struct X_LIGHT_AUTO_S
 #define DSP_RST_p0_O 23
 
 #define ERR1_p0_O 1
-#define ERR2_p0_O 0
-// optional, pin not broke out  #define ALARM_STATE_IND_p0_O 29
+#define ARM_INDICATOR_p0_O 0 //change to indicator led
 
 #define IN_BUFF_OE_p3_O 26
 #define OUT_BUFF_OE_p4_O 28
@@ -267,8 +263,8 @@ struct MSG_S
 
 // SERIAL OUT DEFINES
 //
-#define SERIAL_DEBUG LPC_UART3
-#define SERIAL_BAUD 115200
+//#define SERIAL_DEBUG LPC_UART3
+//#define SERIAL_BAUD 115200
 //
 // END SERIAL OUT DEFINES
 
@@ -282,10 +278,10 @@ struct MSG_S
 
 // EXT LIGHTS DEFINES
 //
-#define EXT_EAST_LT 1
-#define EXT_SOUTH_LT 2
-#define EXT_NORTH_LT 3
-#define EXT_WEST_LT 4
+//#define EXT_EAST_LT 1
+//#define EXT_SOUTH_LT 2
+//#define EXT_NORTH_LT 3
+//#define EXT_WEST_LT 4
 //
 // END EXT LIGHTS DEFINES
 
@@ -314,9 +310,11 @@ struct MSG_S
 #define ON_PRESSED() Chip_GPIO_GetPinState(LPC_GPIO, 0, ON_)
 #define ENABLE_ERR_LED() Chip_GPIO_SetPinOutHigh(LPC_GPIO, 0, ERR1_p0_O)
 #define DISABLE_ERR_LED() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, ERR1_p0_O)
+#define ENABLE_ARM_INDCATOR() Chip_GPIO_SetPinOutHigh(LPC_GPIO, 0, ARM_INDICATOR_p0_O)
+#define DISABLE_ARM_INDICATOR() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, ARM_INDICATOR_p0_O)
 #define PIN_TRIES_EXCEEDED() pinAttempts > MAX_PIN_TRIES
 #define OE_INPUT_ON() (Chip_GPIO_GetPinState(LPC_GPIO, 3, IN_BUFF_OE_p3_O) ^ 1)
-#define SYSCK_GOOD() (Chip_GPIO_GetPinState(LPC_GPIO, 1, 18) ^ 1)
+//#define SYSCK_GOOD() (Chip_GPIO_GetPinState(LPC_GPIO, 1, 18) ^ 1)
 //
 // END PROGRAM DEFINES
 

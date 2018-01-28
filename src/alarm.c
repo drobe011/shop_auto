@@ -7,6 +7,8 @@
  Description : main definition
  ===============================================================================
  */
+//TODO: Change INDCT to start a timer and blink when armed
+//TODO: Swap INDCT and Siren names
 
 #include "chip.h"
 #include <cr_section_macros.h>
@@ -32,7 +34,7 @@ extern uint32_t delayInt;
 
 enum ALARMSTATE_T
 {
-	ARM, ARMING, ARMED, DISARM, DISARMED, ACTIVATE_SIREN
+	ARM, ARMING, ARMED, DISARM, DISARMED, ACTIVATE_ALARM, ALARM_ACTIVATED
 };
 enum ARMEDSTATE_T
 {
@@ -77,11 +79,19 @@ STATIC INLINE void disableCountDown(void)
 	Chip_TIMER_Disable(LPC_TIMER0);
 	Chip_TIMER_Disable(LPC_TIMER1);
 	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
-	NVIC_ClearPendingIRQ(TIMER1_IRQn);
+	//NVIC_ClearPendingIRQ(TIMER1_IRQn);
 
 	timeOut = DISABLE;
 
 	DISABLE_ERR_LED();
+}
+
+STATIC INLINE void flashARMLED()
+{
+	ENABLE_ARM_INDCATOR();
+	pause(100);
+	DISABLE_ARM_INDICATOR();
+	updateTime = 0;
 }
 
 uint8_t getPIN(void);
@@ -105,6 +115,7 @@ void checkMotionLightStatus(void);
 void editMotionLightSensor(uint8_t sensorid);
 void showAllSensorStat(void);
 void showAllXMSStat(void);
+void checkPIN(void);
 
 int main(void)
 {
@@ -125,7 +136,6 @@ int main(void)
 				dispClear();
 				ENABLE_ON_PWR();
 				ALARMSTATE = ARMED;
-				//ENABLE_ERR_LED();
 				break;
 			case ARMING:
 				armingDelay();
@@ -133,13 +143,14 @@ int main(void)
 				break;
 			case ARMED:
 				sensorsActive = pollAlarmSensors();
-				//Chip_TIMER_Reset(LPC_TIMER0);
 
 				if (sensorsActive)
 					if (!entryDelay(sensorsActive))
-						ALARMSTATE = ACTIVATE_SIREN;
+						ALARMSTATE = ACTIVATE_ALARM;
+				if (updateTime) flashARMLED();
 				break;
 			case DISARM:
+				setIOpin(&automation_O[INDCT], DISABLE);
 				RESET_PIN_ATTEMPTS();
 				DISABLE_ON_PWR();
 				DISABLE_ERR_LED();
@@ -150,7 +161,6 @@ int main(void)
 				readyToArm = 2;  //SO IT DISPLAYS AFTER WRONG KEYPRESS
 				break;
 			case DISARMED:
-				Chip_TIMER_Disable(LPC_TIMER0);
 				if (updateTime)
 					updateDisplayTime();
 				if (!dispDimmed && CHECK_DIM_TIMER())
@@ -161,11 +171,13 @@ int main(void)
 					displayReadyToArm();
 				checkMenu();
 				break;
-			case ACTIVATE_SIREN:
-				ENABLE_ERR_LED();
-				pause(2000);
-				DISABLE_ERR_LED();
-				ALARMSTATE = DISARM;
+			case ACTIVATE_ALARM:
+				setIOpin(&automation_O[INDCT], ENABLE);
+				//
+				ALARMSTATE = ALARM_ACTIVATED;
+				break;
+			case ALARM_ACTIVATED:
+				checkPIN();
 				break;
 			}
 			RESET_STATE_TIMER();
@@ -183,7 +195,7 @@ uint8_t getPIN(void)
 	{
 		if (systemTick > (on_pressed_time + ON_PRESSED_TIMEOUT))
 		{
-			ALARMSTATE = ACTIVATE_SIREN;
+			ALARMSTATE = ACTIVATE_ALARM;
 			return 0;
 		}
 	}
@@ -863,12 +875,10 @@ uint8_t checkReadyToArm(void)
 
 void armingDelay(void)
 {
-	//uint32_t armingTimer = systemTick;
 	setCountDown(ARM_DELAY);
 	displayArming();
 	while (timeOut)
 	{
-		//TODO:MAYBE BLINK SOMETHING WHILE ARM DELAY
 		__NOP();
 	}
 }
@@ -877,8 +887,6 @@ uint8_t entryDelay(uint8_t active)
 {
 	if (activeSensors[0] == DOOR_MAIN)
 	{
-		//uint32_t entrytime = systemTick;
-
 		setCountDown(ENTRY_DELAY);
 		while (timeOut)
 		{
@@ -985,3 +993,14 @@ void showAllXMSStat(void)
 	}
 }
 
+void checkPIN(void)
+{
+	if (onPressed)
+	{
+		displayPIN();
+		if (getPIN() == 2)
+			ALARMSTATE = DISARM;
+		else
+			dispClear();
+	}
+}
