@@ -30,5 +30,6 @@ void displayReadyToArm(void);
 void displayArming(void);
 void displayPIN(void);
 void dispAllXMSStat(void);
+void dispSensAll(void);
 
 #endif /* MENUS_H_ */

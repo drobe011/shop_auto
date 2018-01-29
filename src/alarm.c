@@ -83,14 +83,14 @@ STATIC INLINE void disableCountDown(void)
 
 	timeOut = DISABLE;
 
-	DISABLE_ERR_LED();
+	setIOpin(&automation_O[ARM_I], DISABLE);
 }
 
 STATIC INLINE void flashARMLED()
 {
-	ENABLE_ARM_INDCATOR();
+	setIOpin(&automation_O[ARM_I], ENABLE);
 	pause(100);
-	DISABLE_ARM_INDICATOR();
+	setIOpin(&automation_O[ARM_I], DISABLE);
 	updateTime = 0;
 }
 
@@ -143,17 +143,17 @@ int main(void)
 				break;
 			case ARMED:
 				sensorsActive = pollAlarmSensors();
-
+				pollAutomation();
 				if (sensorsActive)
 					if (!entryDelay(sensorsActive))
 						ALARMSTATE = ACTIVATE_ALARM;
 				if (updateTime) flashARMLED();
 				break;
 			case DISARM:
-				setIOpin(&automation_O[INDCT], DISABLE);
+				setIOpin(&automation_O[SIREN], DISABLE);
 				RESET_PIN_ATTEMPTS();
 				DISABLE_ON_PWR();
-				DISABLE_ERR_LED();
+				setIOpin(&automation_O[ERROR], DISABLE);
 				dispMainDARD(c_user->name);
 				displayNormal();
 				displayON();
@@ -170,9 +170,10 @@ int main(void)
 				if (checkReadyToArm() != readyToArm)
 					displayReadyToArm();
 				checkMenu();
+				pollAutomation();
 				break;
 			case ACTIVATE_ALARM:
-				setIOpin(&automation_O[INDCT], ENABLE);
+				setIOpin(&automation_O[SIREN], ENABLE);
 				//
 				ALARMSTATE = ALARM_ACTIVATED;
 				break;
@@ -855,21 +856,19 @@ uint8_t checkReadyToArm(void)
 
 	if (!OE_INPUT_ON())
 	{
-		ENABLE_ERR_LED();
+		setIOpin(&automation_O[ERROR], ENABLE);
 		return 0;
 	}
 	else
-		DISABLE_ERR_LED();
+		setIOpin(&automation_O[ERROR], DISABLE);
 
 	for (uint8_t t_s = 0; t_s < trippedSensors; t_s++)
 	{
 		if (alarm_system_I[activeSensors[t_s]].req_to_arm)
 		{
-			ENABLE_ERR_LED();
 			return 0;
 		}
 	}
-	DISABLE_ERR_LED();
 	return 1;
 }
 
@@ -947,10 +946,7 @@ uint8_t pollAutomation(void)
 
 void showAllSensorStat(void)
 {
-	dispClear();
-
-	setCursor(1, 2);
-	sendChar('*');
+	dispSensAll();
 
 	while (!getKP(200))
 	{

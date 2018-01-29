@@ -51,14 +51,17 @@ struct ALARM_SYSTEM_S motion_lights[] = {
 
 struct ALARM_SYSTEM_S automation_O[] =
 {
-		{ "L_X_S", 2, 3, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
-		{ "L_X_N", 0, 18, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
-		{ "L_X_E", 2, 4, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
-		{ "L_X_W", 2, 5, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
-		{ "INDCT", 0, 17, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE },
-		{ "FAN", 2, 6, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
-		{ "L_I_M", 0, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE },
-		{ "L_I_S", 3, 25, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE },
+		{ "L_X_S", 2, 3, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
+		{ "L_X_N", 0, 18, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
+		{ "L_X_E", 2, 4, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
+		{ "L_X_W", 2, 5, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
+		{ "INDCT", 0, 17, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "FAN", 2, 6, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
+		{ "L_I_M", 0, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "L_I_S", 3, 25, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
+		{ "SIREN", 0, 26, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "ARM_I", 0, 0, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "ERROR", 0, 1, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 };
 
 struct LIGHT_AUTO_S light_auto[] =
@@ -113,10 +116,7 @@ void setUpGPIO(void)
 	Chip_GPIO_Init(LPC_GPIO);
 
 	//SET FUNCTION|MODE SYSTEM IO
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, ARM_INDICATOR_p0_O, IOCON_MODE_INACT | IOCON_FUNC0);
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, ERR1_p0_O, IOCON_MODE_INACT | IOCON_FUNC0);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, LIGHT_SENSE_port, LIGHT_SENSE_pin, LIGHT_SENSE_mode | LIGHT_SENSE_func);
-	Chip_IOCON_PinMuxSet(LPC_IOCON, SIREN_DAC_port, SIREN_DAC_pin, SIREN_DAC_mode | SIREN_DAC_func);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, SDA0_port, SDA0_pin, SDA0_mode | SDA0_func);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, SCL0_port, SCL0_pin, SCL0_mode | SCL0_func);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, XB_TX1_port, XB_TX1_pin, XB_TX1_mode | XB_TX1_func);
@@ -134,8 +134,6 @@ void setUpGPIO(void)
 
 	//SET OUTPUT GPIO
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, DSP_RST_p0_O, true);
-	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, ARM_INDICATOR_p0_O, true);
-	Chip_GPIO_SetPinDIR(LPC_GPIO, 0, ERR1_p0_O, true);
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 3, IN_BUFF_OE_p3_O, true);
 	IN_BUFF_OFF();
 	Chip_GPIO_SetPinDIR(LPC_GPIO, 4, OUT_BUFF_OE_p4_O, true);
@@ -497,19 +495,22 @@ uint8_t getKPInput(uint32_t *p_values, uint8_t length)
 
 void setIOpin(struct ALARM_SYSTEM_S *sys, uint8_t level)
 {
-	if (level)
+	if (sys->active)
 	{
-		if (sys->sig_active_level)
-			Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 1);
+		if (level)
+		{
+			if (sys->sig_active_level)
+				Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 1);
+			else
+				Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
+		}
 		else
-			Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
-	}
-	else
-	{
-		if (sys->sig_active_level)
-			Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
-		else
-			Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
+		{
+			if (sys->sig_active_level)
+				Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
+			else
+				Chip_GPIO_SetPinState(LPC_GPIO, sys->port, sys->pin, 0);
+		}
 	}
 }
 
@@ -578,12 +579,12 @@ void TIMER0_IRQHandler(void)
 {
 	if (Chip_TIMER_MatchPending(LPC_TIMER0, 0))
 	{
-		ENABLE_ERR_LED();
+		setIOpin(&automation_O[INDCT], ENABLE);
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
 	}
 	else
 	{
-		DISABLE_ERR_LED();
+		setIOpin(&automation_O[INDCT], DISABLE);
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
 	}
 
@@ -600,5 +601,5 @@ void TIMER1_IRQHandler(void)
 
 	timeOut = DISABLE;
 
-	DISABLE_ERR_LED();
+	setIOpin(&automation_O[INDCT], DISABLE);
 }

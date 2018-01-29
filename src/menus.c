@@ -54,6 +54,7 @@ struct MSG_S DISP_SENS_EDIT = { 1, 0, "[1] [2] [3] [4] [5]" };
 struct MSG_S DISP_ENTRY_DELAY = { 1, 0, "Ent Delay [   ]:" };
 struct MSG_S DISP_MOTN_EDIT = { 1, 0, "[1] [2] [3]" };
 struct MSG_S DISP_XMTN_ALL = { 0, 0, "  S |  N |  E |  W" };
+struct MSG_S DISP_SENS_ALL = {1, 2, "*2345678901234" };
 
 void clearLine(uint8_t row)
 {
@@ -322,4 +323,10 @@ void dispAllXMSStat(void)
 {
 	dispClear();
 	sendDisplay(0, &DISP_XMTN_ALL);
+}
+
+void dispSensAll(void)
+{
+	dispClear();
+	sendDisplay(0, &DISP_SENS_ALL);
 }

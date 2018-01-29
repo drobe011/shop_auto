@@ -11,8 +11,6 @@
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR "a"
 
-//#define ARRAY_LEN(x)  (sizeof(x) / sizeof((x)[0]))
-
 // ALARM SYSTEMS GLOBALS AND DEFINES
 //
 
@@ -110,10 +108,6 @@ struct X_LIGHT_AUTO_S
 #define LIGHT_SENSE_pin 2
 #define LIGHT_SENSE_func IOCON_FUNC2
 #define LIGHT_SENSE_mode IOCON_MODE_INACT
-#define SIREN_DAC_port 0
-#define SIREN_DAC_pin 26
-#define SIREN_DAC_func IOCON_FUNC2
-#define SIREN_DAC_mode IOCON_MODE_INACT
 #define SDA0_port 0
 #define SDA0_pin 27
 #define SDA0_func IOCON_FUNC1
@@ -174,13 +168,6 @@ struct X_LIGHT_AUTO_S
 #define MTN_EXT_W 3
 #define X_MOTION_DETECTORS 4
 
-/*#define NUM_OF_AUTO_I 4
-#define LIM_AUTO 4
-#define LIS_AUTO 5
-#define FAN_AUTO 6
-#define NUM_OF_TOTAL_AUTO 7
-*/
-
 ////OUTPUTS
 #define L_X_S 0
 #define L_X_N 1
@@ -190,7 +177,9 @@ struct X_LIGHT_AUTO_S
 #define FAN 5
 #define L_I_M 6
 #define L_I_S 7
-#define NUM_OF_AUTO_O 8
+#define SIREN 8
+#define ARM_I 9
+#define NUM_OF_AUTO_O 10
 
 ////TEMP IO
 #define TMP_ALM_LO_p2_I 13
@@ -200,9 +189,6 @@ struct X_LIGHT_AUTO_S
 
 ////DISPLAY IO
 #define DSP_RST_p0_O 23
-
-#define ERR1_p0_O 1
-#define ARM_INDICATOR_p0_O 0 //change to indicator led
 
 #define IN_BUFF_OE_p3_O 26
 #define OUT_BUFF_OE_p4_O 28
@@ -261,31 +247,7 @@ struct MSG_S
 //
 // END RTC DEFINES
 
-// SERIAL OUT DEFINES
-//
-//#define SERIAL_DEBUG LPC_UART3
-//#define SERIAL_BAUD 115200
-//
-// END SERIAL OUT DEFINES
-
-// INT LIGHTS/FAN DEFINES
-//
-#define INT_MAIN_LT 1
-#define INT_SUPP_LT 2
-#define INT_FAN 3
-//
-// END INT LIGHTS/FAN DEFINES
-
-// EXT LIGHTS DEFINES
-//
-//#define EXT_EAST_LT 1
-//#define EXT_SOUTH_LT 2
-//#define EXT_NORTH_LT 3
-//#define EXT_WEST_LT 4
-//
-// END EXT LIGHTS DEFINES
-
-// PROGRAM DEFINES
+// EEPROM DEFINES
 //
 #define EPROM_PAGE_SZ 32
 #define EPROM_DELAY() pause(10)
@@ -297,7 +259,11 @@ struct MSG_S
 #define BOOTTIME_OFFSET (19 * EPROM_PAGE_SZ)
 #define SENSOR_PACKET_SIZE 9
 #define X_MOTION_PACKET_SIZE 7
+//
+// END EEPROM DEFINES
 
+//PROGRAM DEFINES
+//
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)
 #define CHECK_OFF_TIMER() systemTick > (dimTimer + OFF_OLED_TIME)
@@ -308,13 +274,8 @@ struct MSG_S
 #define DISABLE_ON_PWR() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, K5)
 #define ON_PRESSED_TIMEOUT 1000
 #define ON_PRESSED() Chip_GPIO_GetPinState(LPC_GPIO, 0, ON_)
-#define ENABLE_ERR_LED() Chip_GPIO_SetPinOutHigh(LPC_GPIO, 0, ERR1_p0_O)
-#define DISABLE_ERR_LED() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, ERR1_p0_O)
-#define ENABLE_ARM_INDCATOR() Chip_GPIO_SetPinOutHigh(LPC_GPIO, 0, ARM_INDICATOR_p0_O)
-#define DISABLE_ARM_INDICATOR() Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, ARM_INDICATOR_p0_O)
 #define PIN_TRIES_EXCEEDED() pinAttempts > MAX_PIN_TRIES
 #define OE_INPUT_ON() (Chip_GPIO_GetPinState(LPC_GPIO, 3, IN_BUFF_OE_p3_O) ^ 1)
-//#define SYSCK_GOOD() (Chip_GPIO_GetPinState(LPC_GPIO, 1, 18) ^ 1)
 //
 // END PROGRAM DEFINES
 
