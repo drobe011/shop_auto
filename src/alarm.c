@@ -948,7 +948,7 @@ void showAllSensorStat(void)
 {
 	dispSensAll();
 
-	while (!getKP(200))
+	do
 	{
 		setCursor(0, 2);
 
@@ -956,7 +956,8 @@ void showAllSensorStat(void)
 		{
 			sendChar(getIOpin(&alarm_system_I[sensorid]) + 48);
 		}
-	}
+	} while (!getKP(200));
+
 	while (getKP(100))
 	{
 		__NOP();
@@ -967,7 +968,7 @@ void showAllXMSStat(void)
 {
 	dispAllXMSStat();
 
-	while (!getKP(200))
+	do
 	{
 		setCursor(1, 1);
 
@@ -982,7 +983,8 @@ void showAllXMSStat(void)
 				sendChar(' ');
 			}
 		}
-	}
+	} while (!getKP(200));
+
 	while (getKP(100))
 	{
 		__NOP();
