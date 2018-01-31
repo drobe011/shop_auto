@@ -55,7 +55,7 @@ struct ALARM_SYSTEM_S automation_O[] =
 		{ "L_X_N", 0, 18, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "L_X_E", 2, 4, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "L_X_W", 2, 5, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
-		{ "INDCT", 0, 17, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "BUZZR", 0, 17, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 		{ "FAN", 2, 6, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "L_I_M", 0, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 		{ "L_I_S", 3, 25, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
@@ -579,17 +579,16 @@ void TIMER0_IRQHandler(void)
 {
 	if (Chip_TIMER_MatchPending(LPC_TIMER0, 0))
 	{
-		setIOpin(&automation_O[ARM_I], ENABLE);
+		setIOpin(&automation_O[BUZZR], ENABLE);
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
 	}
 	else
 	{
-		setIOpin(&automation_O[ARM_I], DISABLE);
+		setIOpin(&automation_O[BUZZR], DISABLE);
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
 	}
 
 	LPC_TIMER0->PR -= (115-delayInt) * 13;
-	//NVIC_ClearPendingIRQ(TIMER0_IRQn);
 }
 
 void TIMER1_IRQHandler(void)
@@ -597,9 +596,8 @@ void TIMER1_IRQHandler(void)
 	Chip_TIMER_Disable(LPC_TIMER0);
 	Chip_TIMER_Disable(LPC_TIMER1);
 	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
-	//NVIC_ClearPendingIRQ(TIMER1_IRQn);
 
 	timeOut = DISABLE;
 
-	setIOpin(&automation_O[ARM_I], DISABLE);
+	setIOpin(&automation_O[BUZZR], DISABLE);
 }

@@ -144,10 +144,7 @@ int main(void)
 			case ARMED:
 				sensorsActive = pollAlarmSensors();
 				pollAutomation();
-				if (sensorsActive)
-					if (!entryDelay(sensorsActive))
-						ALARMSTATE = ACTIVATE_ALARM;
-					else disableCountDown();
+				if (sensorsActive) entryDelay(sensorsActive);
 				if (updateTime) flashARMLED();
 				break;
 			case DISARM:
@@ -881,6 +878,7 @@ void armingDelay(void)
 	{
 		__NOP();
 	}
+	//disableCountDown();
 }
 
 uint8_t entryDelay(uint8_t active)
@@ -894,14 +892,24 @@ uint8_t entryDelay(uint8_t active)
 			{
 				displayPIN();
 				if (getPIN() == 2)
+				{
+					ALARMSTATE = DISARM;
+					disableCountDown();
 					return 1;
+				}
 				else
+				{
 					dispClear();
-				if (PIN_TRIES_EXCEEDED())
-					return 0;
+					if (PIN_TRIES_EXCEEDED())
+					{
+						ALARMSTATE = ACTIVATE_ALARM;
+						return 0;
+					}
+				}
 			}
 		}
 	}
+	ALARMSTATE = ACTIVATE_ALARM;
 	return 0;
 }
 

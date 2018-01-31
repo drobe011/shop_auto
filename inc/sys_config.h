@@ -173,7 +173,7 @@ struct X_LIGHT_AUTO_S
 #define L_X_N 1
 #define L_X_E 2
 #define L_X_W 3
-#define INDCT 4
+#define BUZZR 4
 #define FAN 5
 #define L_I_M 6
 #define L_I_S 7
