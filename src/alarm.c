@@ -83,7 +83,7 @@ STATIC INLINE void disableCountDown(void)
 
 	timeOut = DISABLE;
 
-	setIOpin(&automation_O[ARM_I], DISABLE);
+	setIOpin(&automation_O[BUZZR], DISABLE);
 }
 
 STATIC INLINE void flashARMLED()
@@ -121,6 +121,7 @@ int main(void)
 {
 	setUpSystem();
 	IN_BUFF_ON();
+	OUT_BUFF_ON();
 
 	uint32_t stateTimer = systemTick;
 	dimTimer = systemTick;
