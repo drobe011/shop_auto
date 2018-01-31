@@ -179,7 +179,8 @@ struct X_LIGHT_AUTO_S
 #define L_I_S 7
 #define SIREN 8
 #define ARM_I 9
-#define NUM_OF_AUTO_O 10
+#define ERROR_O 10
+#define NUM_OF_AUTO_O 11
 
 ////TEMP IO
 #define TMP_ALM_LO_p2_I 13

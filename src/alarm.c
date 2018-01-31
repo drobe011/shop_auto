@@ -147,6 +147,7 @@ int main(void)
 				if (sensorsActive)
 					if (!entryDelay(sensorsActive))
 						ALARMSTATE = ACTIVATE_ALARM;
+					else disableCountDown();
 				if (updateTime) flashARMLED();
 				break;
 			case DISARM:

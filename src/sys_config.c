@@ -60,7 +60,7 @@ struct ALARM_SYSTEM_S automation_O[] =
 		{ "L_I_M", 0, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 		{ "L_I_S", 3, 25, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "SIREN", 0, 26, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-		{ "ARM_I", 0, 0, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "ARM_I", 0, 0, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "ERROR", 0, 1, A_S_ACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 };
 
@@ -579,16 +579,16 @@ void TIMER0_IRQHandler(void)
 {
 	if (Chip_TIMER_MatchPending(LPC_TIMER0, 0))
 	{
-		setIOpin(&automation_O[INDCT], ENABLE);
+		setIOpin(&automation_O[ARM_I], ENABLE);
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
 	}
 	else
 	{
-		setIOpin(&automation_O[INDCT], DISABLE);
+		setIOpin(&automation_O[ARM_I], DISABLE);
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
 	}
 
-	LPC_TIMER0->PR -= (100-delayInt) * 13;
+	LPC_TIMER0->PR -= (115-delayInt) * 13;
 	//NVIC_ClearPendingIRQ(TIMER0_IRQn);
 }
 
@@ -601,5 +601,5 @@ void TIMER1_IRQHandler(void)
 
 	timeOut = DISABLE;
 
-	setIOpin(&automation_O[INDCT], DISABLE);
+	setIOpin(&automation_O[ARM_I], DISABLE);
 }
