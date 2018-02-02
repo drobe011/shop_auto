@@ -79,7 +79,7 @@ STATIC INLINE void disableCountDown(void)
 	Chip_TIMER_Disable(LPC_TIMER0);
 	Chip_TIMER_Disable(LPC_TIMER1);
 	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
-	//NVIC_ClearPendingIRQ(TIMER1_IRQn);
+	NVIC_ClearPendingIRQ(TIMER1_IRQn);
 
 	timeOut = DISABLE;
 
@@ -101,7 +101,8 @@ void checkIntLightSubMenu(void);
 void checkExtLightSubMenu(void);
 void changeTimeMenu(void);
 void checkStatus(void);
-void inputBuffers(void);
+//void inputBuffers(void); //move to sysconfig
+void editBuffers(void); //move to sysconfig
 void changeDarkTH(void);
 void changeArmDelay(void);
 void armingDelay(void);
@@ -279,7 +280,7 @@ void checkMenu(void)
 			checkStatus();
 			break;
 		case KP_pcnt:
-			inputBuffers();
+			editBuffers();
 			break;
 		case KP_div:
 			changeDarkTH();
@@ -810,7 +811,7 @@ void RTC_IRQHandler(void)
 	updateTime = 1;
 }
 
-void inputBuffers(void)
+/*void inputBuffers(void)
 {
 	uint32_t selection[1];
 	selection[0] = 0;
@@ -825,6 +826,33 @@ void inputBuffers(void)
 	}
 	else
 		IN_BUFF_ON();
+}
+*/
+void editBuffers(void)
+{
+	uint32_t selection[1];
+	selection[0] = 0;
+	dispBuffers();
+	if (!getKPInput(selection, 1))
+		return;
+	if (selection[0] > 3)
+		return;
+
+	switch (selection[0])
+	{
+	case 0:
+		IN_BUFF_OFF();
+		break;
+	case 1:
+		IN_BUFF_ON();
+		break;
+	case 2:
+		OUT_BUFF_OFF();
+		break;
+	case 3:
+		OUT_BUFF_ON();
+		break;
+	}
 }
 
 uint8_t pollAlarmSensors(void)

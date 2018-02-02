@@ -34,9 +34,9 @@ keymap.txt
      		[ 1 ] = ALL ON
      		[ 0 ] = ALL OFF
      		
-     	[%] = INPUT BUFFERS
+     	[%] = INPUT/OUTPUT BUFFERS
      	
-     	[X] = ALARM TEST
+     	[X] = 
      	
      	[SQRT] = CHANGE TIME
      	

@@ -277,6 +277,7 @@ struct MSG_S
 #define ON_PRESSED() Chip_GPIO_GetPinState(LPC_GPIO, 0, ON_)
 #define PIN_TRIES_EXCEEDED() pinAttempts > MAX_PIN_TRIES
 #define OE_INPUT_ON() (Chip_GPIO_GetPinState(LPC_GPIO, 3, IN_BUFF_OE_p3_O) ^ 1)
+#define OE_OUTPUT_ON() (Chip_GPIO_GetPinState(LPC_GPIO, 4, OUT_BUFF_OE_p4_O) ^ 1)
 //
 // END PROGRAM DEFINES
 

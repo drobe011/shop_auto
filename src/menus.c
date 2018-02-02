@@ -41,7 +41,8 @@ struct MSG_S DISP_STATUS3 = { 1, 0, "Inactive" };
 struct MSG_S DISP_STATUS_STAY = { 0, 0, "STAY" };
 struct MSG_S DISP_STATUS_AWAY = { 0, 0, "AWAY" };
 struct MSG_S DISP_MOTION_DUR = { 0, 8, "DUR:" };
-struct MSG_S INPUT_BUFF = { 0, 0, "INPUT 0:OFF/1:ON" };
+struct MSG_S INPUT_BUFF = { 0, 1, "INPUT[ ] 0:OFF/1:ON" };
+struct MSG_S OUTPUT_BUFF = { 1, 0, "OUTPUT[ ] 2:OFF/3:ON" };
 struct MSG_S DISP_TEMP_CONST = { 1, 12, "000F/00%" };
 struct MSG_S DISP_RDY_ARM = { 1, 9, { 42, '\0' } };
 struct MSG_S DISP_NOTRDY_ARM = { 1, 9, { 219, '\0' } };
@@ -200,10 +201,21 @@ void dispSensorStatus(uint8_t item)
 	}
 }
 
-void dispInputBuffers(void)
+/*void dispInputBuffers(void)
 {
 	dispClear();
 	sendDisplay(0, &INPUT_BUFF);
+}
+*/
+void dispBuffers(void)
+{
+	dispClear();
+	sendDisplay(0, &INPUT_BUFF);
+	setCursor(0, 7);
+	sendChar(OE_INPUT_ON() ? 'Y' : 'N');
+	sendDisplay(0, &OUTPUT_BUFF);
+	setCursor(1, 7);
+	sendChar(OE_OUTPUT_ON() ? 'Y' : 'N');
 }
 
 void displayReadyToArm(void)
