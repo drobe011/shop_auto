@@ -633,6 +633,7 @@ void editSensor(uint8_t sensorid)
 					byteStorage[2]);
 			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 8),
 					byteStorage[3]);
+			break;
 		}
 		dispSensorEdit(sensorid);
 	}
@@ -1000,15 +1001,24 @@ uint8_t pollAutomation(void)
 
 void showAllSensorStat(void)
 {
+	uint8_t sensorStatus[NUM_OF_SYSTEMS] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2};
+	uint8_t sensorValue = 0;
+
 	dispSensAll();
 
 	do
 	{
-		setCursor(0, 2);
+		//setCursor(0, 2);
 
 		for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 		{
-			sendChar(getIOpin(&alarm_system_I[sensorid]) + 48);
+			sensorValue = getIOpin(&alarm_system_I[sensorid]);
+			if (sensorValue != sensorStatus[sensorid])
+			{
+				setCursor(0,sensorid+2);
+				sensorStatus[sensorid] = sensorValue;
+				sendChar(sensorValue + 48);
+			}
 		}
 	} while (!getKP(200));
 
