@@ -101,7 +101,6 @@ void checkIntLightSubMenu(void);
 void checkExtLightSubMenu(void);
 void changeTimeMenu(void);
 void checkStatus(void);
-//void inputBuffers(void); //move to sysconfig
 void editBuffers(void); //move to sysconfig
 void changeDarkTH(void);
 void changeArmDelay(void);
@@ -153,12 +152,11 @@ int main(void)
 				setIOpin(&automation_O[SIREN], DISABLE);
 				RESET_PIN_ATTEMPTS();
 				DISABLE_ON_PWR();
-				//setIOpin(&automation_O[ERROR], DISABLE);
 				dispMainDARD(c_user->name);
 				displayNormal();
 				displayON();
 				ALARMSTATE = DISARMED;
-				readyToArm = 2;  //SO IT DISPLAYS AFTER WRONG KEYPRESS
+				readyToArm = 2;  //SO IT DISPLAYS AFTER WRONG KEYPRESS <-----------TEST THIS------------>
 				break;
 			case DISARMED:
 				if (updateTime)
@@ -591,48 +589,34 @@ void editSensor(uint8_t sensorid)
 		switch (selection[0])
 		{
 		case KP_1:
-			alarm_system_I[sensorid].active = (
-					alarm_system_I[sensorid].active ? 0 : 1);
-			saveByte((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 1,
-					alarm_system_I[sensorid].active);
+			alarm_system_I[sensorid].active = (alarm_system_I[sensorid].active ? 0 : 1);
+			saveByte((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 1, alarm_system_I[sensorid].active);
 			break;
 		case KP_2:
-			alarm_system_I[sensorid].req_to_arm = (
-					alarm_system_I[sensorid].req_to_arm ? 0 : 1);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 2),
-					alarm_system_I[sensorid].req_to_arm);
+			alarm_system_I[sensorid].req_to_arm = (alarm_system_I[sensorid].req_to_arm ? 0 : 1);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 2), alarm_system_I[sensorid].req_to_arm);
 			break;
 		case KP_3:
-			alarm_system_I[sensorid].armedstate = (
-					alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 3),
-					alarm_system_I[sensorid].armedstate);
+			alarm_system_I[sensorid].armedstate = (alarm_system_I[sensorid].armedstate == 0 ? 4 : 0);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 3), alarm_system_I[sensorid].armedstate);
 			break;
 		case KP_4:
-			alarm_system_I[sensorid].sig_active_level = (
-					alarm_system_I[sensorid].sig_active_level ? 0 : 1);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 4),
-					alarm_system_I[sensorid].sig_active_level);
+			alarm_system_I[sensorid].sig_active_level = (alarm_system_I[sensorid].sig_active_level ? 0 : 1);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 4), alarm_system_I[sensorid].sig_active_level);
 			break;
 		case KP_5:
 			setCursor(0, 16);
 			selection[0] = 0;
-			if (!getKPInput(selection, 3))
-				break;
-			if (selection[0] == 255)
-				break;
+			if (!getKPInput(selection, 3)) break;
+			if (selection[0] == 255) break;
 			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
-			if (value <= 999)
-				alarm_system_I[sensorid].delay = value;
+			if (value <= 999) alarm_system_I[sensorid].delay = value;
+			else break;
 			intTobytes(byteStorage, value);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 5),
-					byteStorage[0]);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 6),
-					byteStorage[1]);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 7),
-					byteStorage[2]);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 8),
-					byteStorage[3]);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 5), byteStorage[0]);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 6), byteStorage[1]);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 7), byteStorage[2]);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 8), byteStorage[3]);
 			break;
 		}
 		dispSensorEdit(sensorid);
@@ -812,23 +796,6 @@ void RTC_IRQHandler(void)
 	updateTime = 1;
 }
 
-/*void inputBuffers(void)
-{
-	uint32_t selection[1];
-	selection[0] = 0;
-	dispInputBuffers();
-	if (!getKPInput(selection, 1))
-		return;
-	if (selection[0] > 1)
-		return;
-	if (!selection[0])
-	{
-		IN_BUFF_OFF();
-	}
-	else
-		IN_BUFF_ON();
-}
-*/
 void editBuffers(void)
 {
 	uint32_t selection[1];
@@ -885,14 +852,11 @@ uint8_t checkReadyToArm(void)
 
 	if (!OE_INPUT_ON())
 	{
-		//setIOpin(&automation_O[ERROR], ENABLE);
 		error_led = ENABLE;
 	}
-	//else setIOpin(&automation_O[ERROR], DISABLE);
 
 	if (!OE_OUTPUT_ON())
 	{
-		//setIOpin(&automation_O[ERROR], ENABLE);
 		error_led = ENABLE;
 	}
 
@@ -924,7 +888,6 @@ void armingDelay(void)
 	{
 		__NOP();
 	}
-	//disableCountDown();
 }
 
 uint8_t entryDelay(uint8_t active)
@@ -973,7 +936,7 @@ uint8_t pollAutomation(void)
 			{
 				if (getIOpin(&motion_lights[sensor]))
 				{
-					setIOpin(&automation_O[motion_lights[sensor].device], 1);
+					setIOpin(&automation_O[motion_lights[sensor].device], ENABLE);
 					motion_lights[sensor].timestamp = systemTick;
 				}
 			}
@@ -982,19 +945,59 @@ uint8_t pollAutomation(void)
 			{
 				if (systemTick > motion_lights[sensor].timestamp + (motion_lights[sensor].delay * (1000 * 60)))
 				{
-					setIOpin(&automation_O[motion_lights[sensor].device], 0);
+					setIOpin(&automation_O[motion_lights[sensor].device], DISABLE);
 					motion_lights[sensor].timestamp = 0;
 				}
 			}
 		}
+
 		Chip_RTC_GetFullTime(LPC_RTC, &checkTime);
 		//check if time to turn on interior lights
 		for (uint8_t iLights = 0; iLights < no_of_turnon_times; iLights++)
 		{
-
+			if (!light_auto[iLights].active)
+			{
+				if ((uint8_t)checkTime.time[RTC_TIMETYPE_HOUR] == light_auto[iLights].hour)
+					if ((uint8_t)checkTime.time[RTC_TIMETYPE_MINUTE] == light_auto[iLights].min)
+						if ((uint8_t)checkTime.time[RTC_TIMETYPE_SECOND] == 0)
+						{
+							light_auto[iLights].active = ENABLE;
+							setIOpin(&automation_O[L_I_S], ENABLE);
+							automation_O[L_I_S].timestamp = systemTick;
+						}
+			}
+			else //check to turn off
+			{
+				if (systemTick > automation_O[L_I_S].timestamp + (light_auto[iLights].duration * (1000 * 60)))
+				{
+					light_auto[iLights].active = DISABLE;
+					setIOpin(&automation_O[L_I_S], DISABLE);
+					automation_O[L_I_S].timestamp = 0;
+				}
+			}
 		}
 
 		//check if time to strobe exterior lights
+		for (uint8_t xstrobe = 0; xstrobe < no_of_x_flashes; xstrobe++)
+		{
+			if ((uint8_t)checkTime.time[RTC_TIMETYPE_HOUR] == x_light_auto[xstrobe].hour)
+					if ((uint8_t)checkTime.time[RTC_TIMETYPE_MINUTE] == x_light_auto[xstrobe].min)
+						if ((uint8_t)checkTime.time[RTC_TIMETYPE_SECOND] == 0)
+						{
+							setIOpin(&automation_O[L_X_N], ENABLE);
+							pause(250);
+							setIOpin(&automation_O[L_X_N], DISABLE);
+							setIOpin(&automation_O[L_X_E], ENABLE);
+							pause(250);
+							setIOpin(&automation_O[L_X_E], DISABLE);
+							setIOpin(&automation_O[L_X_S], ENABLE);
+							pause(250);
+							setIOpin(&automation_O[L_X_S], DISABLE);
+							setIOpin(&automation_O[L_X_W], ENABLE);
+							pause(250);
+							setIOpin(&automation_O[L_X_W], DISABLE);
+						}
+		}
 	}
 	return numActiveSensors;
 }
@@ -1008,8 +1011,6 @@ void showAllSensorStat(void)
 
 	do
 	{
-		//setCursor(0, 2);
-
 		for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 		{
 			sensorValue = getIOpin(&alarm_system_I[sensorid]);
@@ -1060,9 +1061,11 @@ void checkPIN(void)
 	if (onPressed)
 	{
 		displayPIN();
-		if (getPIN() == 2)
-			ALARMSTATE = DISARM;
+		if (getPIN() == 2) ALARMSTATE = DISARM;
 		else
+		{
 			dispClear();
+			displayOFF();
+		}
 	}
 }

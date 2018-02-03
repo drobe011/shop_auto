@@ -539,7 +539,7 @@ uint8_t isDark(uint8_t mode)
 
 	if (mode)
 	{
-		if (lightLevel >= DARK_THRESHOLD) return 0;
+		if (lightLevel >= DARK_THRESHOLD) return 1;
 		else return 1;
 	}
 	else return lightLevel;
