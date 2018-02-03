@@ -153,7 +153,7 @@ int main(void)
 				setIOpin(&automation_O[SIREN], DISABLE);
 				RESET_PIN_ATTEMPTS();
 				DISABLE_ON_PWR();
-				setIOpin(&automation_O[ERROR], DISABLE);
+				//setIOpin(&automation_O[ERROR], DISABLE);
 				dispMainDARD(c_user->name);
 				displayNormal();
 				displayON();
@@ -880,23 +880,39 @@ uint8_t checkReadyToArm(void)
 {
 	uint8_t trippedSensors = 0;
 	trippedSensors = pollAlarmSensors();
+	uint8_t error_led = DISABLE;
 
 	if (!OE_INPUT_ON())
 	{
-		setIOpin(&automation_O[ERROR], ENABLE);
-		return 0;
+		//setIOpin(&automation_O[ERROR], ENABLE);
+		error_led = ENABLE;
 	}
-	else
-		setIOpin(&automation_O[ERROR], DISABLE);
+	//else setIOpin(&automation_O[ERROR], DISABLE);
+
+	if (!OE_OUTPUT_ON())
+	{
+		//setIOpin(&automation_O[ERROR], ENABLE);
+		error_led = ENABLE;
+	}
 
 	for (uint8_t t_s = 0; t_s < trippedSensors; t_s++)
 	{
 		if (alarm_system_I[activeSensors[t_s]].req_to_arm)
 		{
-			return 0;
+			error_led = ENABLE;
 		}
 	}
-	return 1;
+
+	if (error_led)
+	{
+		setIOpin(&automation_O[ERROR_O], ENABLE);
+		return 0;
+	}
+	else
+	{
+		setIOpin(&automation_O[ERROR_O], DISABLE);
+		return 1;
+	}
 }
 
 void armingDelay(void)
