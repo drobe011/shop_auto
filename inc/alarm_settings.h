@@ -8,8 +8,8 @@
 #define X_LIGHT_ON_TIME 5
 
 #define no_of_turnon_times 3
-#define turnon1_hr 11
-#define turnon1_min 15
+#define turnon1_hr 23
+#define turnon1_min 05
 #define turnon1_dur 5
 #define turnon2_hr 2
 #define turnon2_min 30

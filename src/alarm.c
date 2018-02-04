@@ -964,6 +964,7 @@ uint8_t pollAutomation(void)
 							light_auto[iLights].active = ENABLE;
 							setIOpin(&automation_O[L_I_S], ENABLE);
 							automation_O[L_I_S].timestamp = systemTick;
+							setIOpin(&automation_O[ARM_I], ENABLE);
 						}
 			}
 			else //check to turn off
@@ -972,6 +973,7 @@ uint8_t pollAutomation(void)
 				{
 					light_auto[iLights].active = DISABLE;
 					setIOpin(&automation_O[L_I_S], DISABLE);
+					setIOpin(&automation_O[ARM_I], DISABLE);
 					automation_O[L_I_S].timestamp = 0;
 				}
 			}
