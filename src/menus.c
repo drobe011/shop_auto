@@ -57,7 +57,7 @@ struct MSG_S DISP_ENTRY_DELAY = { 1, 0, "Ent Delay [   ]:" };
 struct MSG_S DISP_MOTN_EDIT = { 1, 0, "[1] [2] [3]" };
 struct MSG_S DISP_XMTN_ALL = { 0, 0, "  S |  N |  E |  W" };
 struct MSG_S DISP_SENS_ALL = { 1, 2, "*1234567890123" };
-struct MSG_S DISP_AUTO_O_ALL = { 1, 3, "SNEWBFMSXAE" };
+struct MSG_S DISP_AUTO_O_ALL = { 1, 4, "SNEWBFMSXAE" };
 
 void clearLine(uint8_t row)
 {

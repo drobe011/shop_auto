@@ -137,7 +137,6 @@ int main(void)
 			{
 			case ARM:
 				dispClear();
-				//ENABLE_ON_PWR();
 				ALARMSTATE = ARMED;
 				break;
 			case ARMING:
@@ -1089,24 +1088,22 @@ void showAllSensorStat(void)
 
 void showAllAuto_O_Stat(void)
 {
-	uint8_t sensorStatus[NUM_OF_SYSTEMS] = {2,2,2,2,2,2,2,2,2,2,2};
+	//uint8_t sensorStatus[NUM_OF_AUTO_O] = {2,2,2,2,2,2,2,2,2,2,2};
 	uint8_t sensorValue = 0;
 
 	dispAuto_O_All();
+	setCursor(0,4);
 
-	do
+	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_O; sensorid++)
 	{
-		for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_O; sensorid++)
-		{
-			sensorValue = getIOpin(&automation_O[sensorid]);
-			if (sensorValue != sensorStatus[sensorid])
-			{
-				setCursor(0,sensorid+2);
-				sensorStatus[sensorid] = sensorValue;
-				sendChar(sensorValue + 48);
-			}
-		}
-	} while (!getKP(200));
+		sensorValue = getIOpin(&automation_O[sensorid]);
+		sendChar(sensorValue + 48);
+	}
+
+	while (!getKP(200))
+	{
+		__NOP();
+	}
 
 	while (getKP(100))
 	{
