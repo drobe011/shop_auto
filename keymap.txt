@@ -36,8 +36,10 @@ keymap.txt
      		
      	[%] = INPUT/OUTPUT BUFFERS
      	
-     	[X] = 
-     	
+     	[X] = OUTPUT STATUS
+     		[KEYPAD] = SELECTION
+     			[=] = Edit output info
+     			
      	[SQRT] = CHANGE TIME
      	
      	[=] = SYSTEM STATUS

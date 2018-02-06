@@ -101,6 +101,7 @@ void checkIntLightSubMenu(void);
 void checkExtLightSubMenu(void);
 void changeTimeMenu(void);
 void checkStatus(void);
+void checkAuto_O_Status(void);
 void editBuffers(void); //move to sysconfig
 void changeDarkTH(void);
 void changeArmDelay(void);
@@ -114,6 +115,7 @@ void editSensor(uint8_t sensorid);
 void checkMotionLightStatus(void);
 void editMotionLightSensor(uint8_t sensorid);
 void showAllSensorStat(void);
+void showAllAuto_O_Stat(void);
 void showAllXMSStat(void);
 void checkPIN(void);
 
@@ -135,7 +137,7 @@ int main(void)
 			{
 			case ARM:
 				dispClear();
-				ENABLE_ON_PWR();
+				//ENABLE_ON_PWR();
 				ALARMSTATE = ARMED;
 				break;
 			case ARMING:
@@ -291,6 +293,9 @@ void checkMenu(void)
 			break;
 		case KP_dec:
 			checkMotionLightStatus();
+			break;
+		case KP_times:
+			checkAuto_O_Status();
 			break;
 		}
 	}
@@ -537,7 +542,7 @@ void checkStatus(void)
 	if (selection[0] == 255)
 		return;
 	value = (selection[0] * 10) + selection[1];
-	if (value > NUM_OF_SYSTEMS)
+	if (value > NUM_OF_SYSTEMS - 1)
 		return;
 
 	uint32_t menuTimer = systemTick;
@@ -622,6 +627,56 @@ void editSensor(uint8_t sensorid)
 		dispSensorEdit(sensorid);
 	}
 }
+
+void checkAuto_O_Status(void)
+{
+	uint32_t selection[2] = { 0, 0 };
+
+	uint32_t value = 0;
+
+	dispAuto_O_Status(0);
+	setCursor(0, 9);
+	if (!getKPInput(selection, 2))
+	{
+		showAllAuto_O_Stat();  /////////////////////
+		return;
+	}
+	if (selection[0] == 255)
+		return;
+	value = (selection[0] * 10) + selection[1];
+	if (value > NUM_OF_AUTO_O - 1)
+		return;
+
+	uint32_t menuTimer = systemTick;
+
+	dispAuto_O(value);
+
+	selection[0] = 0;
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		while (getKP(100))
+		{
+			__NOP();
+		}
+		if (selection[0])
+			break;
+	}
+
+	if (selection[0] == KP_equal)
+	{
+		editSensor(value);
+	}
+
+	menuTimer = systemTick;
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		__NOP();
+	}
+}
+
 //AUTOMATION SENSORS
 void checkMotionLightStatus(void)
 {
@@ -895,6 +950,7 @@ uint8_t entryDelay(uint8_t active)
 	if (activeSensors[0] == DOOR_MAIN)
 	{
 		setCountDown(ENTRY_DELAY);
+		ENABLE_ON_PWR();
 		while (timeOut)
 		{
 			if (onPressed)
@@ -964,7 +1020,7 @@ uint8_t pollAutomation(void)
 							light_auto[iLights].active = ENABLE;
 							setIOpin(&automation_O[L_I_S], ENABLE);
 							automation_O[L_I_S].timestamp = systemTick;
-							setIOpin(&automation_O[ARM_I], ENABLE);
+							//setIOpin(&automation_O[ARM_I], ENABLE); FOR TESTING
 						}
 			}
 			else //check to turn off
@@ -973,7 +1029,7 @@ uint8_t pollAutomation(void)
 				{
 					light_auto[iLights].active = DISABLE;
 					setIOpin(&automation_O[L_I_S], DISABLE);
-					setIOpin(&automation_O[ARM_I], DISABLE);
+					//setIOpin(&automation_O[ARM_I], DISABLE);
 					automation_O[L_I_S].timestamp = 0;
 				}
 			}
@@ -1016,6 +1072,33 @@ void showAllSensorStat(void)
 		for (uint8_t sensorid = 0; sensorid < NUM_OF_SYSTEMS; sensorid++)
 		{
 			sensorValue = getIOpin(&alarm_system_I[sensorid]);
+			if (sensorValue != sensorStatus[sensorid])
+			{
+				setCursor(0,sensorid+2);
+				sensorStatus[sensorid] = sensorValue;
+				sendChar(sensorValue + 48);
+			}
+		}
+	} while (!getKP(200));
+
+	while (getKP(100))
+	{
+		__NOP();
+	}
+}
+
+void showAllAuto_O_Stat(void)
+{
+	uint8_t sensorStatus[NUM_OF_SYSTEMS] = {2,2,2,2,2,2,2,2,2,2,2};
+	uint8_t sensorValue = 0;
+
+	dispAuto_O_All();
+
+	do
+	{
+		for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_O; sensorid++)
+		{
+			sensorValue = getIOpin(&automation_O[sensorid]);
 			if (sensorValue != sensorStatus[sensorid])
 			{
 				setCursor(0,sensorid+2);

@@ -18,11 +18,12 @@ void dispIntLight(void);
 void dispExtLight(void);
 void dispTimeChange(uint8_t);
 void dispSensor(uint8_t item);
+void dispAuto_O(uint8_t item);
 void dispSensorStatus(uint8_t item);
+void dispAuto_O_Status(uint8_t item);
 void dispSensorEdit(uint8_t sensorid);
 void dispMotionSensor(uint8_t item);
 void dispMotionSensorEdit(uint8_t sensorid);
-//void dispInputBuffers(void);
 void dispBuffers(void);
 void dispDarkTH(void);
 void dispArmDelay(void);
@@ -32,5 +33,6 @@ void displayArming(void);
 void displayPIN(void);
 void dispAllXMSStat(void);
 void dispSensAll(void);
+void dispAuto_O_All(void);
 
 #endif /* MENUS_H_ */

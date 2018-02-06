@@ -36,6 +36,7 @@ struct MSG_S DISP_MONTH = { 1, 0, "Month: " };
 struct MSG_S DISP_DAY = { 1, 0, "Day: " };
 struct MSG_S DISP_YEAR = { 1, 0, "Year: " };
 struct MSG_S DISP_STATUS = { 0, 0, "Sensor: " };
+struct MSG_S DISP_OUTPUT = { 0, 0, "Output: " };
 struct MSG_S DISP_STATUS2 = { 1, 0, "Active" };
 struct MSG_S DISP_STATUS3 = { 1, 0, "Inactive" };
 struct MSG_S DISP_STATUS_STAY = { 0, 0, "STAY" };
@@ -55,7 +56,8 @@ struct MSG_S DISP_SENS_EDIT = { 1, 0, "[1] [2] [3] [4] [5]" };
 struct MSG_S DISP_ENTRY_DELAY = { 1, 0, "Ent Delay [   ]:" };
 struct MSG_S DISP_MOTN_EDIT = { 1, 0, "[1] [2] [3]" };
 struct MSG_S DISP_XMTN_ALL = { 0, 0, "  S |  N |  E |  W" };
-struct MSG_S DISP_SENS_ALL = {1, 2, "*1234567890123" };
+struct MSG_S DISP_SENS_ALL = { 1, 2, "*1234567890123" };
+struct MSG_S DISP_AUTO_O_ALL = { 1, 3, "SNEWBFMSXAE" };
 
 void clearLine(uint8_t row)
 {
@@ -160,6 +162,20 @@ void dispSensor(uint8_t item)
 	sendChar(getIOpin(&alarm_system_I[item]) + 48);
 }
 
+void dispAuto_O(uint8_t item)
+{
+	struct MSG_S sensor = { 0, 15, "" };
+	strcpy((char*) sensor.msg, (char*) automation_O[item].name);
+	sendDisplay(0, &sensor);
+	clearLine(1);
+	setCursor(1, 0);
+	dispAuto_O_Status((automation_O[item].active ? 1 : 2));
+	setCursor(1, 10);
+	dispAuto_O_Status((automation_O[item].armedstate ? 3 : 4));
+	setCursor(1, 19);
+	sendChar(getIOpin(&automation_O[item]) + 48);
+}
+
 void dispMotionSensor(uint8_t item)
 {
 	char dur[4];
@@ -201,6 +217,28 @@ void dispSensorStatus(uint8_t item)
 	}
 }
 
+void dispAuto_O_Status(uint8_t item)
+{
+	switch (item)
+	{
+	case 0:
+		dispClear();
+		sendDisplay(0, &DISP_OUTPUT);
+		break;
+	case 1:
+		sendDisplay(0, &DISP_STATUS2);
+		break;
+	case 2:
+		sendDisplay(0, &DISP_STATUS3);
+		break;
+	case 3:
+		sendDisplay(1, &DISP_STATUS_STAY);
+		break;
+	case 4:
+		sendDisplay(1, &DISP_STATUS_AWAY);
+		break;
+	}
+}
 /*void dispInputBuffers(void)
 {
 	dispClear();
@@ -341,4 +379,10 @@ void dispSensAll(void)
 {
 	dispClear();
 	sendDisplay(0, &DISP_SENS_ALL);
+}
+
+void dispAuto_O_All(void)
+{
+	dispClear();
+	sendDisplay(0, &DISP_AUTO_O_ALL);
 }
