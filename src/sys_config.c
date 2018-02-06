@@ -230,7 +230,7 @@ void setUpTimer(void)
 
 void pause(uint32_t ps)
 {
-	uint32_t ticks = systemTick; // + ps;
+	uint32_t ticks = systemTick;
 	while (systemTick - ticks < ps)
 	{
 		__NOP();

@@ -53,6 +53,7 @@ struct MSG_S DISP_DARK1 = { 0, 0, "[0-255]" };
 struct MSG_S DISP_DARK2 = { 1, 0, "Dark TH [   ]:" };
 struct MSG_S DISP_ARM_DELAY = { 1, 0, "Arm Delay [   ]:" };
 struct MSG_S DISP_SENS_EDIT = { 1, 0, "[1] [2] [3] [4] [5]" };
+struct MSG_S DISP_AUTO_O_EDIT = { 1, 4, "[1]  [2]" };
 struct MSG_S DISP_ENTRY_DELAY = { 1, 0, "Ent Delay [   ]:" };
 struct MSG_S DISP_MOTN_EDIT = { 1, 0, "[1] [2] [3]" };
 struct MSG_S DISP_XMTN_ALL = { 0, 0, "  S |  N |  E |  W" };
@@ -323,6 +324,17 @@ void dispSensorEdit(uint8_t sensorid)
 	strcpy((char*) delay_msg.msg, (char*) delay_tmp);
 	sendDisplay(0, &delay_msg);
 	sendDisplay(0, &DISP_SENS_EDIT);
+}
+
+void dispAuto_O_Edit(uint8_t sensorid)
+{
+	dispClear();
+	setCursor(0, 5);
+	sendChar(automation_O[sensorid].active ? 'Y' : 'N');
+	setCursor(0, 10);
+	sendChar(automation_O[sensorid].sig_active_level ? 'H' : 'L');
+
+	sendDisplay(0, &DISP_AUTO_O_EDIT);
 }
 
 void dispMotionSensorEdit(uint8_t sensorid)

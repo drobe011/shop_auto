@@ -14,6 +14,7 @@ extern uint8_t ENTRY_DELAY;
 extern uint8_t DARK_THRESHOLD;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
+extern struct ALARM_SYSTEM_S automation_O[];
 
 EEPROM_STATUS initEEPROM(void)
 {
@@ -147,7 +148,35 @@ EEPROM_STATUS getEEPROMdata(void)
 			return BAD;
 		}
 	}
+	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_O; sensorid++)
+	{
+		tbuffer = eepromTXbuffer;
+		rbuffer = eepromRXbuffer;
+		address = (EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET;
+		tbuffer[0] = (address >> 8) & 0xFF;
+		tbuffer[1] = address & 0xFF;
+		EEPROMxfer.txBuff = tbuffer;
+		EEPROMxfer.rxBuff = rbuffer;
+		EEPROMxfer.rxSz = OUTPUT_PACKET_SIZE;
+		EEPROMxfer.txSz = 2;
 
+		EPROM_DELAY();
+
+		if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+		{
+			return BAD;
+		}
+
+		if (rbuffer[0] == sensorid)
+		{
+			automation_O[sensorid].active = rbuffer[1];
+			automation_O[sensorid].sig_active_level = rbuffer[2];
+		}
+		else
+		{
+			return BAD;
+		}
+	}
 	return GOOD;
 }
 
@@ -232,7 +261,29 @@ EEPROM_STATUS setEEPROMdefaults(void)
 			return BAD;
 		}
 	}
+	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_O; sensorid++)
+	{
+		tbuffer = eepromTXbuffer;
+		address = (EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET;
 
+		EEPROMxfer.txBuff = tbuffer;
+		EEPROMxfer.rxSz = 0;
+		EEPROMxfer.txSz = OUTPUT_PACKET_SIZE + 2;
+
+		tbuffer[0] = (address >> 8) & 0xFF;
+		tbuffer[1] = address & 0xFF;
+		tbuffer[2] = sensorid;
+		tbuffer[3] = automation_O[sensorid].active;
+		tbuffer[4] = automation_O[sensorid].sig_active_level;
+
+		EPROM_DELAY();
+
+		Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+		if (EEPROMxfer.txSz > 0)
+		{
+			return BAD;
+		}
+	}
 	return GOOD;
 }
 

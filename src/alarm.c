@@ -112,6 +112,7 @@ uint8_t pollAutomation(void);
 uint8_t checkReadyToArm(void);
 uint8_t entryDelay(uint8_t active);
 void editSensor(uint8_t sensorid);
+void editAuto_O(uint8_t sensorid);
 void checkMotionLightStatus(void);
 void editMotionLightSensor(uint8_t sensorid);
 void showAllSensorStat(void);
@@ -627,6 +628,34 @@ void editSensor(uint8_t sensorid)
 	}
 }
 
+void editAuto_O(uint8_t sensorid)
+{
+	uint32_t menuTimer = systemTick;
+	uint32_t selection[1] = { 0 };
+
+	dispAuto_O_Edit(sensorid);
+
+	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		while (getKP(100))
+		{
+			__NOP();
+		}
+		switch (selection[0])
+		{
+		case KP_1:
+			alarm_system_I[sensorid].active = (automation_O[sensorid].active ? 0 : 1);
+			saveByte((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 1, automation_O[sensorid].active);
+			break;
+		case KP_2:
+			alarm_system_I[sensorid].sig_active_level = (automation_O[sensorid].sig_active_level ? 0 : 1);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 2), automation_O[sensorid].sig_active_level);
+			break;
+		}
+		dispAuto_O_Edit(sensorid);
+	}
+}
 void checkAuto_O_Status(void)
 {
 	uint32_t selection[2] = { 0, 0 };
@@ -665,7 +694,7 @@ void checkAuto_O_Status(void)
 
 	if (selection[0] == KP_equal)
 	{
-		editSensor(value);
+		editAuto_O(value);
 	}
 
 	menuTimer = systemTick;
