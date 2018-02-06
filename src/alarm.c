@@ -645,11 +645,11 @@ void editAuto_O(uint8_t sensorid)
 		switch (selection[0])
 		{
 		case KP_1:
-			alarm_system_I[sensorid].active = (automation_O[sensorid].active ? 0 : 1);
+			automation_O[sensorid].active = (automation_O[sensorid].active ? 0 : 1);
 			saveByte((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 1, automation_O[sensorid].active);
 			break;
 		case KP_2:
-			alarm_system_I[sensorid].sig_active_level = (automation_O[sensorid].sig_active_level ? 0 : 1);
+			automation_O[sensorid].sig_active_level = (automation_O[sensorid].sig_active_level ? 0 : 1);
 			saveByte(((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 2), automation_O[sensorid].sig_active_level);
 			break;
 		}
@@ -666,7 +666,7 @@ void checkAuto_O_Status(void)
 	setCursor(0, 9);
 	if (!getKPInput(selection, 2))
 	{
-		showAllAuto_O_Stat();  /////////////////////
+		showAllAuto_O_Stat();
 		return;
 	}
 	if (selection[0] == 255)
