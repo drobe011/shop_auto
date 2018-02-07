@@ -21,6 +21,7 @@
 #define A_S_SIG_LEVEL_LOW 0
 #define A_S_SIG_LEVEL_HIGH 1
 #define A_S_ARM_ST_AWAY 0
+#define A_S_NO_ALARM 1
 #define A_S_ARM_ST_STAY 4
 #define NONE 0
 
@@ -147,14 +148,14 @@ struct X_LIGHT_AUTO_S
 #define PWR_SENSE 0
 #define VIB1 1
 #define MTN_INT1 2
-#define SPAR2 3
+#define LIM 3
 #define DOOR_MAIN 4
 #define WDW_E 5
-#define SPAR1 6
+#define LIS 6
 #define WDW_S 7
 #define DOOR_N 8
 #define DOOR_E 9
-#define SPAR3 10
+#define I_FAN 10
 #define SPAR4 11
 #define MTN_INT2 12
 #define VIB2 13

@@ -25,8 +25,8 @@ struct MSG_S DISP_BOOT1 = { 1, 2, "..initializing.." };
 struct MSG_S DISP_SPACE = { 0, 0, "                    " };
 struct MSG_S DISP_ARMED_TYPE1 = { 0, 0, "AW1,AW2,AW3,AW4,STY" };
 struct MSG_S DISP_ARMED_TYPE2 = { 1, 0, "M+  SQR  /   -   =" };
-struct MSG_S DISP_INT_LIGHT1 = { 0, 0, "PRI  ALT  ALL  FAN" };
-struct MSG_S DISP_INT_LIGHT2 = { 1, 0, "7/4  8/5  1/0  %/*" };
+struct MSG_S DISP_INT_LIGHT1 = { 1, 0, "1:Main 2:Sup: 3:Fan" };
+//struct MSG_S DISP_INT_LIGHT2 = { 1, 0, "7/4  8/5  1/0  %/*" };
 struct MSG_S DISP_EXT_LIGHT1 = { 0, 1, "E   S   N   W  ALL" };
 struct MSG_S DISP_EXT_LIGHT2 = { 1, 0, "7/4 8/5 9/6 $/* 1/0" };
 struct MSG_S DISP_CHANGE_TIME = { 0, 0, "Time/Date" };
@@ -111,7 +111,13 @@ void dispIntLight(void)
 {
 	dispClear();
 	sendDisplay(0, &DISP_INT_LIGHT1);
-	sendDisplay(0, &DISP_INT_LIGHT2);
+
+	setCursor(0, 3);
+	sendChar(getIOpin(&alarm_system_I[LIM]) ? 'Y' : 'N');
+	setCursor(0, 9);
+	sendChar(getIOpin(&alarm_system_I[LIS]) ? 'Y' : 'N');
+	setCursor(0, 12);
+	sendChar(getIOpin(&alarm_system_I[I_FAN]) ? 'Y' : 'N');
 }
 
 void dispExtLight(void)

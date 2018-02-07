@@ -18,8 +18,8 @@
 #include <stdio.h>
 #include <string.h>
 
-volatile uint32_t systemTick;
-volatile uint8_t updateTime = 0;
+extern uint32_t systemTick;
+extern uint8_t updateTime;
 volatile uint8_t onPressed = 0;
 extern struct users_S *c_user;
 extern struct users_S users[];
@@ -38,7 +38,7 @@ enum ALARMSTATE_T
 };
 enum ARMEDSTATE_T
 {
-	AWAY, AWAY_NO_INT_AUTO, AWAY_NO_EXT_AUTO, AWAY_NO_AUTO, STAY
+	AWAY, NO_ALARM, AWAY_NO_EXT_AUTO, AWAY_NO_AUTO, STAY
 };
 
 uint8_t ARM_DELAY = ARM_DELAY_D;  //ee
@@ -71,7 +71,6 @@ STATIC INLINE void setCountDown(uint32_t secs)
 	Chip_TIMER_SetMatch(LPC_TIMER1, 0, secs * 1000);
 	Chip_TIMER_Enable(LPC_TIMER1);
 	Chip_TIMER_Enable(LPC_TIMER0);
-
 }
 
 STATIC INLINE void disableCountDown(void)
@@ -158,7 +157,7 @@ int main(void)
 				displayNormal();
 				displayON();
 				ALARMSTATE = DISARMED;
-				readyToArm = 2;  //SO IT DISPLAYS AFTER WRONG KEYPRESS <-----------TEST THIS------------>
+				readyToArm = 2;  //SO IT DISPLAYS AFTER WRONG KEYPRESS
 				break;
 			case DISARMED:
 				if (updateTime)
@@ -209,7 +208,7 @@ uint8_t getPIN(void)
 		on_pressed_time = systemTick;
 		while (getKP(150))
 		{
-			if (systemTick > (on_pressed_time + KP_TIMEOUT_DEFAULT_MS))
+			if (systemTick - on_pressed_time > KP_TIMEOUT_DEFAULT_MS)
 			{
 				ENABLE_ON_PWR();
 				pinAttempts++;
@@ -318,7 +317,7 @@ void checkAlarmSubMenu(void)
 			ARMEDSTATE = AWAY;
 			break;
 		case KP_root:
-			ARMEDSTATE = AWAY_NO_INT_AUTO;
+			ARMEDSTATE = NO_ALARM;
 			break;
 		case KP_div:
 			ARMEDSTATE = AWAY_NO_EXT_AUTO;
@@ -337,82 +336,33 @@ void checkAlarmSubMenu(void)
 void checkIntLightSubMenu(void)
 {
 	uint32_t selection = 0;
-	uint32_t lightBit = 0;
-	uint8_t lightState = 0;
 
 	dispIntLight();
-	selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-	while (getKP(100))
+	uint32_t menuTimer = systemTick;
+
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
-		__NOP();
-	}
-
-	if (selection)
-	{
-		switch (selection)
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		while (getKP(100))
 		{
-		case KP_7: //MAIN LIGHTS ON
-			lightBit = 0;
-			lightState = 1;
-			break;
-		case KP_4: //MAIN LIGHTS OFF
-			lightBit = 0;
-			lightState = 0;
-			break;
-		case KP_8: //SUPP LIGHTS ON
-			lightBit = 1;
-			lightState = 1;
-			break;
-		case KP_5: //SUPP LIGHTS OFF
-			lightBit = 1;
-			lightState = 0;
-			break;
-		case KP_1: //ALL LIGHTS ON
-			lightBit = 2;
-			lightState = 1;
-			break;
-		case KP_0: //ALL LIGJHTS OFF
-			lightBit = 2;
-			lightState = 0;
-			break;
-		case KP_pcnt: //FAN ON
-			lightBit = 3;
-			lightState = 1;
-			break;
-		case KP_times: //FAN OFF
-			lightBit = 3;
-			lightState = 0;
-			break;
-		default:
-			return;
+			__NOP();
 		}
-
-		setIOpin(&automation_O[L_I_M], 1);
-		pause(2); //give light controller time to react
-		setIOpin(&automation_O[L_I_M], 1);
-		pause(2); //light controller waits until LT_MAIN goes low to read
-
-		switch (lightBit)
+		if (selection)
 		{
-		case 0:
-			setIOpin(&automation_O[L_I_M], lightState);
-			break;
-		case 1:
-			setIOpin(&automation_O[L_I_S], lightState);
-			break;
-		case 2:
-			setIOpin(&automation_O[L_I_M], lightState);
-			setIOpin(&automation_O[L_I_S], lightState);
-			break;
-		case 3:
-			setIOpin(&automation_O[FAN], lightState);
+			switch (selection)
+			{
+			case KP_1: //MAIN LIGHTS TOGGLE
+				setIOpin(&automation_O[L_I_M], (getIOpin(&alarm_system_I[LIM]) ^ 1));
+				break;
+			case KP_2: //SUPP LIGHTS TOGGLE
+				setIOpin(&automation_O[L_I_S], (getIOpin(&alarm_system_I[LIS]) ^ 1));
+				break;
+			case KP_3: //FAN TOGGLE
+				setIOpin(&automation_O[FAN], (getIOpin(&alarm_system_I[I_FAN]) ^ 1));
+				break;
+			}
+			dispIntLight();
 		}
-
-		pause(10);
-
-		setIOpin(&automation_O[L_I_M], 0);
-		setIOpin(&automation_O[L_I_S], 0);
-		setIOpin(&automation_O[FAN], 0);
 	}
 }
 
@@ -551,7 +501,7 @@ void checkStatus(void)
 
 	selection[0] = 0;
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		while (getKP(100))
@@ -569,7 +519,7 @@ void checkStatus(void)
 
 	menuTimer = systemTick;
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		__NOP();
 	}
@@ -584,7 +534,7 @@ void editSensor(uint8_t sensorid)
 
 	dispSensorEdit(sensorid);
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		while (getKP(100))
@@ -635,7 +585,7 @@ void editAuto_O(uint8_t sensorid)
 
 	dispAuto_O_Edit(sensorid);
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		while (getKP(100))
@@ -681,7 +631,7 @@ void checkAuto_O_Status(void)
 
 	selection[0] = 0;
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		while (getKP(100))
@@ -699,7 +649,7 @@ void checkAuto_O_Status(void)
 
 	menuTimer = systemTick;
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		__NOP();
 	}
@@ -731,7 +681,7 @@ void checkMotionLightStatus(void)
 
 	selection[0] = 0;
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		while (getKP(100))
@@ -749,7 +699,7 @@ void checkMotionLightStatus(void)
 
 	menuTimer = systemTick;
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		__NOP();
 	}
@@ -764,7 +714,7 @@ void editMotionLightSensor(uint8_t sensorid)
 
 	dispMotionSensorEdit(sensorid);
 
-	while (systemTick < menuTimer + KP_TIMEOUT_SUBMENU_MS)
+	while (systemTick - menuTimer < KP_TIMEOUT_SUBMENU_MS)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		while (getKP(100))
@@ -868,17 +818,6 @@ void changeEntryDelay(void)
 	saveByte(ENTRY_DELAY_OFFSET, ENTRY_DELAY);
 }
 
-void SysTick_Handler(void)
-{
-	systemTick++;
-}
-
-void RTC_IRQHandler(void)
-{
-	Chip_RTC_ClearIntPending(LPC_RTC, RTC_INT_COUNTER_INCREASE);
-	updateTime = 1;
-}
-
 void editBuffers(void)
 {
 	uint32_t selection[1];
@@ -914,7 +853,7 @@ uint8_t pollAlarmSensors(void)
 	{
 		for (sensor = 0; sensor < NUM_OF_SYSTEMS; sensor++)
 		{
-			if (alarm_system_I[sensor].active)
+			if (alarm_system_I[sensor].active && (alarm_system_I[sensor].armedstate != A_S_NO_ALARM))
 			{
 				if (getIOpin(&alarm_system_I[sensor]))
 				{
@@ -1027,7 +966,7 @@ uint8_t pollAutomation(void)
 			//check if time to turn off
 			if (motion_lights[sensor].timestamp > 0)
 			{
-				if (systemTick > motion_lights[sensor].timestamp + (motion_lights[sensor].delay * (1000 * 60)))
+				if (systemTick - motion_lights[sensor].timestamp > (motion_lights[sensor].delay * (1000 * 60)))
 				{
 					setIOpin(&automation_O[motion_lights[sensor].device], DISABLE);
 					motion_lights[sensor].timestamp = 0;
@@ -1053,7 +992,7 @@ uint8_t pollAutomation(void)
 			}
 			else //check to turn off
 			{
-				if (systemTick > automation_O[L_I_S].timestamp + (light_auto[iLights].duration * (1000 * 60)))
+				if (systemTick - automation_O[L_I_S].timestamp > (light_auto[iLights].duration * (1000 * 60)))
 				{
 					light_auto[iLights].active = DISABLE;
 					setIOpin(&automation_O[L_I_S], DISABLE);

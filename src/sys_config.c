@@ -4,11 +4,12 @@
 #include "alarm_settings.h"
 #include "eeprom.h"
 
+volatile uint32_t systemTick;
+volatile uint8_t updateTime = 0;
 volatile uint32_t countDown;
 volatile uint32_t delayInt;
 volatile uint32_t timeOut;
 
-extern uint32_t systemTick;
 extern uint8_t onPressed;
 extern uint8_t dispDimmed;
 extern uint32_t dimTimer;
@@ -28,14 +29,14 @@ struct ALARM_SYSTEM_S alarm_system_I[] = {
 		{ "PWR_S", 1, 18, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 		{ "VIB_1", 1, 19, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 		{ "MTN_1", 1, 21, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_STAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D, NONE, NONE },
-		{ "SPAR2", 1, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "L_I_M", 1, 24, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_NO_ALARM, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "DOR_M", 1, 25, A_S_ACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, ENTRY_DELAY_D, NONE, NONE },
 		{ "WDW_E", 1, 27, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-		{ "SPAR1", 1, 28, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "L_I_S", 1, 28, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_NO_ALARM, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "WDW_S", 1, 29, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 		{ "DOR_N", 1, 30, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 		{ "DOR_E", 1, 31, A_S_INACTIVE, A_S_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
-		{ "SPAR3", 2, 8, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
+		{ "F_A_N", 2, 8, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_NO_ALARM, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "SPAR4", 2, 11, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
 		{ "MTN_2", 2, 12, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, ENTRY_DELAY_D, NONE, NONE },
 		{ "VIB_2", 4, 29, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_LOW, NONE, NONE, NONE },
@@ -394,7 +395,7 @@ uint32_t getKP(uint32_t timeout)
 
 	timeoutTickState = systemTick;
 
-	while (systemTick < timeoutTickState + timeout)
+	while (systemTick - timeoutTickState < timeout)
 	{
 		switch (kpState)
 		{
@@ -567,6 +568,17 @@ void intTobytes(uint8_t *bytes, uint32_t intVal)
 	bytes[1] = (intVal >> 16) & 0xFF;
 	bytes[2] = (intVal >> 8) & 0xFF;
 	bytes[3] = intVal & 0xFF;
+}
+
+void SysTick_Handler(void)
+{
+	systemTick++;
+}
+
+void RTC_IRQHandler(void)
+{
+	Chip_RTC_ClearIntPending(LPC_RTC, RTC_INT_COUNTER_INCREASE);
+	updateTime = 1;
 }
 
 void EINT3_IRQHandler(void)
