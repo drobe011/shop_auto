@@ -116,7 +116,7 @@ void dispIntLight(void)
 	sendChar(getIOpin(&alarm_system_I[LIM]) ? 'Y' : 'N');
 	setCursor(0, 9);
 	sendChar(getIOpin(&alarm_system_I[LIS]) ? 'Y' : 'N');
-	setCursor(0, 12);
+	setCursor(0, 17);
 	sendChar(getIOpin(&alarm_system_I[I_FAN]) ? 'Y' : 'N');
 }
 
