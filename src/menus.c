@@ -442,12 +442,17 @@ void dispUpTime(void)
 	time_t rtcTime = mktime(&tempRTC_time);
 	double timediff = difftime(rtcTime, bTime);
 
-	uint32_t upHours = timediff / (60*60);
-	//if (upHours < 0) upHours = 0;
-	uint32_t upMinutes = (timediff - (24*60*60)) / 60;
-	//if (upMinutes < 0) upMinutes = 0;
-	uint32_t upSeconds = (timediff - (24*60*60)) - 60;
-	if (upSeconds == 0) upSeconds = timediff;
+	int upMinutes = timediff / 60;
+	timediff -= upMinutes * 60;
+	int upHours = upMinutes / 60;
+	upMinutes -= upHours * 60;
+
+//	uint32_t upHours = timediff / (60*60);
+//	//if (upHours < 0) upHours = 0;
+//	uint32_t upMinutes = (timediff - (24*60*60)) / 60;
+//	//if (upMinutes < 0) upMinutes = 0;
+//	uint32_t upSeconds = (timediff - (24*60*60)) - 60;
+//	if (upSeconds == 0) upSeconds = timediff;
 
 	char hrs[4];
 	struct MSG_S hrs_S = {0, 9, ""};
@@ -461,7 +466,7 @@ void dispUpTime(void)
 
 	char sec[3];
 	struct MSG_S sec_S = {0, 16, ""};
-	sprintf(sec, "%02d", upSeconds);
+	sprintf(sec, "%02d", timediff);
 	strcpy((char*) sec_S.msg, (char*) sec);
 
 	sendDisplay(0, &hrs_S);
