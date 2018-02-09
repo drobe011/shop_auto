@@ -412,6 +412,7 @@ void dispAuto_O_All(void)
 void dispUpTime(void)
 {
 	RTC_TIME_T RTCTime;
+	RTC_TIME_T boot_time_LPC;
 	struct tm tempRTC_time;
 	struct tm boot_time;
 
@@ -419,7 +420,7 @@ void dispUpTime(void)
 	sendDisplay(0, &DISP_UPTIME);
 
 	Chip_RTC_GetFullTime(LPC_RTC, &RTCTime);
-	if (!getBootStamp(&boot_time)) return;
+	if (!getBootStamp(&boot_time_LPC)) return;
 
 	tempRTC_time.tm_year = RTCTime.time[RTC_TIMETYPE_YEAR] - 2000;
 	tempRTC_time.tm_mon = RTCTime.time[RTC_TIMETYPE_MONTH];
@@ -429,13 +430,24 @@ void dispUpTime(void)
 	tempRTC_time.tm_sec = RTCTime.time[RTC_TIMETYPE_SECOND];
 	tempRTC_time.tm_isdst = 0;
 
+	boot_time.tm_year = boot_time_LPC.time[RTC_TIMETYPE_YEAR] - 2000;
+	boot_time.tm_mon = boot_time_LPC.time[RTC_TIMETYPE_MONTH];
+	boot_time.tm_mday = boot_time_LPC.time[RTC_TIMETYPE_DAYOFMONTH];
+	boot_time.tm_hour = boot_time_LPC.time[RTC_TIMETYPE_HOUR];
+	boot_time.tm_min = boot_time_LPC.time[RTC_TIMETYPE_MINUTE];
+	boot_time.tm_sec = boot_time_LPC.time[RTC_TIMETYPE_SECOND];
+	boot_time.tm_isdst = 0;
+
 	time_t bTime = mktime(&boot_time);
 	time_t rtcTime = mktime(&tempRTC_time);
-	uint32_t timediff = difftime(rtcTime, bTime);
+	double timediff = difftime(rtcTime, bTime);
 
-	uint32_t upHours = timediff / (60*60);
-	uint32_t upMinutes = (timediff - (24*60*60)) / 60;
-	uint32_t upSeconds = (timediff - (24*60*60)) - 60;
+	double upHours = timediff / (60*60);
+	if (upHours < 0) upHours = 0;
+	double upMinutes = (timediff - (24*60*60)) / 60;
+	if (upMinutes < 0) upMinutes = 0;
+	double upSeconds = (timediff - (24*60*60)) - 60;
+	if (upSeconds < 0) upSeconds = 66;
 
 	char hrs[4];
 	struct MSG_S hrs_S = {0, 9, ""};
