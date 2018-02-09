@@ -271,7 +271,7 @@ struct MSG_S
 //
 #define CHECK_STATE_TIMER() systemTick > (stateTimer + MAIN_STATE_LOOP_FX)
 #define CHECK_DIM_TIMER() systemTick > (dimTimer + DIM_OLED_TIME)
-#define CHECK_OFF_TIMER() systemTick > (dimTimer + OFF_OLED_TIME)
+#define CHECK_DISPLAY_OFF_TIMER() systemTick > (dimTimer + OFF_OLED_TIME)
 #define RESET_STATE_TIMER() stateTimer = systemTick
 #define RESET_DIM_TIMER() dimTimer = systemTick
 #define RESET_PIN_ATTEMPTS() pinAttempts = 0
@@ -282,6 +282,8 @@ struct MSG_S
 #define PIN_TRIES_EXCEEDED() pinAttempts > MAX_PIN_TRIES
 #define OE_INPUT_ON() (Chip_GPIO_GetPinState(LPC_GPIO, 3, IN_BUFF_OE_p3_O) ^ 1)
 #define OE_OUTPUT_ON() (Chip_GPIO_GetPinState(LPC_GPIO, 4, OUT_BUFF_OE_p4_O) ^ 1)
+#define TIME_UP(x,y) (systemTick - x) > y
+#define TIME_WAIT(x,y) (systemTick - x) < y
 //
 // END PROGRAM DEFINES
 

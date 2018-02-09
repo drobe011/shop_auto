@@ -36,9 +36,9 @@ keymap.txt
      		
      	[%] = INPUT/OUTPUT BUFFERS
      	
-     	[X] = OUTPUT STATUS
-     		[KEYPAD] = SELECTION
-     			[=] = Edit output info
+     	[X] = CHECK OUTPUTS
+     	
+     	[0] = SHOW UPTIME
      			
      	[SQRT] = CHANGE TIME
      	

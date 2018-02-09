@@ -9,8 +9,8 @@ volatile uint8_t updateTime = 0;
 volatile uint32_t countDown;
 volatile uint32_t delayInt;
 volatile uint32_t timeOut;
+volatile uint8_t onPressed;
 
-extern uint8_t onPressed;
 extern uint8_t dispDimmed;
 extern uint32_t dimTimer;
 extern uint8_t DARK_THRESHOLD;
@@ -164,11 +164,11 @@ void setUpGPIO(void)
 	NVIC_EnableIRQ(EINT3_IRQn);
 
 	//SET DEFAULT OUTPUT VALUE
-	Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, K5);
+	//Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, K5);
 
-	setIOpin(&automation_O[L_I_M], 0);
-	setIOpin(&automation_O[L_I_S], 0);
-	setIOpin(&automation_O[FAN], 0);
+//	setIOpin(&automation_O[L_I_M], 0);
+//	setIOpin(&automation_O[L_I_S], 0);
+//	setIOpin(&automation_O[FAN], 0);
 	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_GPIO);
 }
 
@@ -232,7 +232,7 @@ void setUpTimer(void)
 void pause(uint32_t ps)
 {
 	uint32_t ticks = systemTick;
-	while (systemTick - ticks < ps)
+	while (TIME_WAIT(ticks, ps))
 	{
 		__NOP();
 	}
@@ -395,7 +395,7 @@ uint32_t getKP(uint32_t timeout)
 
 	timeoutTickState = systemTick;
 
-	while (systemTick - timeoutTickState < timeout)
+	while (TIME_WAIT(timeoutTickState, timeout))
 	{
 		switch (kpState)
 		{

@@ -14,6 +14,6 @@ EEPROM_STATUS initEEPROM(void);
 EEPROM_STATUS setEEPROMdefaults(void);
 EEPROM_STATUS getEEPROMdata(void);
 EEPROM_STATUS setEEPROMbyte(uint32_t offset, uint8_t byte);
-EEPROM_STATUS setBootStamp(void);
+EEPROM_STATUS getBootStamp(struct tm *boottime);
 
 #endif /* EEPROM_H_ */

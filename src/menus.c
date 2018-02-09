@@ -7,8 +7,10 @@
 #include "chip.h"
 #include "menus.h"
 #include "sys_config.h"
+#include "eeprom.h"
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 extern struct users_S *c_user;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
@@ -25,10 +27,8 @@ struct MSG_S DISP_BOOT1 = { 1, 2, "..initializing.." };
 struct MSG_S DISP_SPACE = { 0, 0, "                    " };
 struct MSG_S DISP_ARMED_TYPE1 = { 0, 0, "AW1,AW2,AW3,AW4,STY" };
 struct MSG_S DISP_ARMED_TYPE2 = { 1, 0, "M+  SQR  /   -   =" };
-struct MSG_S DISP_INT_LIGHT1 = { 1, 0, "1:Main 2:Sup: 3:Fan" };
-//struct MSG_S DISP_INT_LIGHT2 = { 1, 0, "7/4  8/5  1/0  %/*" };
-struct MSG_S DISP_EXT_LIGHT1 = { 0, 1, "E   S   N   W  ALL" };
-struct MSG_S DISP_EXT_LIGHT2 = { 1, 0, "7/4 8/5 9/6 $/* 1/0" };
+struct MSG_S DISP_INT_LIGHT1 = { 1, 0, "1:Main 2:Sup 3:Fan" };
+struct MSG_S DISP_EXT_LIGHT1 = { 1, 1, "1:S  2:N  3:E  4:W" };
 struct MSG_S DISP_CHANGE_TIME = { 0, 0, "Time/Date" };
 struct MSG_S DISP_HOUR = { 1, 0, "Hour: " };
 struct MSG_S DISP_MINUTE = { 1, 0, "Minute: " };
@@ -59,6 +59,7 @@ struct MSG_S DISP_MOTN_EDIT = { 1, 0, "[1] [2] [3]" };
 struct MSG_S DISP_XMTN_ALL = { 0, 0, "  S |  N |  E |  W" };
 struct MSG_S DISP_SENS_ALL = { 1, 2, "*1234567890123" };
 struct MSG_S DISP_AUTO_O_ALL = { 1, 4, "SNEWBFMSXAE" };
+struct MSG_S DISP_UPTIME = { 0, 1, "UPTIME: 000:00:00" };
 
 void clearLine(uint8_t row)
 {
@@ -123,8 +124,16 @@ void dispIntLight(void)
 void dispExtLight(void)
 {
 	dispClear();
+
 	sendDisplay(0, &DISP_EXT_LIGHT1);
-	sendDisplay(0, &DISP_EXT_LIGHT2);
+	setCursor(0, 2);
+	sendChar(getIOpin(&automation_O[L_X_S]) ? 'Y' : 'N');
+	setCursor(0, 7);
+	sendChar(getIOpin(&automation_O[L_X_N]) ? 'Y' : 'N');
+	setCursor(0, 12);
+	sendChar(getIOpin(&automation_O[L_X_E]) ? 'Y' : 'N');
+	setCursor(0, 17);
+	sendChar(getIOpin(&automation_O[L_X_W]) ? 'Y' : 'N');
 }
 
 void dispTimeChange(uint8_t mode)
@@ -246,12 +255,7 @@ void dispAuto_O_Status(uint8_t item)
 		break;
 	}
 }
-/*void dispInputBuffers(void)
-{
-	dispClear();
-	sendDisplay(0, &INPUT_BUFF);
-}
-*/
+
 void dispBuffers(void)
 {
 	dispClear();
@@ -403,4 +407,52 @@ void dispAuto_O_All(void)
 {
 	dispClear();
 	sendDisplay(0, &DISP_AUTO_O_ALL);
+}
+
+void dispUpTime(void)
+{
+	RTC_TIME_T RTCTime;
+	struct tm tempRTC_time;
+	struct tm boot_time;
+
+	dispClear();
+	sendDisplay(0, &DISP_UPTIME);
+
+	Chip_RTC_GetFullTime(LPC_RTC, &RTCTime);
+	if (!getBootStamp(&boot_time)) return;
+
+	tempRTC_time.tm_year = RTCTime.time[RTC_TIMETYPE_YEAR] - 2000;
+	tempRTC_time.tm_mon = RTCTime.time[RTC_TIMETYPE_MONTH];
+	tempRTC_time.tm_mday = RTCTime.time[RTC_TIMETYPE_DAYOFMONTH];
+	tempRTC_time.tm_hour = RTCTime.time[RTC_TIMETYPE_HOUR];
+	tempRTC_time.tm_min = RTCTime.time[RTC_TIMETYPE_MINUTE];
+	tempRTC_time.tm_sec = RTCTime.time[RTC_TIMETYPE_SECOND];
+	tempRTC_time.tm_isdst = 0;
+
+	time_t bTime = mktime(&boot_time);
+	time_t rtcTime = mktime(&tempRTC_time);
+	uint32_t timediff = difftime(rtcTime, bTime);
+
+	uint32_t upHours = timediff / (60*60);
+	uint32_t upMinutes = (timediff - (24*60*60)) / 60;
+	uint32_t upSeconds = (timediff - (24*60*60)) - 60;
+
+	char hrs[4];
+	struct MSG_S hrs_S = {0, 9, ""};
+	sprintf(hrs, "%03d", upHours);
+	strcpy((char*) hrs_S.msg, (char*) hrs);
+
+	char min[3];
+	struct MSG_S min_S = {0, 13, ""};
+	sprintf(min, "%03d", upMinutes);
+	strcpy((char*) min_S.msg, (char*) min);
+
+	char sec[3];
+	struct MSG_S sec_S = {0, 16, ""};
+	sprintf(sec, "%03d", upSeconds);
+	strcpy((char*) sec_S.msg, (char*) sec);
+
+	sendDisplay(0, &hrs_S);
+	sendDisplay(0, &min_S);
+	sendDisplay(0, &sec_S);
 }

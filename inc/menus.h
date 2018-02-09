@@ -35,5 +35,6 @@ void displayPIN(void);
 void dispAllXMSStat(void);
 void dispSensAll(void);
 void dispAuto_O_All(void);
+void dispUpTime(void);
 
 #endif /* MENUS_H_ */

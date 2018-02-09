@@ -1,4 +1,5 @@
 #include <chip.h>
+#include <time.h>
 #include "sys_config.h"
 #include "eeprom.h"
 
@@ -336,5 +337,41 @@ EEPROM_STATUS setBootStamp(void)
 	{
 		return BAD;
 	}
+	return GOOD;
+}
+
+EEPROM_STATUS getBootStamp(struct tm *boottime)
+{
+	uint32_t address = BOOTTIME_OFFSET;
+	uint8_t *tbuffer = eepromTXbuffer;
+	uint8_t *rbuffer = eepromRXbuffer;
+	uint8_t year0 = 0;
+	uint8_t year1 = 0;
+	uint32_t newYear = 0;
+
+	tbuffer[0] = (address >> 8) & 0xFF;
+	tbuffer[1] = address & 0xFF;
+
+	EEPROMxfer.rxSz = 7;
+	EEPROMxfer.txSz = 2;
+	EEPROMxfer.txBuff = tbuffer;
+	EEPROMxfer.rxBuff = rbuffer;
+
+	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+	{
+		return BAD;
+	}
+
+	boottime->tm_mon = rbuffer[4];
+	boottime->tm_mday = rbuffer[3];
+	boottime->tm_hour = rbuffer[2];
+	boottime->tm_min = rbuffer[1];
+	boottime->tm_sec = rbuffer[0];
+	boottime->tm_isdst = 0;
+	year0 = rbuffer[5];
+	year1 = rbuffer[6];
+	newYear = ((uint32_t) year0 << 8) + (uint32_t) year1;
+	boottime->tm_year = newYear - 2000;
+
 	return GOOD;
 }
