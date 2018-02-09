@@ -117,7 +117,7 @@ void dispIntLight(void)
 	sendChar(getIOpin(&alarm_system_I[LIM]) ? 'Y' : 'N');
 	setCursor(0, 9);
 	sendChar(getIOpin(&alarm_system_I[LIS]) ? 'Y' : 'N');
-	setCursor(0, 17);
+	setCursor(0, 15);
 	sendChar(getIOpin(&alarm_system_I[I_FAN]) ? 'Y' : 'N');
 }
 
@@ -447,26 +447,19 @@ void dispUpTime(void)
 	int upHours = upMinutes / 60;
 	upMinutes -= upHours * 60;
 
-//	uint32_t upHours = timediff / (60*60);
-//	//if (upHours < 0) upHours = 0;
-//	uint32_t upMinutes = (timediff - (24*60*60)) / 60;
-//	//if (upMinutes < 0) upMinutes = 0;
-//	uint32_t upSeconds = (timediff - (24*60*60)) - 60;
-//	if (upSeconds == 0) upSeconds = timediff;
-
 	char hrs[4];
 	struct MSG_S hrs_S = {0, 9, ""};
-	sprintf(hrs, "%03d", upHours);
+	sprintf(hrs, "%03d", (uint8_t)upHours);
 	strcpy((char*) hrs_S.msg, (char*) hrs);
 
 	char min[3];
 	struct MSG_S min_S = {0, 13, ""};
-	sprintf(min, "%02d", upMinutes);
+	sprintf(min, "%02d", (uint8_t)upMinutes);
 	strcpy((char*) min_S.msg, (char*) min);
 
 	char sec[3];
 	struct MSG_S sec_S = {0, 16, ""};
-	sprintf(sec, "%02d", timediff);
+	sprintf(sec, "%02d", (uint8_t)timediff);
 	strcpy((char*) sec_S.msg, (char*) sec);
 
 	sendDisplay(0, &hrs_S);
