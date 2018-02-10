@@ -512,8 +512,8 @@ void dispAutomateLIS(void)
 	sendChar(19);
 	setCursor(1, 9);
 	pause(1000);
-	sendCMD(10 | 5);
+	sendCMD(10 | 4);
 	pause(4000);
-	sendCMD(8 | 5);
+	sendCMD(8 | 4);
 	pause(2000);
 }
