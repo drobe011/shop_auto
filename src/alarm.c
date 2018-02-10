@@ -17,18 +17,18 @@
 #include <string.h>
 
 extern uint32_t systemTick;
-extern uint8_t updateTime;
-extern uint8_t onPressed;
+extern uint8_t updateTimeFlag;
+extern uint8_t onPressedFlag;
 extern struct users_S *c_user;
 extern struct users_S users[];
-extern struct ALARM_SYSTEM_S automation_O[];
+extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct LIGHT_AUTO_S light_auto[];
 extern struct X_LIGHT_AUTO_S x_light_auto[];
-extern uint32_t timeOut;
-extern uint32_t countDown;
-extern uint32_t delayInt;
+extern uint32_t timer_timeOutFlag;
+extern uint32_t timers_countDown;
+extern uint32_t timer0_interval;
 
 enum ALARMSTATE_T
 {
@@ -56,16 +56,16 @@ uint8_t activeSensors[17];
 STATIC INLINE void updateDisplayTime(void)
 {
 	dispDateTime();
-	updateTime = 0;
+	updateTimeFlag = 0;
 }
 
 STATIC INLINE void setCountDown(uint32_t secs)
 {
-	timeOut = ENABLE;
-	delayInt = secs;
+	timer_timeOutFlag = ENABLE;
+	timer0_interval = secs;
 	Chip_TIMER_Reset(LPC_TIMER0);
 	Chip_TIMER_Reset(LPC_TIMER1);
-	LPC_TIMER0->PR = countDown;
+	LPC_TIMER0->PR = timers_countDown;
 	Chip_TIMER_SetMatch(LPC_TIMER1, 0, secs * 1000);
 	Chip_TIMER_Enable(LPC_TIMER1);
 	Chip_TIMER_Enable(LPC_TIMER0);
@@ -78,19 +78,20 @@ STATIC INLINE void disableCountDown(void)
 	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
 	NVIC_ClearPendingIRQ(TIMER1_IRQn);
 
-	timeOut = DISABLE;
+	timer_timeOutFlag = DISABLE;
 
-	setIOpin(&automation_O[BUZZR], DISABLE);
+	setIOpin(&alarm_system_O[BUZZR], DISABLE);
 }
 
 STATIC INLINE void flashARMLED()
 {
-	setIOpin(&automation_O[ARM_I], ENABLE);
+	setIOpin(&alarm_system_O[ARM_I], ENABLE);
 	pause(100);
-	setIOpin(&automation_O[ARM_I], DISABLE);
-	updateTime = 0;
+	setIOpin(&alarm_system_O[ARM_I], DISABLE);
+	updateTimeFlag = 0;
 }
 
+//Not really good debounce, however keypad has consistent behavior
 STATIC INLINE void debouncer(void)
 {
 	while (getKP(100))
@@ -100,31 +101,32 @@ STATIC INLINE void debouncer(void)
 }
 
 uint8_t getPIN(void);
-void checkMenu(void);
-void checkAlarmSubMenu(void);
-void checkIntLightSubMenu(void);
-void checkExtLightSubMenu(void);
-void changeTimeMenu(void);
-void checkStatus(void);
-void checkAuto_O_Status(void);
-void editBuffers(void); //move to sysconfig
-void changeDarkTH(void);
-void changeArmDelay(void);
-void armingDelay(void);
-void changeEntryDelay(void);
 uint8_t pollAlarmSensors(void);
 uint8_t pollAutomation(void);
 uint8_t checkReadyToArm(void);
 uint8_t entryDelay(uint8_t active);
-void editSensor(uint8_t sensorid);
-void editAuto_O(uint8_t sensorid);
-void checkMotionLightStatus(void);
-void editMotionLightSensor(uint8_t sensorid);
-void showAllSensorStat(void);
-void showAllAuto_O_Stat(void);
-void showAllXMSStat(void);
+void checkMenu(void);
 void checkPIN(void);
 void showUpTime(void);
+
+void menu_Arm(void);
+void menu_Lights_Int(void);
+void menu_Lights_Ext(void);
+void menu_changeTime(void);
+void menu_inputStatus(void);
+void subMenu_inputStatusAll(void);
+void subMenu_edit_Inputs(uint8_t sensorid);
+void menu_outputStatus(void);
+void subMenu_outputStatusAll(void);
+void subMenu_edit_Outputs(uint8_t sensorid);
+void menu_edit_IObuffers(void);
+void menu_edit_DarkTH(void);
+void menu_edit_ArmDelay(void);
+void armingDelay(void);
+void menu_edit_EntryDelay(void);
+void menu_ExtMotionSensorStatus(void);
+void subMenu_ExtMotionSensorAll(void);
+void subMenu_edit_ExtMotionSensor(uint8_t sensorid);
 
 int main(void)
 {
@@ -154,33 +156,28 @@ int main(void)
 				sensorsActive = pollAlarmSensors();
 				pollAutomation();
 				if (sensorsActive) entryDelay(sensorsActive);
-				if (updateTime) flashARMLED();
+				if (updateTimeFlag) flashARMLED();
 				break;
 			case DISARM:
-				setIOpin(&automation_O[SIREN], DISABLE);
+				setIOpin(&alarm_system_O[SIREN], DISABLE);
 				RESET_PIN_ATTEMPTS();
 				DISABLE_ON_PWR();
 				dispMainDARD(c_user->name);
 				displayNormal();
 				displayON();
-				ALARMSTATE = DISARMED;
 				readyToArm = 2;  //SO IT DISPLAYS AFTER WRONG KEYPRESS
+				ALARMSTATE = DISARMED;
 				break;
 			case DISARMED:
-				if (updateTime)
-					updateDisplayTime();
-				if (!dispDimmed && CHECK_DIM_TIMER())
-					displayDim();
-				if (dispDimmed == 1 && CHECK_DISPLAY_OFF_TIMER())
-					displayOFF();
-				if (checkReadyToArm() != readyToArm)
-					displayReadyToArm();
+				if (updateTimeFlag) updateDisplayTime();
+				if (!dispDimmed && CHECK_DIM_TIMER()) displayDim();
+				if (dispDimmed == 1 && CHECK_DISPLAY_OFF_TIMER()) displayOFF();
+				if (checkReadyToArm() != readyToArm) displayReadyToArm();
 				checkMenu();
 				pollAutomation();
 				break;
 			case ACTIVATE_ALARM:
-				setIOpin(&automation_O[SIREN], ENABLE);
-				//
+				setIOpin(&alarm_system_O[SIREN], ENABLE);
 				ALARMSTATE = ALARM_ACTIVATED;
 				break;
 			case ALARM_ACTIVATED:
@@ -206,7 +203,7 @@ uint8_t getPIN(void)
 			return 0;
 		}
 	}
-	onPressed = 0;
+	onPressedFlag = 0;
 	DISABLE_ON_PWR();
 	for (uint8_t keys = 0; keys < 4; keys++)
 	{
@@ -266,37 +263,37 @@ void checkMenu(void)
 		case KP_Mplus:
 			if (!readyToArm || !OE_INPUT_ON())
 				return;
-			checkAlarmSubMenu();
+			menu_Arm();
 			break;
 		case KP_MRC:
-			checkIntLightSubMenu();
+			menu_Lights_Int();
 			break;
 		case KP_Mminus:
-			checkExtLightSubMenu();
+			menu_Lights_Ext();
 			break;
 		case KP_root:
-			changeTimeMenu();
+			menu_changeTime();
 			break;
 		case KP_equal:
-			checkStatus();
+			menu_inputStatus();
 			break;
 		case KP_pcnt:
-			editBuffers();
+			menu_edit_IObuffers();
 			break;
 		case KP_div:
-			changeDarkTH();
+			menu_edit_DarkTH();
 			break;
 		case KP_plus:
-			changeArmDelay();
+			menu_edit_ArmDelay();
 			break;
 		case KP_minus:
-			changeEntryDelay();
+			menu_edit_EntryDelay();
 			break;
 		case KP_dec:
-			checkMotionLightStatus();
+			menu_ExtMotionSensorStatus();
 			break;
 		case KP_times:
-			checkAuto_O_Status();
+			menu_outputStatus();
 			break;
 		case KP_0:
 			showUpTime();
@@ -304,7 +301,8 @@ void checkMenu(void)
 		}
 	}
 }
-void checkAlarmSubMenu(void)
+
+void menu_Arm(void)
 {
 	uint32_t selection = 0;
 
@@ -335,7 +333,7 @@ void checkAlarmSubMenu(void)
 	}
 }
 
-void checkIntLightSubMenu(void)
+void menu_Lights_Int(void)
 {
 	uint32_t selection = 0;
 
@@ -351,13 +349,13 @@ void checkIntLightSubMenu(void)
 			switch (selection)
 			{
 			case KP_1: //MAIN LIGHTS TOGGLE
-				setIOpin(&automation_O[L_I_M], (getIOpin(&alarm_system_I[LIM]) ^ 1));
+				setIOpin(&alarm_system_O[L_I_M], (getIOpin(&alarm_system_I[LIM]) ^ 1));
 				break;
 			case KP_2: //SUPP LIGHTS TOGGLE
-				setIOpin(&automation_O[L_I_S], (getIOpin(&alarm_system_I[LIS]) ^ 1));
+				setIOpin(&alarm_system_O[L_I_S], (getIOpin(&alarm_system_I[LIS]) ^ 1));
 				break;
 			case KP_3: //FAN TOGGLE
-				setIOpin(&automation_O[FAN], (getIOpin(&alarm_system_I[I_FAN]) ^ 1));
+				setIOpin(&alarm_system_O[FAN], (getIOpin(&alarm_system_I[I_FAN]) ^ 1));
 				break;
 			}
 			dispIntLight();
@@ -365,7 +363,7 @@ void checkIntLightSubMenu(void)
 	}
 }
 
-void checkExtLightSubMenu(void)
+void menu_Lights_Ext(void)
 {
 	uint32_t selection = 0;
 
@@ -382,15 +380,15 @@ void checkExtLightSubMenu(void)
 			switch (selection)
 			{
 			case KP_1: //SOUTH LIGHT TOGGLE
-				setIOpin(&automation_O[L_X_S], (getIOpin(&automation_O[L_X_S]) ^ 1));
+				setIOpin(&alarm_system_O[L_X_S], (getIOpin(&alarm_system_O[L_X_S]) ^ 1));
 				break;
 			case KP_2: //NORTH LIGHT TOGGLE
-				setIOpin(&automation_O[L_X_N], (getIOpin(&automation_O[L_X_N]) ^ 1));
+				setIOpin(&alarm_system_O[L_X_N], (getIOpin(&alarm_system_O[L_X_N]) ^ 1));
 			case KP_3: //EAST LIGHT TOGGLE
-				setIOpin(&automation_O[L_X_E], (getIOpin(&automation_O[L_X_E]) ^ 1));
+				setIOpin(&alarm_system_O[L_X_E], (getIOpin(&alarm_system_O[L_X_E]) ^ 1));
 				break;
 			case KP_4: //WEST LIGHT TOGGLE
-				setIOpin(&automation_O[L_X_W], (getIOpin(&automation_O[L_X_W]) ^ 1));
+				setIOpin(&alarm_system_O[L_X_W], (getIOpin(&alarm_system_O[L_X_W]) ^ 1));
 				break;
 			}
 			dispExtLight();
@@ -398,54 +396,44 @@ void checkExtLightSubMenu(void)
 	}
 }
 
-void changeTimeMenu(void)
+void menu_changeTime(void)
 {
 	uint32_t selection[2] = { 0, 0 };
 	uint32_t value = 0;
 	RTC_TIME_T tempTime;
 
 	dispTimeChange(HR);
-	if (!getKPInput(selection, 2))
-		return;
+	if (!getKPInput(selection, 2)) return;
 	value = (selection[0] * 10) + selection[1];
-	if (value > 23)
-		return;
+	if (value > 23) return;
 	tempTime.time[RTC_TIMETYPE_HOUR] = value;
 	pause(500);
 
 	dispTimeChange(MINIT);
-	if (!getKPInput(selection, 2))
-		return;
+	if (!getKPInput(selection, 2)) return;
 	value = (selection[0] * 10) + selection[1];
-	if (value > 59)
-		return;
+	if (value > 59) return;
 	tempTime.time[RTC_TIMETYPE_MINUTE] = value;
 	pause(500);
 
 	dispTimeChange(MOS);
-	if (!getKPInput(selection, 2))
-		return;
+	if (!getKPInput(selection, 2)) return;
 	value = (selection[0] * 10) + selection[1];
-	if (value > 12)
-		return;
+	if (value > 12) return;
 	tempTime.time[RTC_TIMETYPE_MONTH] = value;
 	pause(500);
 
 	dispTimeChange(DAY);
-	if (!getKPInput(selection, 2))
-		return;
+	if (!getKPInput(selection, 2)) return;
 	value = (selection[0] * 10) + selection[1];
-	if (value > 31)
-		return;
+	if (value > 31) return;
 	tempTime.time[RTC_TIMETYPE_DAYOFMONTH] = value;
 	pause(500);
 
 	dispTimeChange(YR);
-	if (!getKPInput(selection, 2))
-		return;
+	if (!getKPInput(selection, 2)) return;
 	value = (selection[0] * 10) + selection[1];
-	if (value > 50)
-		return;
+	if (value > 50) return;
 	tempTime.time[RTC_TIMETYPE_YEAR] = (2000 + value);
 	pause(500);
 
@@ -453,28 +441,26 @@ void changeTimeMenu(void)
 	Chip_RTC_SetFullTime(LPC_RTC, &tempTime);
 }
 
-void checkStatus(void)
+void menu_inputStatus(void)
 {
 	uint32_t selection[2] = { 0, 0 };
 
 	uint32_t value = 0;
 
-	dispSensorStatus(0);
+	dispInputStrings(0);
 	setCursor(0, 9);
 	if (!getKPInput(selection, 2))
 	{
-		showAllSensorStat();
+		subMenu_inputStatusAll();
 		return;
 	}
-	if (selection[0] == 255)
-		return;
+	if (selection[0] == 255) return;
 	value = (selection[0] * 10) + selection[1];
-	if (value > NUM_OF_SYSTEMS - 1)
-		return;
+	if (value > NUM_OF_SYSTEMS - 1) return;
 
 	uint32_t menuTimer = systemTick;
 
-	dispSensor(value);
+	dispInput(value);
 
 	selection[0] = 0;
 
@@ -482,13 +468,12 @@ void checkStatus(void)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection[0])
-			break;
+		if (selection[0]) break;
 	}
 
 	if (selection[0] == KP_equal)
 	{
-		editSensor(value);
+		subMenu_edit_Inputs(value);
 	}
 
 	menuTimer = systemTick;
@@ -499,14 +484,14 @@ void checkStatus(void)
 	}
 }
 
-void editSensor(uint8_t sensorid)
+void subMenu_edit_Inputs(uint8_t sensorid)
 {
 	uint32_t menuTimer = systemTick;
 	uint32_t selection[3] = { 0, 0, 0 };
 	uint32_t value;
 	uint8_t byteStorage[4];
 
-	dispSensorEdit(sensorid);
+	dispEditInput(sensorid);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
@@ -545,16 +530,16 @@ void editSensor(uint8_t sensorid)
 			saveByte(((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 8), byteStorage[3]);
 			break;
 		}
-		dispSensorEdit(sensorid);
+		dispEditInput(sensorid);
 	}
 }
 
-void editAuto_O(uint8_t sensorid)
+void subMenu_edit_Outputs(uint8_t sensorid)
 {
 	uint32_t menuTimer = systemTick;
 	uint32_t selection[1] = { 0 };
 
-	dispAuto_O_Edit(sensorid);
+	dispEditOutput(sensorid);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
@@ -563,29 +548,29 @@ void editAuto_O(uint8_t sensorid)
 		switch (selection[0])
 		{
 		case KP_1:
-			automation_O[sensorid].active = (automation_O[sensorid].active ? 0 : 1);
-			saveByte((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 1, automation_O[sensorid].active);
+			alarm_system_O[sensorid].active = (alarm_system_O[sensorid].active ? 0 : 1);
+			saveByte((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 1, alarm_system_O[sensorid].active);
 			break;
 		case KP_2:
-			automation_O[sensorid].sig_active_level = (automation_O[sensorid].sig_active_level ? 0 : 1);
-			saveByte(((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 2), automation_O[sensorid].sig_active_level);
+			alarm_system_O[sensorid].sig_active_level = (alarm_system_O[sensorid].sig_active_level ? 0 : 1);
+			saveByte(((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 2), alarm_system_O[sensorid].sig_active_level);
 			break;
 		}
-		dispAuto_O_Edit(sensorid);
+		dispEditOutput(sensorid);
 	}
 }
 
-void checkAuto_O_Status(void)
+void menu_outputStatus(void)
 {
 	uint32_t selection[2] = { 0, 0 };
 
 	uint32_t value = 0;
 
-	dispAuto_O_Status(0);
+	dispOutputStrings(0);
 	setCursor(0, 9);
 	if (!getKPInput(selection, 2))
 	{
-		showAllAuto_O_Stat();
+		subMenu_outputStatusAll();
 		return;
 	}
 	if (selection[0] == 255)
@@ -596,7 +581,7 @@ void checkAuto_O_Status(void)
 
 	uint32_t menuTimer = systemTick;
 
-	dispAuto_O(value);
+	dispOutput(value);
 
 	selection[0] = 0;
 
@@ -609,9 +594,9 @@ void checkAuto_O_Status(void)
 			break;
 	}
 
-	if (selection[0] == KP_equal)
+	if (selection[0] == KP_times)
 	{
-		editAuto_O(value);
+		subMenu_edit_Outputs(value);
 	}
 
 	menuTimer = systemTick;
@@ -623,17 +608,17 @@ void checkAuto_O_Status(void)
 }
 
 //AUTOMATION SENSORS
-void checkMotionLightStatus(void)
+void menu_ExtMotionSensorStatus(void)
 {
 	uint32_t selection[2] = { 0, 0 };
 
 	uint32_t value = 0;
 
-	dispSensorStatus(0);
+	dispInputStrings(0);
 	setCursor(0, 9);
 	if (!getKPInput(selection, 1))
 	{
-		showAllXMSStat();
+		subMenu_ExtMotionSensorAll();
 		return;
 	}
 	if (selection[0] == 255)
@@ -658,7 +643,7 @@ void checkMotionLightStatus(void)
 
 	if (selection[0] == KP_dec)
 	{
-		editMotionLightSensor(value);
+		subMenu_edit_ExtMotionSensor(value);
 	}
 
 	menuTimer = systemTick;
@@ -669,14 +654,14 @@ void checkMotionLightStatus(void)
 	}
 }
 
-void editMotionLightSensor(uint8_t sensorid)
+void subMenu_edit_ExtMotionSensor(uint8_t sensorid)
 {
 	uint32_t menuTimer = systemTick;
 	uint32_t selection[3] = { 0, 0, 0 };
 	uint32_t value;
 	uint8_t byteStorage[4];
 
-	dispMotionSensorEdit(sensorid);
+	dispEditMotionSensor(sensorid);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
@@ -716,10 +701,11 @@ void editMotionLightSensor(uint8_t sensorid)
 			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 6),
 					byteStorage[3]);
 		}
-		dispMotionSensorEdit(sensorid);
+		dispEditMotionSensor(sensorid);
 	}
 }
-void changeDarkTH(void)
+
+void menu_edit_DarkTH(void)
 {
 	uint32_t selection[3];
 	uint32_t thValue = 0;
@@ -739,7 +725,7 @@ void changeDarkTH(void)
 	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
 }
 
-void changeArmDelay(void)
+void menu_edit_ArmDelay(void)
 {
 	uint32_t selection[3];
 	uint32_t adValue = 0;
@@ -759,7 +745,7 @@ void changeArmDelay(void)
 	saveByte(ARM_DELAY_OFFSET, ARM_DELAY);
 }
 
-void changeEntryDelay(void)
+void menu_edit_EntryDelay(void)
 {
 	uint32_t selection[3];
 	uint32_t edValue = 0;
@@ -779,7 +765,7 @@ void changeEntryDelay(void)
 	saveByte(ENTRY_DELAY_OFFSET, ENTRY_DELAY);
 }
 
-void editBuffers(void)
+void menu_edit_IObuffers(void)
 {
 	uint32_t selection[1];
 	selection[0] = 0;
@@ -853,12 +839,12 @@ uint8_t checkReadyToArm(void)
 
 	if (error_led)
 	{
-		setIOpin(&automation_O[ERROR_O], ENABLE);
+		setIOpin(&alarm_system_O[ERROR_O], ENABLE);
 		return 0;
 	}
 	else
 	{
-		setIOpin(&automation_O[ERROR_O], DISABLE);
+		setIOpin(&alarm_system_O[ERROR_O], DISABLE);
 		return 1;
 	}
 }
@@ -867,7 +853,7 @@ void armingDelay(void)
 {
 	setCountDown(ARM_DELAY);
 	displayArming();  //DIDN'T SEND TO PAUSE IN CASE WANTED IT TO DO SOMETHING
-	while (timeOut)
+	while (timer_timeOutFlag)
 	{
 		__NOP();
 	}
@@ -879,9 +865,9 @@ uint8_t entryDelay(uint8_t active)
 	{
 		setCountDown(ENTRY_DELAY);
 		ENABLE_ON_PWR();
-		while (timeOut)
+		while (timer_timeOutFlag)
 		{
-			if (onPressed)
+			if (onPressedFlag)
 			{
 				displayPIN();
 				if (getPIN() == 2)
@@ -920,7 +906,7 @@ uint8_t pollAutomation(void)
 			{
 				if (getIOpin(&motion_lights[sensor]))
 				{
-					setIOpin(&automation_O[motion_lights[sensor].device], ENABLE);
+					setIOpin(&alarm_system_O[motion_lights[sensor].device], ENABLE);
 					motion_lights[sensor].timestamp = systemTick;
 				}
 			}
@@ -929,7 +915,7 @@ uint8_t pollAutomation(void)
 			{
 				if (systemTick - motion_lights[sensor].timestamp > (motion_lights[sensor].delay * (1000 * 60)))
 				{
-					setIOpin(&automation_O[motion_lights[sensor].device], DISABLE);
+					setIOpin(&alarm_system_O[motion_lights[sensor].device], DISABLE);
 					motion_lights[sensor].timestamp = 0;
 				}
 			}
@@ -946,19 +932,19 @@ uint8_t pollAutomation(void)
 						if ((uint8_t)checkTime.time[RTC_TIMETYPE_SECOND] == 0)
 						{
 							light_auto[iLights].active = ENABLE;
-							setIOpin(&automation_O[L_I_S], ENABLE);
-							automation_O[L_I_S].timestamp = systemTick;
+							setIOpin(&alarm_system_O[L_I_S], ENABLE);
+							alarm_system_O[L_I_S].timestamp = systemTick;
 							//setIOpin(&automation_O[ARM_I], ENABLE); FOR TESTING
 						}
 			}
 			else //check to turn off
 			{
-				if (TIME_UP(automation_O[L_I_S].timestamp, (light_auto[iLights].duration * (1000 * 60))))
+				if (TIME_UP(alarm_system_O[L_I_S].timestamp, (light_auto[iLights].duration * (1000 * 60))))
 				{
 					light_auto[iLights].active = DISABLE;
-					setIOpin(&automation_O[L_I_S], DISABLE);
+					setIOpin(&alarm_system_O[L_I_S], DISABLE);
 					//setIOpin(&automation_O[ARM_I], DISABLE);
-					automation_O[L_I_S].timestamp = 0;
+					alarm_system_O[L_I_S].timestamp = 0;
 				}
 			}
 		}
@@ -970,30 +956,30 @@ uint8_t pollAutomation(void)
 					if ((uint8_t)checkTime.time[RTC_TIMETYPE_MINUTE] == x_light_auto[xstrobe].min)
 						if ((uint8_t)checkTime.time[RTC_TIMETYPE_SECOND] == 0)
 						{
-							setIOpin(&automation_O[L_X_N], ENABLE);
+							setIOpin(&alarm_system_O[L_X_N], ENABLE);
 							pause(250);
-							setIOpin(&automation_O[L_X_N], DISABLE);
-							setIOpin(&automation_O[L_X_E], ENABLE);
+							setIOpin(&alarm_system_O[L_X_N], DISABLE);
+							setIOpin(&alarm_system_O[L_X_E], ENABLE);
 							pause(250);
-							setIOpin(&automation_O[L_X_E], DISABLE);
-							setIOpin(&automation_O[L_X_S], ENABLE);
+							setIOpin(&alarm_system_O[L_X_E], DISABLE);
+							setIOpin(&alarm_system_O[L_X_S], ENABLE);
 							pause(250);
-							setIOpin(&automation_O[L_X_S], DISABLE);
-							setIOpin(&automation_O[L_X_W], ENABLE);
+							setIOpin(&alarm_system_O[L_X_S], DISABLE);
+							setIOpin(&alarm_system_O[L_X_W], ENABLE);
 							pause(250);
-							setIOpin(&automation_O[L_X_W], DISABLE);
+							setIOpin(&alarm_system_O[L_X_W], DISABLE);
 						}
 		}
 	}
 	return numActiveSensors;
 }
 
-void showAllSensorStat(void)
+void subMenu_inputStatusAll(void)
 {
 	uint8_t sensorStatus[NUM_OF_SYSTEMS] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 	uint8_t sensorValue = 0;
 
-	dispSensAll();
+	dispInputAll();
 
 	do
 	{
@@ -1012,17 +998,17 @@ void showAllSensorStat(void)
 	debouncer();
 }
 
-void showAllAuto_O_Stat(void)
+void subMenu_outputStatusAll(void)
 {
 	//uint8_t sensorStatus[NUM_OF_AUTO_O] = {2,2,2,2,2,2,2,2,2,2,2};
 	uint8_t sensorValue = 0;
 
-	dispAuto_O_All();
+	dispOutputAll();
 	setCursor(0,4);
 
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_O; sensorid++)
 	{
-		sensorValue = getIOpin(&automation_O[sensorid]);
+		sensorValue = getIOpin(&alarm_system_O[sensorid]);
 		sendChar(sensorValue + 48);
 	}
 
@@ -1034,9 +1020,9 @@ void showAllAuto_O_Stat(void)
 	debouncer();
 }
 
-void showAllXMSStat(void)
+void subMenu_ExtMotionSensorAll(void)
 {
-	dispAllXMSStat();
+	dispMotionSensorAll();
 
 	do
 	{
@@ -1046,7 +1032,7 @@ void showAllXMSStat(void)
 		{
 			sendChar(getIOpin(&motion_lights[sensorid]) + 48);
 			sendChar('-');
-			sendChar(getIOpin(&automation_O[motion_lights[sensorid].device]) + 48);
+			sendChar(getIOpin(&alarm_system_O[motion_lights[sensorid].device]) + 48);
 			if (sensorid < 3)
 			{
 				sendChar('|');
@@ -1060,7 +1046,7 @@ void showAllXMSStat(void)
 
 void checkPIN(void)
 {
-	if (onPressed)
+	if (onPressedFlag)
 	{
 		displayPIN();
 		if (getPIN() == 2) ALARMSTATE = DISARM;

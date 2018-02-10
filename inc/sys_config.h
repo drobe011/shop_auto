@@ -12,7 +12,8 @@
 #define VERSION_MINOR "a"
 
 // ALARM SYSTEMS GLOBALS AND DEFINES
-//
+// SHORTCUTS FOR DEFINING STRUCT MEMBERS
+// SHOULD MERGE AND USE ALREADY DEFINED ENUM
 
 #define A_S_INACTIVE 0
 #define A_S_ACTIVE 1
@@ -51,6 +52,7 @@ struct X_LIGHT_AUTO_S
 {
 	uint8_t hour;
 	uint8_t min;
+	uint8_t active;
 };
 
 //

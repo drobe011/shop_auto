@@ -16,28 +16,27 @@ keymap.txt
      	[M+] = ARM MENU
      		[M+] = ARM AWAY
      		[sqrt] = ARM AWAY (NO INT AUTOMATION)
-     		[  / ] = ARM AWAY (NO EXT AUTOMATION)
-     		[  - ] = ARM AWAY (NO AUTOMATION)
-     		[  = ] = ARM STAY
+     		[ / ] = ARM AWAY (NO EXT AUTOMATION)
+     		[ - ] = ARM AWAY (NO AUTOMATION)
+     		[ = ] = ARM STAY
      		
      	[MRC] = INTERIOR LIGHT MENU
-     		[ 7/4 ] = MAIN LIGHTS			|
-     		[ 8/5 ] = SUPPLEMENT LIGHTS	} [0][1] = ON/OFF
-     		[ 1/0 ] = ALL LIGHTS
-     		[ %/* ] = FAN					|
+     		[ 1 ] = MAIN LIGHTS
+     		[ 2 ] = SUPPLEMENT LIGHTS
+     		[ 3 ] = FAN
      	
      	[M-] = EXTERIOR LIGHTS MENU
-     		[ 1 ] = EAST LIGHT
-     		[ 2 ] = SOUTH LIGHT
-     		[ 3 ] = NORTH LIGHT
+     		[ 1 ] = SOUTH LIGHT
+     		[ 2 ] = NORTH LIGHT
+     		[ 3 ] = EAST LIGHT
      		[ 4 ] = WEST LIGHT
-     		[ 1 ] = ALL ON
-     		[ 0 ] = ALL OFF
      		
      	[%] = INPUT/OUTPUT BUFFERS
      	
      	[X] = CHECK OUTPUTS
-     	
+     		[KEYPAD] = SELECTION
+     			[X] = Edit sensor info
+     			
      	[0] = SHOW UPTIME
      			
      	[SQRT] = CHANGE TIME

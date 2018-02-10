@@ -14,7 +14,7 @@
 
 extern struct users_S *c_user;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
-extern struct ALARM_SYSTEM_S automation_O[];
+extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern RTC_TIME_T cTime;
 extern uint8_t readyToArm;
@@ -59,7 +59,9 @@ struct MSG_S DISP_MOTN_EDIT = { 1, 0, "[1] [2] [3]" };
 struct MSG_S DISP_XMTN_ALL = { 0, 0, "  S |  N |  E |  W" };
 struct MSG_S DISP_SENS_ALL = { 1, 2, "*1234567890123" };
 struct MSG_S DISP_AUTO_O_ALL = { 1, 4, "SNEWBFMSXAE" };
-struct MSG_S DISP_UPTIME = { 0, 1, "UPTIME: 000:00:00" };
+struct MSG_S DISP_UPTIME = { 0, 0, "UPTIME: 000:00:00" };
+struct MSG_S DISP_UPTIME1 = { 1, 0, "BOOT: 00/00/00 00:00" };
+
 
 void clearLine(uint8_t row)
 {
@@ -127,13 +129,13 @@ void dispExtLight(void)
 
 	sendDisplay(0, &DISP_EXT_LIGHT1);
 	setCursor(0, 2);
-	sendChar(getIOpin(&automation_O[L_X_S]) ? 'Y' : 'N');
+	sendChar(getIOpin(&alarm_system_O[L_X_S]) ? 'Y' : 'N');
 	setCursor(0, 7);
-	sendChar(getIOpin(&automation_O[L_X_N]) ? 'Y' : 'N');
+	sendChar(getIOpin(&alarm_system_O[L_X_N]) ? 'Y' : 'N');
 	setCursor(0, 12);
-	sendChar(getIOpin(&automation_O[L_X_E]) ? 'Y' : 'N');
+	sendChar(getIOpin(&alarm_system_O[L_X_E]) ? 'Y' : 'N');
 	setCursor(0, 17);
-	sendChar(getIOpin(&automation_O[L_X_W]) ? 'Y' : 'N');
+	sendChar(getIOpin(&alarm_system_O[L_X_W]) ? 'Y' : 'N');
 }
 
 void dispTimeChange(uint8_t mode)
@@ -164,32 +166,32 @@ void dispTimeChange(uint8_t mode)
 	}
 }
 
-void dispSensor(uint8_t item)
+void dispInput(uint8_t item)
 {
 	struct MSG_S sensor = { 0, 15, "" };
 	strcpy((char*) sensor.msg, (char*) alarm_system_I[item].name);
 	sendDisplay(0, &sensor);
 	clearLine(1);
 	setCursor(1, 0);
-	dispSensorStatus((alarm_system_I[item].active ? 1 : 2));
+	dispInputStrings((alarm_system_I[item].active ? 1 : 2));
 	setCursor(1, 10);
-	dispSensorStatus((alarm_system_I[item].armedstate ? 3 : 4));
+	dispInputStrings((alarm_system_I[item].armedstate ? 3 : 4));
 	setCursor(1, 19);
 	sendChar(getIOpin(&alarm_system_I[item]) + 48);
 }
 
-void dispAuto_O(uint8_t item)
+void dispOutput(uint8_t item)
 {
 	struct MSG_S sensor = { 0, 15, "" };
-	strcpy((char*) sensor.msg, (char*) automation_O[item].name);
+	strcpy((char*) sensor.msg, (char*) alarm_system_O[item].name);
 	sendDisplay(0, &sensor);
 	clearLine(1);
 	setCursor(1, 0);
-	dispAuto_O_Status((automation_O[item].active ? 1 : 2));
+	dispOutputStrings((alarm_system_O[item].active ? 1 : 2));
 	setCursor(1, 10);
-	dispAuto_O_Status((automation_O[item].armedstate ? 3 : 4));
+	dispOutputStrings((alarm_system_O[item].armedstate ? 3 : 4));
 	setCursor(1, 19);
-	sendChar(getIOpin(&automation_O[item]) + 48);
+	sendChar(getIOpin(&alarm_system_O[item]) + 48);
 }
 
 void dispMotionSensor(uint8_t item)
@@ -200,9 +202,9 @@ void dispMotionSensor(uint8_t item)
 	strcpy((char*) sensor.msg, (char*) motion_lights[item].name);
 	dispClear();
 	sendDisplay(0, &sensor);
-	dispSensorStatus((motion_lights[item].active ? 1 : 2));
+	dispInputStrings((motion_lights[item].active ? 1 : 2));
 	setCursor(1, 19);
-	sendChar(getIOpin(&automation_O[motion_lights[item].device]) + 48);
+	sendChar(getIOpin(&alarm_system_O[motion_lights[item].device]) + 48);
 	sendDisplay(0, &DISP_MOTION_DUR);
 	sprintf(dur, "%03d", motion_lights[item].delay);
 	struct MSG_S dur_tmp = { 0, 13, "" };
@@ -210,7 +212,7 @@ void dispMotionSensor(uint8_t item)
 	sendDisplay(0, &dur_tmp);
 }
 
-void dispSensorStatus(uint8_t item)
+void dispInputStrings(uint8_t item)
 {
 	switch (item)
 	{
@@ -233,7 +235,7 @@ void dispSensorStatus(uint8_t item)
 	}
 }
 
-void dispAuto_O_Status(uint8_t item)
+void dispOutputStrings(uint8_t item)
 {
 	switch (item)
 	{
@@ -316,7 +318,7 @@ void dispDarkTH(void)
 	setCursor(1, 15);
 }
 
-void dispSensorEdit(uint8_t sensorid)
+void dispEditInput(uint8_t sensorid)
 {
 	dispClear();
 	setCursor(0, 1);
@@ -336,18 +338,18 @@ void dispSensorEdit(uint8_t sensorid)
 	sendDisplay(0, &DISP_SENS_EDIT);
 }
 
-void dispAuto_O_Edit(uint8_t sensorid)
+void dispEditOutput(uint8_t sensorid)
 {
 	dispClear();
 	setCursor(0, 5);
-	sendChar(automation_O[sensorid].active ? 'Y' : 'N');
+	sendChar(alarm_system_O[sensorid].active ? 'Y' : 'N');
 	setCursor(0, 10);
-	sendChar(automation_O[sensorid].sig_active_level ? 'H' : 'L');
+	sendChar(alarm_system_O[sensorid].sig_active_level ? 'H' : 'L');
 
 	sendDisplay(0, &DISP_AUTO_O_EDIT);
 }
 
-void dispMotionSensorEdit(uint8_t sensorid)
+void dispEditMotionSensor(uint8_t sensorid)
 {
 	dispClear();
 	setCursor(0, 1);
@@ -391,19 +393,19 @@ void dispEntryDelay(void)
 	setCursor(1, 17);
 }
 
-void dispAllXMSStat(void)
+void dispMotionSensorAll(void)
 {
 	dispClear();
 	sendDisplay(0, &DISP_XMTN_ALL);
 }
 
-void dispSensAll(void)
+void dispInputAll(void)
 {
 	dispClear();
 	sendDisplay(0, &DISP_SENS_ALL);
 }
 
-void dispAuto_O_All(void)
+void dispOutputAll(void)
 {
 	dispClear();
 	sendDisplay(0, &DISP_AUTO_O_ALL);
@@ -448,21 +450,59 @@ void dispUpTime(void)
 	upMinutes -= upHours * 60;
 
 	char hrs[4];
-	struct MSG_S hrs_S = {0, 9, ""};
+	struct MSG_S hrs_S = {0, 8, ""};
 	sprintf(hrs, "%03d", (uint8_t)upHours);
 	strcpy((char*) hrs_S.msg, (char*) hrs);
 
 	char min[3];
-	struct MSG_S min_S = {0, 13, ""};
+	struct MSG_S min_S = {0, 12, ""};
 	sprintf(min, "%02d", (uint8_t)upMinutes);
 	strcpy((char*) min_S.msg, (char*) min);
 
 	char sec[3];
-	struct MSG_S sec_S = {0, 16, ""};
+	struct MSG_S sec_S = {0, 15, ""};
 	sprintf(sec, "%02d", (uint8_t)timediff);
 	strcpy((char*) sec_S.msg, (char*) sec);
 
 	sendDisplay(0, &hrs_S);
 	sendDisplay(0, &min_S);
 	sendDisplay(0, &sec_S);
+
+	sprintf(hrs, "%02d", (uint8_t)RTCTime.time[RTC_TIMETYPE_HOUR]);
+	strcpy((char*) hrs_S.msg, (char*) hrs);
+	hrs_S.row = 1;
+	hrs_S.column = 15;
+
+	sprintf(min, "%02d", (uint8_t)RTCTime.time[RTC_TIMETYPE_MINUTE]);
+	strcpy((char*) min_S.msg, (char*) min);
+	min_S.row = 1;
+	min_S.column = 18;
+
+	char mos[3];
+	struct MSG_S mos_S = {0, 16, ""};
+	sprintf(mos, "%02d", (uint8_t)RTCTime.time[RTC_TIMETYPE_MONTH]);
+	strcpy((char*) mos_S.msg, (char*) mos);
+	mos_S.row = 1;
+	mos_S.column = 6;
+
+	char day[3];
+	struct MSG_S day_S = {0, 16, ""};
+	sprintf(day, "%02d", (uint8_t)RTCTime.time[RTC_TIMETYPE_DAYOFMONTH]);
+	strcpy((char*) day_S.msg, (char*) day);
+	day_S.row = 1;
+	day_S.column = 9;
+
+	char yr[3];
+	struct MSG_S yr_S = {0, 16, ""};
+	sprintf(yr, "%02d", ((uint8_t)RTCTime.time[RTC_TIMETYPE_DAYOFMONTH]) - 2000);
+	strcpy((char*) yr_S.msg, (char*) yr);
+	yr_S.row = 1;
+	yr_S.column = 9;
+
+	sendDisplay(0, &DISP_UPTIME1);
+	sendDisplay(0, &mos_S);
+	sendDisplay(0, &day_S);
+	sendDisplay(0, &yr_S);
+	sendDisplay(0, &hrs_S);
+	sendDisplay(0, &min_S);
 }

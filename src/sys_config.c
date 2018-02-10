@@ -5,11 +5,11 @@
 #include "eeprom.h"
 
 volatile uint32_t systemTick;
-volatile uint8_t updateTime = 0;
-volatile uint32_t countDown;
-volatile uint32_t delayInt;
-volatile uint32_t timeOut;
-volatile uint8_t onPressed;
+volatile uint8_t updateTimeFlag;
+volatile uint32_t timers_countDown;
+volatile uint32_t timer0_interval;
+volatile uint32_t timer_timeOutFlag;
+volatile uint8_t onPressedFlag;
 
 extern uint8_t dispDimmed;
 extern uint32_t dimTimer;
@@ -50,7 +50,7 @@ struct ALARM_SYSTEM_S motion_lights[] = {
 };
 
 
-struct ALARM_SYSTEM_S automation_O[] =
+struct ALARM_SYSTEM_S alarm_system_O[] =
 {
 		{ "L_X_S", 2, 3, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
 		{ "L_X_N", 0, 18, A_S_INACTIVE, A_S_NOT_REQ_TO_ARM, A_S_ARM_ST_AWAY, A_S_SIG_LEVEL_HIGH, NONE, NONE, NONE },
@@ -67,14 +67,16 @@ struct ALARM_SYSTEM_S automation_O[] =
 
 struct LIGHT_AUTO_S light_auto[] =
 {
-		{ turnon1_hr, turnon1_min, turnon1_dur, 0 },
-		{ turnon2_hr, turnon2_min, turnon2_dur, 0 },
-		{ turnon3_hr, turnon3_min, turnon3_dur, 0 },
+		{ turnon1_hr, turnon1_min, turnon1_dur, DISABLE },
+		{ turnon2_hr, turnon2_min, turnon2_dur, DISABLE },
+		{ turnon3_hr, turnon3_min, turnon3_dur, DISABLE },
+		{ NONE, NONE, NONE, DISABLE },
 };
 
 struct X_LIGHT_AUTO_S x_light_auto[] = {
 		{ flash1_hr, flash1_min },
 		{ flash2_hr, flash2_min },
+		{ NONE, NONE, DISABLE },
 };
 
 static void setUpGPIO(void);
@@ -96,6 +98,7 @@ void dispClear(void)
 	sendCMD(0x01);
 	pause(2);
 }
+
 void setUpSystem(void)
 {
 	SystemCoreClockUpdate();
@@ -112,6 +115,7 @@ void setUpSystem(void)
 	setUpTimer();
 	pause(500);
 }
+
 void setUpGPIO(void)
 {
 	Chip_GPIO_Init(LPC_GPIO);
@@ -141,7 +145,7 @@ void setUpGPIO(void)
 	OUT_BUFF_OFF();
 	for (uint8_t o_p = 0; o_p < NUM_OF_AUTO_O; o_p++)
 	{
-		Chip_GPIO_SetPinDIR(LPC_GPIO, automation_O[o_p].port, automation_O[o_p].pin, true);
+		Chip_GPIO_SetPinDIR(LPC_GPIO, alarm_system_O[o_p].port, alarm_system_O[o_p].pin, true);
 	}
 
 	//SET ADC FOR LIGHT SENSE
@@ -194,14 +198,14 @@ static EEPROM_STATUS setUpEEPROM(void)
 
 void setUpTimer(void)
 {
-	countDown = (SystemCoreClock * .001) -1;
+	timers_countDown = (SystemCoreClock * .001) -1;
 
 	//TIMER0 CONTROLS ON/OFF TIME OF COUNTDOWN
 	Chip_TIMER_Disable(LPC_TIMER0);
 	Chip_TIMER_DeInit(LPC_TIMER0);
 	Chip_TIMER_Init(LPC_TIMER0);
 	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER0, SYSCTL_CLKDIV_1);
-	Chip_TIMER_PrescaleSet(LPC_TIMER0, countDown);
+	Chip_TIMER_PrescaleSet(LPC_TIMER0, timers_countDown);
 	Chip_TIMER_ResetOnMatchDisable(LPC_TIMER0, 0);
 	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER0, 1);
 	Chip_TIMER_SetMatch(LPC_TIMER0, 0, 500);
@@ -219,7 +223,7 @@ void setUpTimer(void)
 	Chip_TIMER_DeInit(LPC_TIMER1);
 	Chip_TIMER_Init(LPC_TIMER1);
 	Chip_Clock_SetPCLKDiv(SYSCTL_CLOCK_TIMER1, SYSCTL_CLKDIV_1);
-	Chip_TIMER_PrescaleSet(LPC_TIMER1, countDown);
+	Chip_TIMER_PrescaleSet(LPC_TIMER1, timers_countDown);
 	Chip_TIMER_ResetOnMatchEnable(LPC_TIMER1, 0);
 	Chip_TIMER_SetMatch(LPC_TIMER1, 0, 30000);
 	Chip_TIMER_Reset(LPC_TIMER1);
@@ -260,6 +264,7 @@ void sendChar(uint8_t data)
 {
 	sendData(data);
 }
+
 void sendDisplay(uint8_t startAtCursor, struct MSG_S *msg)
 {
 	uint8_t row = 0;
@@ -578,29 +583,29 @@ void SysTick_Handler(void)
 void RTC_IRQHandler(void)
 {
 	Chip_RTC_ClearIntPending(LPC_RTC, RTC_INT_COUNTER_INCREASE);
-	updateTime = 1;
+	updateTimeFlag = 1;
 }
 
 void EINT3_IRQHandler(void)
 {
 	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, GPIOINT_PORT0, (1 << ON_));
-	onPressed = 1;
+	onPressedFlag = 1;
 }
 
 void TIMER0_IRQHandler(void)
 {
 	if (Chip_TIMER_MatchPending(LPC_TIMER0, 0))
 	{
-		setIOpin(&automation_O[BUZZR], ENABLE);
+		setIOpin(&alarm_system_O[BUZZR], ENABLE);
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 0);
 	}
 	else
 	{
-		setIOpin(&automation_O[BUZZR], DISABLE);
+		setIOpin(&alarm_system_O[BUZZR], DISABLE);
 		Chip_TIMER_ClearMatch(LPC_TIMER0, 1);
 	}
 
-	LPC_TIMER0->PR -= (115-delayInt) * 13;
+	LPC_TIMER0->PR -= (115-timer0_interval) * 13;
 }
 
 void TIMER1_IRQHandler(void)
@@ -609,7 +614,7 @@ void TIMER1_IRQHandler(void)
 	Chip_TIMER_Disable(LPC_TIMER1);
 	Chip_TIMER_ClearMatch(LPC_TIMER1, 0);
 
-	timeOut = DISABLE;
+	timer_timeOutFlag = DISABLE;
 
-	setIOpin(&automation_O[BUZZR], DISABLE);
+	setIOpin(&alarm_system_O[BUZZR], DISABLE);
 }

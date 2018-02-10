@@ -15,7 +15,7 @@ extern uint8_t ENTRY_DELAY;
 extern uint8_t DARK_THRESHOLD;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
-extern struct ALARM_SYSTEM_S automation_O[];
+extern struct ALARM_SYSTEM_S alarm_system_O[];
 
 EEPROM_STATUS initEEPROM(void)
 {
@@ -170,8 +170,8 @@ EEPROM_STATUS getEEPROMdata(void)
 
 		if (rbuffer[0] == sensorid)
 		{
-			automation_O[sensorid].active = rbuffer[1];
-			automation_O[sensorid].sig_active_level = rbuffer[2];
+			alarm_system_O[sensorid].active = rbuffer[1];
+			alarm_system_O[sensorid].sig_active_level = rbuffer[2];
 		}
 		else
 		{
@@ -274,8 +274,8 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		tbuffer[0] = (address >> 8) & 0xFF;
 		tbuffer[1] = address & 0xFF;
 		tbuffer[2] = sensorid;
-		tbuffer[3] = automation_O[sensorid].active;
-		tbuffer[4] = automation_O[sensorid].sig_active_level;
+		tbuffer[3] = alarm_system_O[sensorid].active;
+		tbuffer[4] = alarm_system_O[sensorid].sig_active_level;
 
 		EPROM_DELAY();
 
