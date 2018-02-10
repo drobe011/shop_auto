@@ -46,7 +46,7 @@ struct MSG_S INPUT_BUFF = { 0, 1, "INPUT[ ] 0:OFF/1:ON" };
 struct MSG_S OUTPUT_BUFF = { 1, 0, "OUTPUT[ ] 2:OFF/3:ON" };
 struct MSG_S DISP_TEMP_CONST = { 1, 12, "000F/00%" };
 struct MSG_S DISP_RDY_ARM = { 1, 9, { 42, '\0' } };
-struct MSG_S DISP_NOTRDY_ARM = { 1, 9, { 219, '\0' } };
+struct MSG_S DISP_NOTRDY_ARM = { 1, 9, { 119, '\0' } };
 struct MSG_S DISP_ARMING = { 0, 0, { "ARMING...." } };
 struct MSG_S DISP_PIN = { 0, 0, "ENTER PIN: " };
 struct MSG_S DISP_DARK1 = { 0, 0, "[0-255]" };
@@ -469,29 +469,29 @@ void dispUpTime(void)
 	sendDisplay(0, &min_S);
 	sendDisplay(0, &sec_S);
 
-	sprintf(hrs, "%02d", RTCTime.time[RTC_TIMETYPE_HOUR]);
+	sprintf(hrs, "%02d", boot_time_LPC.time[RTC_TIMETYPE_HOUR]);
 	strcpy((char*) hrs_S.msg, (char*) hrs);
 	hrs_S.row = 1;
 	hrs_S.column = 15;
 
-	sprintf(min, "%02d", RTCTime.time[RTC_TIMETYPE_MINUTE]);
+	sprintf(min, "%02d", boot_time_LPC.time[RTC_TIMETYPE_MINUTE]);
 	strcpy((char*) min_S.msg, (char*) min);
 	min_S.row = 1;
 	min_S.column = 18;
 
 	char mos[3];
 	struct MSG_S mos_S = {1, 6, ""};
-	sprintf(mos, "%02d", RTCTime.time[RTC_TIMETYPE_MONTH]);
+	sprintf(mos, "%02d", boot_time_LPC.time[RTC_TIMETYPE_MONTH]);
 	strcpy((char*) mos_S.msg, (char*) mos);
 
 	char day[3];
 	struct MSG_S day_S = {1, 9, ""};
-	sprintf(day, "%02d", RTCTime.time[RTC_TIMETYPE_DAYOFMONTH]);
+	sprintf(day, "%02d", boot_time_LPC.time[RTC_TIMETYPE_DAYOFMONTH]);
 	strcpy((char*) day_S.msg, (char*) day);
 
 	char yr[3];
 	struct MSG_S yr_S = {1, 12, ""};
-	sprintf(yr, "%02d", RTCTime.time[RTC_TIMETYPE_YEAR] - 2000);
+	sprintf(yr, "%02d", boot_time_LPC.time[RTC_TIMETYPE_YEAR] - 2000);
 	strcpy((char*) yr_S.msg, (char*) yr);
 
 	sendDisplay(0, &DISP_UPTIME1);
@@ -509,11 +509,11 @@ void dispAutomateLIS(void)
 	sendDisplay(0, &DISP_AUTO_LIS);
 	sendDisplay(0, &DISP_AUTO_LIS1);
 	setCursor(1, 19);
-	sendChar(19);
+	sendChar(27);
 	setCursor(1, 9);
 	pause(1000);
-	sendCMD(10 | 4);
+	sendCMD(14);
 	pause(4000);
-	sendCMD(8 | 4);
+	sendCMD(12);
 	pause(2000);
 }

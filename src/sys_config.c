@@ -319,9 +319,9 @@ uint8_t initDisplay(void)
 	sendCMD(0x78);				//OLED command set disabled
 	sendCMD(0x08);				//extended function set (2-lines) ?????
 	sendCMD(0x06);				//COM SEG direction
-	sendCMD(0x72);				//function selection B, ROM CGRAM selection
-	sendData(0x0a);				//0x00);
-	//sendCMD(0x2A);				//function set (extended command set)
+	sendCMD(0x72);				//function selection A, ROM CGRAM selection
+	sendData(0x02);				//0x00);
+	sendCMD(0x2A);				//function set (extended command set)
 	sendCMD(0x79);				//OLED command set enabled
 	sendCMD(0xDA);				//set SEG pins hardware configuration
 	sendCMD(0x10);
