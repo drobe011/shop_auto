@@ -1071,5 +1071,28 @@ void showUpTime(void)
 
 void subMenu_edit_AUTO_LIS(void)
 {
-	dispAutomateLIS();
+	uint8_t menuItem = 0;
+	uint32_t selection[2] = { 0, 0 };
+	uint32_t menuTimer = systemTick;
+
+	dispAutomateLIS(menuItem);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		debouncer();
+
+		switch (selection[0])
+		{
+		case KP_plus:
+			if (menuItem < no_of_turnon_times - 1) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		}
+		dispAutomateLIS(menuItem);
+	}
 }

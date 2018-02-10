@@ -9,6 +9,9 @@
 #ifndef MENUS_H_
 #define MENUS_H_
 
+#define ARROW_DOWN 6
+#define ARROW_UP 7
+
 void clearLine(uint8_t row);
 void dispBoot(void);
 void dispMainDARD(uint8_t* value);
@@ -36,6 +39,6 @@ void dispMotionSensorAll(void);
 void dispInputAll(void);
 void dispOutputAll(void);
 void dispUpTime(void);
-void dispAutomateLIS(void);
+void dispAutomateLIS(uint8_t LIS_item);
 
 #endif /* MENUS_H_ */

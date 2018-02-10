@@ -113,7 +113,7 @@ void setUpSystem(void)
 	}
 	setUpUsers();
 	setUpTimer();
-	pause(500);
+	pause(1000);
 }
 
 void setUpGPIO(void)

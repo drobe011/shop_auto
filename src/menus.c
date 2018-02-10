@@ -16,6 +16,7 @@ extern struct users_S *c_user;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct ALARM_SYSTEM_S motion_lights[];
+extern struct LIGHT_AUTO_S light_auto[];
 extern RTC_TIME_T cTime;
 extern uint8_t readyToArm;
 extern uint8_t DARK_THRESHOLD;
@@ -502,18 +503,63 @@ void dispUpTime(void)
 	sendDisplay(0, &min_S);
 }
 
-void dispAutomateLIS(void)
+void dispAutomateLIS(uint8_t LIS_item)
 {
-	dispClear();
+	uint8_t hr = light_auto[LIS_item].hour;
+	uint8_t min = light_auto[LIS_item].min;
+	uint8_t dur = light_auto[LIS_item].duration;
+	uint8_t act = light_auto[LIS_item].active;
 
-	sendDisplay(0, &DISP_AUTO_LIS);
-	sendDisplay(0, &DISP_AUTO_LIS1);
-	setCursor(1, 19);
-	sendChar(6);
+	switch (LIS_item)
+	{
+	case 0:
+		dispClear();
+
+		sendDisplay(0, &DISP_AUTO_LIS);
+		sendDisplay(0, &DISP_AUTO_LIS1);
+		setCursor(0, 19);
+		sendChar(' ');
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 1:
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 3:
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(' ');
+		break;
+	}
+
+	setCursor(0, 9);
+	sendChar(LIS_item + 48 + 1);
+
+	char tmpStr[4];
+	struct MSG_S tmpMSG = {0, 0, ""};
+
+	sprintf(tmpStr, "%02d", hr);
+	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+	setCursor(1, 1);
+	sendDisplay(1, &tmpMSG);
+
+	sprintf(tmpStr, "%02d", min);
+	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+	setCursor(1, 4);
+	sendDisplay(1, &tmpMSG);
+
+	sprintf(tmpStr, "%02d", dur);
+	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
 	setCursor(1, 9);
-	pause(1000);
-	sendCMD(14);
-	pause(4000);
-	sendCMD(12);
-	pause(2000);
+	sendDisplay(1, &tmpMSG);
+
+//	pause(1000);
+//	sendCMD(14);
+//	pause(4000);
+//	sendCMD(12);
+//	pause(2000);
 }
