@@ -507,10 +507,11 @@ void dispAutomateLIS(void)
 	dispClear();
 
 	sendDisplay(0, &DISP_AUTO_LIS);
-	sendDisplay(1, &DISP_AUTO_LIS1);
+	sendDisplay(0, &DISP_AUTO_LIS1);
 	setCursor(1, 19);
 	sendChar(19);
 	setCursor(1, 9);
+	pause(1000);
 	sendCMD(10 | 5);
 	pause(4000);
 	sendCMD(8 | 5);
