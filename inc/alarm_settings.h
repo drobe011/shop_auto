@@ -5,9 +5,12 @@
 #define DIM_OLED_TIME 10000
 #define OFF_OLED_TIME (1000 * 20)
 #define MAX_PIN_TRIES 3
+
+/* TODO: ADD TO MENU AND EEPROM FUNCS */
 #define X_LIGHT_ON_TIME 5
 
-#define no_of_turnon_times 3
+//HAVE ONE MORE IN STRUCT
+#define no_of_turnon_times 4 //ee
 #define turnon1_hr 23
 #define turnon1_min 05
 #define turnon1_dur 5
@@ -18,7 +21,8 @@
 #define turnon3_min 15
 #define turnon3_dur 7
 
-#define no_of_x_flashes 2
+//HAVE ONE MORE IN STRUCT
+#define no_of_x_flashes 3  //ee
 #define flash1_hr 1
 #define flash1_min 5
 #define flash2_hr 3

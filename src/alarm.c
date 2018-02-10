@@ -127,6 +127,7 @@ void menu_edit_EntryDelay(void);
 void menu_ExtMotionSensorStatus(void);
 void subMenu_ExtMotionSensorAll(void);
 void subMenu_edit_ExtMotionSensor(uint8_t sensorid);
+void subMenu_edit_AUTO_LIS(void);
 
 int main(void)
 {
@@ -297,6 +298,9 @@ void checkMenu(void)
 			break;
 		case KP_0:
 			showUpTime();
+			break;
+		case KP_1:
+			subMenu_edit_AUTO_LIS();
 			break;
 		}
 	}
@@ -1063,4 +1067,9 @@ void showUpTime(void)
 	dispUpTime();
 
 	pause(KP_TIMEOUT_SUBMENU_MS);
+}
+
+void subMenu_edit_AUTO_LIS(void)
+{
+	dispAutomateLIS();
 }

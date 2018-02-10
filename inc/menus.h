@@ -36,5 +36,6 @@ void dispMotionSensorAll(void);
 void dispInputAll(void);
 void dispOutputAll(void);
 void dispUpTime(void);
+void dispAutomateLIS(void);
 
 #endif /* MENUS_H_ */

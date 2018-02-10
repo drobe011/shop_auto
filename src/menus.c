@@ -61,7 +61,8 @@ struct MSG_S DISP_SENS_ALL = { 1, 2, "*1234567890123" };
 struct MSG_S DISP_AUTO_O_ALL = { 1, 4, "SNEWBFMSXAE" };
 struct MSG_S DISP_UPTIME = { 0, 0, "UPTIME: 000:00:00" };
 struct MSG_S DISP_UPTIME1 = { 1, 0, "BOOT: 00/00/00 00:00" };
-
+struct MSG_S DISP_AUTO_LIS = { 0, 0, "LIS AUTO 1/4" };
+struct MSG_S DISP_AUTO_LIS1 = { 1, 1, "00:00 @ 00min OFF" };
 
 void clearLine(uint8_t row)
 {
@@ -499,4 +500,19 @@ void dispUpTime(void)
 	sendDisplay(0, &yr_S);
 	sendDisplay(0, &hrs_S);
 	sendDisplay(0, &min_S);
+}
+
+void dispAutomateLIS(void)
+{
+	dispClear();
+
+	sendDisplay(0, &DISP_AUTO_LIS);
+	sendDisplay(1, &DISP_AUTO_LIS1);
+	setCursor(1, 19);
+	sendChar(19);
+	setCursor(1, 9);
+	sendCMD(10 | 5);
+	pause(4000);
+	sendCMD(8 | 5);
+	pause(2000);
 }
