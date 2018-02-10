@@ -68,7 +68,7 @@ struct ALARM_SYSTEM_S alarm_system_O[] =
 struct LIGHT_AUTO_S light_auto[] =
 {
 		{ turnon1_hr, turnon1_min, turnon1_dur, DISABLE },
-		{ turnon2_hr, turnon2_min, turnon2_dur, DISABLE },
+		{ turnon2_hr, turnon2_min, turnon2_dur, ENABLE },
 		{ turnon3_hr, turnon3_min, turnon3_dur, DISABLE },
 		{ NONE, NONE, NONE, DISABLE },
 };

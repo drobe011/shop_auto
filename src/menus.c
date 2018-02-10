@@ -557,6 +557,20 @@ void dispAutomateLIS(uint8_t LIS_item)
 	setCursor(1, 9);
 	sendDisplay(1, &tmpMSG);
 
+	setCursor(1, 15);
+	if (act)
+	{
+		sendChar('O');
+		sendChar('N');
+		sendChar(' ');
+	}
+	else
+	{
+		sendChar('O');
+		sendChar('F');
+		sendChar('F');
+	}
+
 //	pause(1000);
 //	sendCMD(14);
 //	pause(4000);

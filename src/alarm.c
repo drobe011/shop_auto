@@ -128,6 +128,7 @@ void menu_ExtMotionSensorStatus(void);
 void subMenu_ExtMotionSensorAll(void);
 void subMenu_edit_ExtMotionSensor(uint8_t sensorid);
 void subMenu_edit_AUTO_LIS(void);
+void subMenu_edit_Auto_LIS_item(uint8_t item);
 
 int main(void)
 {
@@ -611,7 +612,6 @@ void menu_outputStatus(void)
 	}
 }
 
-//AUTOMATION SENSORS
 void menu_ExtMotionSensorStatus(void)
 {
 	uint32_t selection[2] = { 0, 0 };
@@ -1072,17 +1072,17 @@ void showUpTime(void)
 void subMenu_edit_AUTO_LIS(void)
 {
 	uint8_t menuItem = 0;
-	uint32_t selection[2] = { 0, 0 };
+	uint32_t selection = 0;
 	uint32_t menuTimer = systemTick;
 
 	dispAutomateLIS(menuItem);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
-		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
 
-		switch (selection[0])
+		switch (selection)
 		{
 		case KP_plus:
 			if (menuItem < no_of_turnon_times - 1) menuItem++;
@@ -1092,7 +1092,99 @@ void subMenu_edit_AUTO_LIS(void)
 			if (menuItem) menuItem--;
 			menuTimer = systemTick;
 			break;
+		case KP_equal:
+			subMenu_edit_Auto_LIS_item(menuItem);
+			dispAutomateLIS(menuItem);
+			menuTimer = systemTick;
+			break;
 		}
 		dispAutomateLIS(menuItem);
 	}
+}
+
+void subMenu_edit_Auto_LIS_item(uint8_t item)
+{
+	uint32_t selection[2] = { 0, 0 };
+	uint32_t menuTimer = systemTick;
+	uint8_t value = 0;
+
+	setCursor(1, 1);
+	sendCMD(14);
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		if (!getKPInput(selection, 2))
+		{
+			sendCMD(12);
+			return;
+		}
+		value = (selection[0] * 10) + selection[1];
+		if (value > 23)
+		{
+			sendCMD(12);
+			return;
+		}
+		light_auto[item].hour = value;
+	}
+
+	menuTimer = systemTick;
+	setCursor(1, 4);
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		if (!getKPInput(selection, 2))
+		{
+			sendCMD(12);
+			return;
+		}
+		value = (selection[0] * 10) + selection[1];
+		if (value > 59)
+		{
+			sendCMD(12);
+			return;
+		}
+		light_auto[item].min = value;
+	}
+
+	menuTimer = systemTick;
+	setCursor(1, 9);
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		if (!getKPInput(selection, 2))
+		{
+			sendCMD(12);
+			return;
+		}
+		value = (selection[0] * 10) + selection[1];
+		if (value > 99)
+		{
+			sendCMD(12);
+			return;
+		}
+		light_auto[item].duration = value;
+	}
+
+	menuTimer = systemTick;
+//	setCursor(1, 15);
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		if (!selection[0])
+		{
+			sendCMD(12);
+			return;
+		}
+		light_auto[item].active ^= 1;
+		if (light_auto[item].active)
+		{
+			sendChar('O');
+			sendChar('N');
+			sendChar(' ');
+		}
+		else
+		{
+			sendChar('O');
+			sendChar('F');
+			sendChar('F');
+		}
+	}
+	sendCMD(12);
 }
