@@ -468,36 +468,30 @@ void dispUpTime(void)
 	sendDisplay(0, &min_S);
 	sendDisplay(0, &sec_S);
 
-	sprintf(hrs, "%02d", (uint8_t)RTCTime.time[RTC_TIMETYPE_HOUR]);
+	sprintf(hrs, "%02d", RTCTime.time[RTC_TIMETYPE_HOUR]);
 	strcpy((char*) hrs_S.msg, (char*) hrs);
 	hrs_S.row = 1;
 	hrs_S.column = 15;
 
-	sprintf(min, "%02d", (uint8_t)RTCTime.time[RTC_TIMETYPE_MINUTE]);
+	sprintf(min, "%02d", RTCTime.time[RTC_TIMETYPE_MINUTE]);
 	strcpy((char*) min_S.msg, (char*) min);
 	min_S.row = 1;
 	min_S.column = 18;
 
 	char mos[3];
-	struct MSG_S mos_S = {0, 16, ""};
-	sprintf(mos, "%02d", (uint8_t)RTCTime.time[RTC_TIMETYPE_MONTH]);
+	struct MSG_S mos_S = {1, 6, ""};
+	sprintf(mos, "%02d", RTCTime.time[RTC_TIMETYPE_MONTH]);
 	strcpy((char*) mos_S.msg, (char*) mos);
-	mos_S.row = 1;
-	mos_S.column = 6;
 
 	char day[3];
-	struct MSG_S day_S = {0, 16, ""};
-	sprintf(day, "%02d", (uint8_t)RTCTime.time[RTC_TIMETYPE_DAYOFMONTH]);
+	struct MSG_S day_S = {1, 9, ""};
+	sprintf(day, "%02d", RTCTime.time[RTC_TIMETYPE_DAYOFMONTH]);
 	strcpy((char*) day_S.msg, (char*) day);
-	day_S.row = 1;
-	day_S.column = 9;
 
 	char yr[3];
-	struct MSG_S yr_S = {0, 16, ""};
-	sprintf(yr, "%02d", ((uint8_t)RTCTime.time[RTC_TIMETYPE_DAYOFMONTH]) - 2000);
+	struct MSG_S yr_S = {1, 12, ""};
+	sprintf(yr, "%02d", RTCTime.time[RTC_TIMETYPE_YEAR] - 2000);
 	strcpy((char*) yr_S.msg, (char*) yr);
-	yr_S.row = 1;
-	yr_S.column = 9;
 
 	sendDisplay(0, &DISP_UPTIME1);
 	sendDisplay(0, &mos_S);
