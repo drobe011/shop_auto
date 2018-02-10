@@ -46,7 +46,7 @@ struct MSG_S INPUT_BUFF = { 0, 1, "INPUT[ ] 0:OFF/1:ON" };
 struct MSG_S OUTPUT_BUFF = { 1, 0, "OUTPUT[ ] 2:OFF/3:ON" };
 struct MSG_S DISP_TEMP_CONST = { 1, 12, "000F/00%" };
 struct MSG_S DISP_RDY_ARM = { 1, 9, { 42, '\0' } };
-struct MSG_S DISP_NOTRDY_ARM = { 1, 9, { 119, '\0' } };
+struct MSG_S DISP_NOTRDY_ARM = { 1, 9, { 219, '\0' } };
 struct MSG_S DISP_ARMING = { 0, 0, { "ARMING...." } };
 struct MSG_S DISP_PIN = { 0, 0, "ENTER PIN: " };
 struct MSG_S DISP_DARK1 = { 0, 0, "[0-255]" };
@@ -509,7 +509,7 @@ void dispAutomateLIS(void)
 	sendDisplay(0, &DISP_AUTO_LIS);
 	sendDisplay(0, &DISP_AUTO_LIS1);
 	setCursor(1, 19);
-	sendChar(27);
+	sendChar(6);
 	setCursor(1, 9);
 	pause(1000);
 	sendCMD(14);
