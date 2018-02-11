@@ -207,6 +207,7 @@ uint8_t getPIN(void)
 	}
 	onPressedFlag = 0;
 	DISABLE_ON_PWR();
+	CURSOR_ON();
 	for (uint8_t keys = 0; keys < 4; keys++)
 	{
 		kpData[keys] = getKP(KP_TIMEOUT_DEFAULT_MS + 1000);
@@ -215,6 +216,7 @@ uint8_t getPIN(void)
 		{
 			if (TIME_UP(on_pressed_time, KP_TIMEOUT_DEFAULT_MS))
 			{
+				CURSOR_OFF();
 				ENABLE_ON_PWR();
 				pinAttempts++;
 				return 0;
@@ -223,11 +225,13 @@ uint8_t getPIN(void)
 		sendData('*');
 		if (!kpData[keys])
 		{
+			CURSOR_OFF();
 			ENABLE_ON_PWR();
 			pinAttempts++;
 			return 1;
 		}
 	}
+	CURSOR_OFF();
 	for (uint8_t usersLoop = 1; usersLoop < 5; usersLoop++)
 	{
 		for (uint8_t pinLoop = 0; pinLoop < 4; pinLoop++)
@@ -349,6 +353,7 @@ void menu_Lights_Int(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
+		if(selection == KP_CE) return;
 		if (selection)
 		{
 			switch (selection)
@@ -379,7 +384,7 @@ void menu_Lights_Ext(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-
+		if(selection == KP_CE) return;
 		if (selection)
 		{
 			switch (selection)
@@ -454,39 +459,43 @@ void menu_inputStatus(void)
 
 	dispInputStrings(0);
 	setCursor(0, 9);
+	CURSOR_ON();
 	if (!getKPInput(selection, 2))
 	{
+		CURSOR_OFF();
 		subMenu_inputStatusAll();
 		return;
 	}
+	CURSOR_OFF();
 	if (selection[0] == 255) return;
 	value = (selection[0] * 10) + selection[1];
 	if (value > NUM_OF_SYSTEMS - 1) return;
 
-	uint32_t menuTimer = systemTick;
+//	uint32_t menuTimer = systemTick;
 
 	dispInput(value);
 
 	selection[0] = 0;
 
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
+//	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+//	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection[0]) break;
-	}
+//		if (selection[0]) break;
+//	}
 
 	if (selection[0] == KP_equal)
 	{
 		subMenu_edit_Inputs(value);
 	}
 
-	menuTimer = systemTick;
+//	menuTimer = systemTick;
 
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
-		__NOP();
-	}
+//	pause(KP_TIMEOUT_SUBMENU_MS);
+//	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+//	{
+//		__NOP();
+//	}
 }
 
 void subMenu_edit_Inputs(uint8_t sensorid)
@@ -502,6 +511,7 @@ void subMenu_edit_Inputs(uint8_t sensorid)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
+		if(selection[0] == KP_CE) return;
 		switch (selection[0])
 		{
 		case KP_1:
@@ -542,15 +552,16 @@ void subMenu_edit_Inputs(uint8_t sensorid)
 void subMenu_edit_Outputs(uint8_t sensorid)
 {
 	uint32_t menuTimer = systemTick;
-	uint32_t selection[1] = { 0 };
+	uint32_t selection;
 
 	dispEditOutput(sensorid);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
-		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		if(selection == KP_CE) return; //tests if CE was pressed for abort
 		debouncer();
-		switch (selection[0])
+		switch (selection)
 		{
 		case KP_1:
 			alarm_system_O[sensorid].active = (alarm_system_O[sensorid].active ? 0 : 1);
@@ -573,43 +584,46 @@ void menu_outputStatus(void)
 
 	dispOutputStrings(0);
 	setCursor(0, 9);
+	CURSOR_ON();
 	if (!getKPInput(selection, 2))
 	{
+		CURSOR_OFF();
 		subMenu_outputStatusAll();
 		return;
 	}
+	CURSOR_OFF();
 	if (selection[0] == 255)
 		return;
 	value = (selection[0] * 10) + selection[1];
 	if (value > NUM_OF_AUTO_O - 1)
 		return;
 
-	uint32_t menuTimer = systemTick;
+	//uint32_t menuTimer = systemTick;
 
 	dispOutput(value);
 
 	selection[0] = 0;
 
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
+//	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+//	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
 
-		if (selection[0])
-			break;
-	}
+//		if (selection[0])
+//			break;
+//	}
 
 	if (selection[0] == KP_times)
 	{
 		subMenu_edit_Outputs(value);
 	}
 
-	menuTimer = systemTick;
+//	menuTimer = systemTick;
 
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
-		__NOP();
-	}
+//	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+//	{
+//		__NOP();
+//	}
 }
 
 void menu_ExtMotionSensorStatus(void)
@@ -631,31 +645,31 @@ void menu_ExtMotionSensorStatus(void)
 	if (value > X_MOTION_DETECTORS)
 		return;
 
-	uint32_t menuTimer = systemTick;
+//	uint32_t menuTimer = systemTick;
 
 	dispMotionSensor(value);
 
 	selection[0] = 0;
 
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
+//	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+//	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection[0])
-			break;
-	}
+//		if (selection[0])
+//			break;
+//	}
 
 	if (selection[0] == KP_dec)
 	{
 		subMenu_edit_ExtMotionSensor(value);
 	}
 
-	menuTimer = systemTick;
+//	menuTimer = systemTick;
 
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
-		__NOP();
-	}
+//	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+//	{
+//		__NOP();
+//	}
 }
 
 void subMenu_edit_ExtMotionSensor(uint8_t sensorid)
@@ -671,6 +685,7 @@ void subMenu_edit_ExtMotionSensor(uint8_t sensorid)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
+		if(selection[0] == KP_CE) return;
 		switch (selection[0])
 		{
 		case KP_1:
@@ -715,9 +730,14 @@ void menu_edit_DarkTH(void)
 	uint32_t thValue = 0;
 
 	dispDarkTH();
+	CURSOR_ON();
 	if (!getKPInput(selection, 3))
+	{
+		CURSOR_OFF();
 		return;
+	}
 
+	CURSOR_OFF();
 	thValue = selection[0] * 100;
 	thValue += selection[1] * 10;
 	thValue += selection[2];
@@ -735,9 +755,14 @@ void menu_edit_ArmDelay(void)
 	uint32_t adValue = 0;
 
 	dispArmDelay();
+	CURSOR_ON();
 	if (!getKPInput(selection, 3))
+	{
+		CURSOR_OFF();
 		return;
+	}
 
+	CURSOR_OFF();
 	adValue = selection[0] * 100;
 	adValue += selection[1] * 10;
 	adValue += selection[2];
@@ -755,9 +780,15 @@ void menu_edit_EntryDelay(void)
 	uint32_t edValue = 0;
 
 	dispEntryDelay();
-	if (!getKPInput(selection, 3))
-		return;
+	CURSOR_ON();
 
+	if (!getKPInput(selection, 3))
+	{
+		CURSOR_OFF();
+		return;
+	}
+
+	CURSOR_OFF();
 	edValue = selection[0] * 100;
 	edValue += selection[1] * 10;
 	edValue += selection[2];

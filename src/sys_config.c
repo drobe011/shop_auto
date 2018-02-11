@@ -238,6 +238,10 @@ void pause(uint32_t ps)
 	uint32_t ticks = systemTick;
 	while (TIME_WAIT(ticks, ps))
 	{
+//		if (ps > 100)
+//			{
+//				if(getKP(10) == KP_CE) break;
+//			}
 		__NOP();
 	}
 }
@@ -395,6 +399,7 @@ uint32_t getKP(uint32_t timeout)
 	uint32_t timeoutTickState = 0;
 	uint32_t scanRateTickState = 0;
 	uint32_t portValue = 0;
+	uint32_t keyValue = 0;
 	uint8_t currentOutput = K2;
 	uint8_t kpState = 0;
 
@@ -418,7 +423,8 @@ uint32_t getKP(uint32_t timeout)
 			break;
 		case 2:
 			Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, currentOutput);
-			return (currentOutput | (portValue & KP_MASK_IN));
+			keyValue = (currentOutput | (portValue & KP_MASK_IN));
+			return (keyValue);
 			break;
 		case 3:
 			if (systemTick > scanRateTickState + KP_SCAN_RATE_MS)
@@ -490,7 +496,7 @@ uint8_t getKPInput(uint32_t *p_values, uint8_t length)
 		if (selection == KP_CE)
 		{
 			*p_values = 255;
-			return 255;
+			return 0;
 		}
 		*p_values = getDigit(selection);
 		sendChar(*p_values + 48);
