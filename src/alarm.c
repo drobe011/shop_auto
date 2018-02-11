@@ -210,11 +210,11 @@ uint8_t getPIN(void)
 	CURSOR_ON();
 	for (uint8_t keys = 0; keys < 4; keys++)
 	{
-		kpData[keys] = getKP(KP_TIMEOUT_DEFAULT_MS + 1000);
+		kpData[keys] = getKP(KP_TIMEOUT_PIN_MS);
 		on_pressed_time = systemTick;
 		while (getKP(150))
 		{
-			if (TIME_UP(on_pressed_time, KP_TIMEOUT_DEFAULT_MS))
+			if (TIME_UP(on_pressed_time, KP_TIMEOUT_PIN_MS))
 			{
 				CURSOR_OFF();
 				ENABLE_ON_PWR();
@@ -306,7 +306,7 @@ void checkMenu(void)
 		case KP_0:
 			showUpTime();
 			break;
-		case KP_1:
+		case KP_p_m:
 			subMenu_edit_AUTO_LIS();
 			break;
 		}
@@ -523,8 +523,13 @@ void subMenu_edit_Inputs(uint8_t sensorid)
 		case KP_5:
 			setCursor(0, 16);
 			selection[0] = 0;
-			if (!getKPInput(selection, 3)) break;
-			if (selection[0] == 255) break;
+			CURSOR_ON();
+			if (!getKPInput(selection, 3))
+			{
+				CURSOR_OFF();
+				break;
+			}
+			CURSOR_OFF();
 			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
 			if (value <= 999) alarm_system_I[sensorid].delay = value;
 			else break;
@@ -607,7 +612,7 @@ void menu_ExtMotionSensorStatus(void)
 	uint32_t value = 0;
 
 	dispInputStrings(0);
-	setCursor(0, 9);
+	setCursor(0, 10);
 	CURSOR_ON();
 
 	if (!getKPInput(selection, 1))
@@ -662,7 +667,13 @@ void subMenu_edit_ExtMotionSensor(uint8_t sensorid)
 		case KP_3:
 			setCursor(0, 8);
 			selection[0] = 0;
-			if (!getKPInput(selection, 3)) break;
+			CURSOR_ON();
+			if (!getKPInput(selection, 3))
+			{
+				CURSOR_OFF();
+				break;
+			}
+			CURSOR_OFF();
 			value = (selection[0] * 100) + (selection[1] * 10) + selection[2];
 			if (value <= 999)
 			{
@@ -771,6 +782,7 @@ void menu_edit_IObuffers(void)
 		sendChar(OE_OUTPUT_ON() ? 'Y' : 'N');
 
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		debouncer();
 
 		if (selection == KP_CE) return;
 
@@ -929,16 +941,16 @@ uint8_t pollAutomation(void)
 							light_auto[iLights].on = ENABLE;
 							setIOpin(&alarm_system_O[L_I_S], ENABLE);
 							alarm_system_O[L_I_S].timestamp = systemTick;
-							//setIOpin(&automation_O[ARM_I], ENABLE); FOR TESTING
+							setIOpin(&alarm_system_O[ARM_I], ENABLE);
 						}
 			}
-			else //check to turn off
+			if (light_auto[iLights].on) //check to turn off
 			{
 				if (TIME_UP(alarm_system_O[L_I_S].timestamp, (light_auto[iLights].duration * (1000 * 60))))
 				{
 					light_auto[iLights].on = DISABLE;
 					setIOpin(&alarm_system_O[L_I_S], DISABLE);
-					//setIOpin(&automation_O[ARM_I], DISABLE);
+					setIOpin(&alarm_system_O[ARM_I], DISABLE);
 					alarm_system_O[L_I_S].timestamp = 0;
 				}
 			}
@@ -1056,7 +1068,7 @@ void showUpTime(void)
 {
 	dispUpTime();
 
-	pause(KP_TIMEOUT_SUBMENU_MS);
+	getKP(KP_TIMEOUT_SUBMENU_MS);
 }
 
 void subMenu_edit_AUTO_LIS(void)
@@ -1139,8 +1151,10 @@ void subMenu_edit_Auto_LIS_item(uint8_t item)
 		value_changed++;
 	}
 
+	selection[0] = 0;
 	setCursor(1, 15);
 	selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+	debouncer();
 	if (!selection[0])
 	{
 		CURSOR_OFF();
@@ -1148,7 +1162,7 @@ void subMenu_edit_Auto_LIS_item(uint8_t item)
 	}
 	else
 	{
-		light_auto[item].active ^= 1;
+		light_auto[item].active = (light_auto[item].active ? 0 : 1);
 		value_changed++;
 	}
 

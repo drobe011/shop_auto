@@ -38,6 +38,8 @@ keymap.txt
      			[X] = Edit sensor info
      			
      	[0] = SHOW UPTIME
+     	
+     	[1] = EDIT AUTO_LIS
      			
      	[SQRT] = CHANGE TIME
      	

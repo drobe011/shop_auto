@@ -423,7 +423,7 @@ uint32_t getKP(uint32_t timeout)
 			return (keyValue);
 			break;
 		case 3:
-			if (systemTick > scanRateTickState + KP_SCAN_RATE_MS)
+			if (systemTick - scanRateTickState > KP_SCAN_RATE_MS)
 			{
 				Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, currentOutput);
 				currentOutput = (currentOutput == K6) ? K2 : currentOutput + 1;
