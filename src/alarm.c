@@ -1110,62 +1110,48 @@ void subMenu_edit_Auto_LIS_item(uint8_t item)
 
 	setCursor(1, 1);
 	sendCMD(14);
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
-		if (!getKPInput(selection, 2))
+	//while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	//{
+		if(getKPInput(selection, 2))
 		{
-			sendCMD(12);
-			return;
+			value = (selection[0] * 10) + selection[1];
+			if (value > 23)
+			{
+				sendCMD(12);
+				return;
+			}
+			light_auto[item].hour = value;
 		}
-		value = (selection[0] * 10) + selection[1];
-		if (value > 23)
-		{
-			sendCMD(12);
-			return;
-		}
-		light_auto[item].hour = value;
-	}
 
-	menuTimer = systemTick;
-	setCursor(1, 4);
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
-		if (!getKPInput(selection, 2))
+		menuTimer = systemTick;
+		setCursor(1, 4);
+		if(getKPInput(selection, 2))
 		{
-			sendCMD(12);
-			return;
+			value = (selection[0] * 10) + selection[1];
+			if (value > 59)
+			{
+				sendCMD(12);
+				return;
+			}
+			light_auto[item].min = value;
 		}
-		value = (selection[0] * 10) + selection[1];
-		if (value > 59)
-		{
-			sendCMD(12);
-			return;
-		}
-		light_auto[item].min = value;
-	}
 
-	menuTimer = systemTick;
-	setCursor(1, 9);
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
-		if (!getKPInput(selection, 2))
+		menuTimer = systemTick;
+		setCursor(1, 9);
+		if(getKPInput(selection, 2))
 		{
-			sendCMD(12);
-			return;
+			value = (selection[0] * 10) + selection[1];
+			if (value > 99)
+			{
+				sendCMD(12);
+				return;
+			}
+			light_auto[item].duration = value;
 		}
-		value = (selection[0] * 10) + selection[1];
-		if (value > 99)
-		{
-			sendCMD(12);
-			return;
-		}
-		light_auto[item].duration = value;
-	}
 
-	menuTimer = systemTick;
-//	setCursor(1, 15);
-	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	{
+
+		menuTimer = systemTick;
+		setCursor(1, 15);
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		if (!selection[0])
 		{
@@ -1185,6 +1171,6 @@ void subMenu_edit_Auto_LIS_item(uint8_t item)
 			sendChar('F');
 			sendChar('F');
 		}
-	}
+	//}
 	sendCMD(12);
 }
