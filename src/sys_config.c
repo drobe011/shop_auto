@@ -238,10 +238,6 @@ void pause(uint32_t ps)
 	uint32_t ticks = systemTick;
 	while (TIME_WAIT(ticks, ps))
 	{
-//		if (ps > 100)
-//			{
-//				if(getKP(10) == KP_CE) break;
-//			}
 		__NOP();
 	}
 }
