@@ -3,7 +3,7 @@
 #include <time.h>
 #include "eeprom.h"
 
-#define EEPROM_SIG1 141
+#define EEPROM_SIG1 139
 #define EEPROM_SIG2 201
 
 I2C_XFER_T EEPROMxfer;
@@ -16,6 +16,7 @@ extern uint8_t DARK_THRESHOLD;
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct ALARM_SYSTEM_S alarm_system_O[];
+extern struct LIGHT_AUTO_S light_auto[];
 
 EEPROM_STATUS initEEPROM(void)
 {
@@ -149,6 +150,7 @@ EEPROM_STATUS getEEPROMdata(void)
 			return BAD;
 		}
 	}
+
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_O; sensorid++)
 	{
 		tbuffer = eepromTXbuffer;
@@ -178,6 +180,32 @@ EEPROM_STATUS getEEPROMdata(void)
 			return BAD;
 		}
 	}
+
+	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_LIS; sensorid++)
+	{
+		tbuffer = eepromTXbuffer;
+		rbuffer = eepromRXbuffer;
+		address = (EPROM_PAGE_SZ * sensorid) + AUTO_LIS_OFFSET;
+		tbuffer[0] = (address >> 8) & 0xFF;
+		tbuffer[1] = address & 0xFF;
+		EEPROMxfer.txBuff = tbuffer;
+		EEPROMxfer.rxBuff = rbuffer;
+		EEPROMxfer.rxSz = AUTO_LIS_PACKET_SIZE;
+		EEPROMxfer.txSz = 2;
+
+		EPROM_DELAY();
+
+		if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+		{
+			return BAD;
+		}
+
+		light_auto[sensorid].hour = rbuffer[0];
+		light_auto[sensorid].min = rbuffer[1];
+		light_auto[sensorid].duration = rbuffer[2];
+		light_auto[sensorid].active = rbuffer[3];
+	}
+
 	return GOOD;
 }
 
@@ -276,6 +304,30 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		tbuffer[2] = sensorid;
 		tbuffer[3] = alarm_system_O[sensorid].active;
 		tbuffer[4] = alarm_system_O[sensorid].sig_active_level;
+
+		EPROM_DELAY();
+
+		Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+		if (EEPROMxfer.txSz > 0)
+		{
+			return BAD;
+		}
+	}
+	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_LIS; sensorid++)
+	{
+		tbuffer = eepromTXbuffer;
+		address = (EPROM_PAGE_SZ * sensorid) + AUTO_LIS_OFFSET;
+
+		EEPROMxfer.txBuff = tbuffer;
+		EEPROMxfer.rxSz = 0;
+		EEPROMxfer.txSz = AUTO_LIS_PACKET_SIZE + 2;
+
+		tbuffer[0] = (address >> 8) & 0xFF;
+		tbuffer[1] = address & 0xFF;
+		tbuffer[2] = light_auto[sensorid].hour;
+		tbuffer[3] = light_auto[sensorid].min;
+		tbuffer[4] = light_auto[sensorid].duration;
+		tbuffer[5] = light_auto[sensorid].active;
 
 		EPROM_DELAY();
 

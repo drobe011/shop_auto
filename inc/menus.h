@@ -10,7 +10,9 @@
 #define MENUS_H_
 
 #define ARROW_DOWN 6
-#define ARROW_UP 7
+#define ARROW_UP 5
+#define CURSOR_ON() sendCMD(14)
+#define CURSOR_OFF() sendCMD(12)
 
 void clearLine(uint8_t row);
 void dispBoot(void);

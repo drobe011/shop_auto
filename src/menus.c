@@ -570,10 +570,4 @@ void dispAutomateLIS(uint8_t LIS_item)
 		sendChar('F');
 		sendChar('F');
 	}
-
-//	pause(1000);
-//	sendCMD(14);
-//	pause(4000);
-//	sendCMD(12);
-//	pause(2000);
 }

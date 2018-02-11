@@ -927,15 +927,15 @@ uint8_t pollAutomation(void)
 
 		Chip_RTC_GetFullTime(LPC_RTC, &checkTime);
 		//check if time to turn on interior lights
-		for (uint8_t iLights = 0; iLights < no_of_turnon_times; iLights++)
+		for (uint8_t iLights = 0; iLights < NUM_OF_AUTO_LIS; iLights++)
 		{
-			if (!light_auto[iLights].active)
+			if (light_auto[iLights].active && !light_auto[iLights].on)
 			{
 				if ((uint8_t)checkTime.time[RTC_TIMETYPE_HOUR] == light_auto[iLights].hour)
 					if ((uint8_t)checkTime.time[RTC_TIMETYPE_MINUTE] == light_auto[iLights].min)
 						if ((uint8_t)checkTime.time[RTC_TIMETYPE_SECOND] == 0)
 						{
-							light_auto[iLights].active = ENABLE;
+							light_auto[iLights].on = ENABLE;
 							setIOpin(&alarm_system_O[L_I_S], ENABLE);
 							alarm_system_O[L_I_S].timestamp = systemTick;
 							//setIOpin(&automation_O[ARM_I], ENABLE); FOR TESTING
@@ -945,7 +945,7 @@ uint8_t pollAutomation(void)
 			{
 				if (TIME_UP(alarm_system_O[L_I_S].timestamp, (light_auto[iLights].duration * (1000 * 60))))
 				{
-					light_auto[iLights].active = DISABLE;
+					light_auto[iLights].on = DISABLE;
 					setIOpin(&alarm_system_O[L_I_S], DISABLE);
 					//setIOpin(&automation_O[ARM_I], DISABLE);
 					alarm_system_O[L_I_S].timestamp = 0;
@@ -957,22 +957,22 @@ uint8_t pollAutomation(void)
 		for (uint8_t xstrobe = 0; xstrobe < no_of_x_flashes; xstrobe++)
 		{
 			if ((uint8_t)checkTime.time[RTC_TIMETYPE_HOUR] == x_light_auto[xstrobe].hour)
-					if ((uint8_t)checkTime.time[RTC_TIMETYPE_MINUTE] == x_light_auto[xstrobe].min)
-						if ((uint8_t)checkTime.time[RTC_TIMETYPE_SECOND] == 0)
-						{
-							setIOpin(&alarm_system_O[L_X_N], ENABLE);
-							pause(250);
-							setIOpin(&alarm_system_O[L_X_N], DISABLE);
-							setIOpin(&alarm_system_O[L_X_E], ENABLE);
-							pause(250);
-							setIOpin(&alarm_system_O[L_X_E], DISABLE);
-							setIOpin(&alarm_system_O[L_X_S], ENABLE);
-							pause(250);
-							setIOpin(&alarm_system_O[L_X_S], DISABLE);
-							setIOpin(&alarm_system_O[L_X_W], ENABLE);
-							pause(250);
-							setIOpin(&alarm_system_O[L_X_W], DISABLE);
-						}
+				if ((uint8_t)checkTime.time[RTC_TIMETYPE_MINUTE] == x_light_auto[xstrobe].min)
+					if ((uint8_t)checkTime.time[RTC_TIMETYPE_SECOND] == 0)
+					{
+						setIOpin(&alarm_system_O[L_X_N], ENABLE);
+						pause(250);
+						setIOpin(&alarm_system_O[L_X_N], DISABLE);
+						setIOpin(&alarm_system_O[L_X_E], ENABLE);
+						pause(250);
+						setIOpin(&alarm_system_O[L_X_E], DISABLE);
+						setIOpin(&alarm_system_O[L_X_S], ENABLE);
+						pause(250);
+						setIOpin(&alarm_system_O[L_X_S], DISABLE);
+						setIOpin(&alarm_system_O[L_X_W], ENABLE);
+						pause(250);
+						setIOpin(&alarm_system_O[L_X_W], DISABLE);
+					}
 		}
 	}
 	return numActiveSensors;
@@ -1085,7 +1085,7 @@ void subMenu_edit_AUTO_LIS(void)
 		switch (selection)
 		{
 		case KP_plus:
-			if (menuItem < no_of_turnon_times - 1) menuItem++;
+			if (menuItem < NUM_OF_AUTO_LIS - 1) menuItem++;
 			menuTimer = systemTick;
 			break;
 		case KP_minus:
@@ -1105,72 +1105,70 @@ void subMenu_edit_AUTO_LIS(void)
 void subMenu_edit_Auto_LIS_item(uint8_t item)
 {
 	uint32_t selection[2] = { 0, 0 };
-	uint32_t menuTimer = systemTick;
 	uint8_t value = 0;
+	uint8_t value_changed = 0;
 
 	setCursor(1, 1);
-	sendCMD(14);
-	//while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
-	//{
-		if(getKPInput(selection, 2))
-		{
-			value = (selection[0] * 10) + selection[1];
-			if (value > 23)
-			{
-				sendCMD(12);
-				return;
-			}
-			light_auto[item].hour = value;
-		}
+	CURSOR_ON();
 
-		menuTimer = systemTick;
-		setCursor(1, 4);
-		if(getKPInput(selection, 2))
+	if(getKPInput(selection, 2))
+	{
+		value = (selection[0] * 10) + selection[1];
+		if (value > 23)
 		{
-			value = (selection[0] * 10) + selection[1];
-			if (value > 59)
-			{
-				sendCMD(12);
-				return;
-			}
-			light_auto[item].min = value;
-		}
-
-		menuTimer = systemTick;
-		setCursor(1, 9);
-		if(getKPInput(selection, 2))
-		{
-			value = (selection[0] * 10) + selection[1];
-			if (value > 99)
-			{
-				sendCMD(12);
-				return;
-			}
-			light_auto[item].duration = value;
-		}
-
-
-		menuTimer = systemTick;
-		setCursor(1, 15);
-		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
-		if (!selection[0])
-		{
-			sendCMD(12);
+			CURSOR_OFF();
 			return;
 		}
+		light_auto[item].hour = value;
+		value_changed++;
+	}
+
+	setCursor(1, 4);
+	if(getKPInput(selection, 2))
+	{
+		value = (selection[0] * 10) + selection[1];
+		if (value > 59)
+		{
+			CURSOR_OFF();
+			return;
+		}
+		light_auto[item].min = value;
+		value_changed++;
+	}
+
+	setCursor(1, 9);
+	if(getKPInput(selection, 2))
+	{
+		value = (selection[0] * 10) + selection[1];
+		if (value > 99)
+		{
+			CURSOR_OFF();
+			return;
+		}
+		light_auto[item].duration = value;
+		value_changed++;
+	}
+
+	setCursor(1, 15);
+	selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+	if (!selection[0])
+	{
+		CURSOR_OFF();
+		if (!value_changed) return;
+	}
+	else
+	{
 		light_auto[item].active ^= 1;
-		if (light_auto[item].active)
-		{
-			sendChar('O');
-			sendChar('N');
-			sendChar(' ');
-		}
-		else
-		{
-			sendChar('O');
-			sendChar('F');
-			sendChar('F');
-		}
-	//}
-	sendCMD(12);
+		value_changed++;
+	}
+
+	CURSOR_OFF();
+
+	if (value_changed)
+	{
+		saveByte(((EPROM_PAGE_SZ * item) + AUTO_LIS_OFFSET), light_auto[item].hour);
+		saveByte(((EPROM_PAGE_SZ * item) + AUTO_LIS_OFFSET + 1), light_auto[item].min);
+		saveByte(((EPROM_PAGE_SZ * item) + AUTO_LIS_OFFSET + 2), light_auto[item].duration);
+		saveByte(((EPROM_PAGE_SZ * item) + AUTO_LIS_OFFSET + 3), light_auto[item].active);
+	}
 }

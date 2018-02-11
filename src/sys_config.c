@@ -67,10 +67,10 @@ struct ALARM_SYSTEM_S alarm_system_O[] =
 
 struct LIGHT_AUTO_S light_auto[] =
 {
-		{ turnon1_hr, turnon1_min, turnon1_dur, DISABLE },
-		{ turnon2_hr, turnon2_min, turnon2_dur, ENABLE },
-		{ turnon3_hr, turnon3_min, turnon3_dur, DISABLE },
-		{ NONE, NONE, NONE, DISABLE },
+		{ 23, 5, 5, DISABLE, DISABLE },
+		{ 2, 30, 3, DISABLE, DISABLE },
+		{ 4, 15, 7, DISABLE, DISABLE },
+		{ NONE, NONE, NONE, DISABLE, DISABLE },
 };
 
 struct X_LIGHT_AUTO_S x_light_auto[] = {
@@ -320,7 +320,7 @@ uint8_t initDisplay(void)
 	sendCMD(0x08);				//extended function set (2-lines) ?????
 	sendCMD(0x06);				//COM SEG direction
 	sendCMD(0x72);				//function selection A, ROM CGRAM selection
-	sendData(0x0A);				//0x00);
+	sendData(0x0B);				//256CGROM, Character ROM C
 	sendCMD(0x2A);				//function set (extended command set)
 	sendCMD(0x79);				//OLED command set enabled
 	sendCMD(0xDA);				//set SEG pins hardware configuration

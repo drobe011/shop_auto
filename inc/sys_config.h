@@ -46,6 +46,7 @@ struct LIGHT_AUTO_S
 	uint8_t min;
 	uint8_t duration;
 	uint8_t active;
+	uint8_t on;
 };
 
 struct X_LIGHT_AUTO_S
@@ -185,6 +186,8 @@ struct X_LIGHT_AUTO_S
 #define ERROR_O 10
 #define NUM_OF_AUTO_O 11
 
+#define NUM_OF_AUTO_LIS 4 //ee
+
 ////TEMP IO
 #define TMP_ALM_LO_p2_I 13
 #define TMP_ALM_HI_p0_I 21
@@ -260,12 +263,14 @@ struct MSG_S
 #define DARK_THRESHOLD_OFFSET 4
 #define ASI_OFFSET (1 * EPROM_PAGE_SZ)
 #define MS_OFFSET (15 * EPROM_PAGE_SZ)
-#define BOOTTIME_OFFSET (19 * EPROM_PAGE_SZ)
-#define BOOTTIME_SIZE 7
 #define SENSOR_PACKET_SIZE 9
 #define X_MOTION_PACKET_SIZE 7
-#define OUTPUT_OFFSET (BOOTTIME_OFFSET + BOOTTIME_SIZE)
+#define OUTPUT_OFFSET (19 * EPROM_PAGE_SZ)
 #define OUTPUT_PACKET_SIZE 3
+#define AUTO_LIS_OFFSET (30 * EPROM_PAGE_SZ)
+#define AUTO_LIS_PACKET_SIZE 4
+#define BOOTTIME_OFFSET (31 * EPROM_PAGE_SZ)
+#define BOOTTIME_SIZE 7
 //
 // END EEPROM DEFINES
 
