@@ -708,7 +708,8 @@ void dispLightsMenu(uint8_t position)
 		lightsMenu[1].row = 0;
 		lightsMenu[2].row = 1;
 		sendDisplay(0, &lightsMenu[1]);
-		sendDisplay(0, &lightsMenu[2]);
+		setCursor(1, 0);
+		sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
 		sendChar(ARROW_UP);
 		setCursor(1, 19);
