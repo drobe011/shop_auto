@@ -108,7 +108,6 @@ uint8_t entryDelay(uint8_t active);
 void checkMenu(void);
 void checkPIN(void);
 void showUpTime(void);
-
 void menu_Arm(void);
 void menu_Lights_Int(void);
 void menu_Lights_Ext(void);
@@ -131,6 +130,7 @@ void subMenu_edit_AUTO_LIS(void);
 void subMenu_edit_Auto_LIS_item(uint8_t item);
 void showMainMenu(void);
 void showSensorMenu(void);
+void showLightMenu(void);
 
 int main(void)
 {
@@ -1264,5 +1264,47 @@ void showSensorMenu(void)
 			break;
 		}
 		dispSensorMenu(menuItem);
+	}
+}
+
+void showLightMenu(void)
+{
+	uint32_t selection = 0;
+	uint8_t menuLen = 2;
+	uint8_t menuItem = 0;
+	uint32_t menuTimer = systemTick;
+	dispLightsMenu(menuLen);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		if (selection == KP_CE) return;
+		debouncer();
+
+		switch (selection)
+		{
+		case KP_plus:
+			if (menuItem < menuLen-1) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		case KP_equal:
+			switch (menuItem)
+			{
+			case 0:
+				menu_Lights_Int();
+				break;
+			case 1:
+				menu_Lights_Ext();
+				break;
+			}
+			dispLightsMenu(menuLen);
+			menuTimer = systemTick;
+			break;
+		}
+		dispLightsMenu(menuItem);
 	}
 }
