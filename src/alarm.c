@@ -1188,17 +1188,18 @@ void showMainMenu(void)
 	uint8_t menuLen = 4;
 	uint8_t menuItem = 0;
 	uint32_t menuTimer = systemTick;
-	dispMainMenu(menuLen+1);
+	dispMainMenu(menuLen);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		if (selection == KP_CE) return;
 		debouncer();
 
 		switch (selection)
 		{
 		case KP_plus:
-			if (menuItem < menuLen) menuItem++;
+			if (menuItem < menuLen-1) menuItem++;
 			menuTimer = systemTick;
 			break;
 		case KP_minus:
