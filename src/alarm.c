@@ -1213,6 +1213,9 @@ void showMainMenu(void)
 			case 0:
 				showSensorMenu();
 				break;
+			case 1:
+				showLightMenu();
+				break;
 			}
 			dispMainMenu(menuLen);
 			menuTimer = systemTick;
