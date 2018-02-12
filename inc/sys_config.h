@@ -292,6 +292,7 @@ struct MSG_S
 #define OE_OUTPUT_ON() (Chip_GPIO_GetPinState(LPC_GPIO, 4, OUT_BUFF_OE_p4_O) ^ 1)
 #define TIME_UP(x,y) (systemTick - x) > y
 #define TIME_WAIT(x,y) (systemTick - x) < y
+
 //
 // END PROGRAM DEFINES
 

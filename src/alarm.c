@@ -129,6 +129,7 @@ void subMenu_ExtMotionSensorAll(void);
 void subMenu_edit_ExtMotionSensor(uint8_t sensorid);
 void subMenu_edit_AUTO_LIS(void);
 void subMenu_edit_Auto_LIS_item(uint8_t item);
+void showMainMenu(void);
 
 int main(void)
 {
@@ -308,6 +309,9 @@ void checkMenu(void)
 			break;
 		case KP_p_m:
 			subMenu_edit_AUTO_LIS();
+			break;
+		case KP_3:
+			showMainMenu();
 			break;
 		}
 	}
@@ -1077,6 +1081,7 @@ void subMenu_edit_AUTO_LIS(void)
 	uint32_t selection = 0;
 	uint32_t menuTimer = systemTick;
 
+	dispAutomateLIS(4);
 	dispAutomateLIS(menuItem);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
@@ -1174,5 +1179,40 @@ void subMenu_edit_Auto_LIS_item(uint8_t item)
 		saveByte(((EPROM_PAGE_SZ * item) + AUTO_LIS_OFFSET + 1), light_auto[item].min);
 		saveByte(((EPROM_PAGE_SZ * item) + AUTO_LIS_OFFSET + 2), light_auto[item].duration);
 		saveByte(((EPROM_PAGE_SZ * item) + AUTO_LIS_OFFSET + 3), light_auto[item].active);
+	}
+}
+
+void showMainMenu(void)
+{
+	uint32_t selection = 0;
+	uint8_t menuLen = 4;
+	uint8_t menuItem = 0;
+	uint32_t menuTimer = systemTick;
+	dispMainMenu(menuLen+1);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		debouncer();
+
+		switch (selection)
+		{
+		case KP_plus:
+			if (menuItem < menuLen) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		case KP_equal:
+			switch (menuItem)
+			{
+
+			}
+			menuTimer = systemTick;
+			break;
+		}
+		dispMainMenu(menuItem);
 	}
 }

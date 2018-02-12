@@ -39,7 +39,7 @@ keymap.txt
      			
      	[0] = SHOW UPTIME
      	
-     	[1] = EDIT AUTO_LIS
+     	[2] = EDIT AUTO_LIS
      			
      	[SQRT] = CHANGE TIME
      	
@@ -59,3 +59,9 @@ keymap.txt
      		
      	[-] = ENTRY DELAY
      		[NUMBERS] = DELAY
+     		
+ Put in scrollable menu:
+ arm delay
+ entry delay
+ darkness threshold
+ 

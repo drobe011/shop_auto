@@ -65,6 +65,13 @@ struct MSG_S DISP_UPTIME1 = { 1, 0, "BOOT: 00/00/00 00:00" };
 struct MSG_S DISP_AUTO_LIS = { 0, 0, "LIS AUTO 1/4" };
 struct MSG_S DISP_AUTO_LIS1 = { 1, 1, "00:00 @ 00min OFF" };
 
+struct MSG_S mainMenu[] = {
+		{0, 1, "Sensors"},
+		{1, 1, "Lights"},
+		{0, 1, "Automation"},
+		{0, 1, "Delays"}
+};
+
 void clearLine(uint8_t row)
 {
 	setCursor(row, 0);
@@ -509,10 +516,6 @@ void dispAutomateLIS(uint8_t LIS_item)
 	switch (LIS_item)
 	{
 	case 0:
-		dispClear();
-
-		sendDisplay(0, &DISP_AUTO_LIS);
-		sendDisplay(0, &DISP_AUTO_LIS1);
 		setCursor(0, 19);
 		sendChar(' ');
 		setCursor(1, 19);
@@ -529,6 +532,12 @@ void dispAutomateLIS(uint8_t LIS_item)
 		sendChar(ARROW_UP);
 		setCursor(1, 19);
 		sendChar(' ');
+		break;
+	case 4:
+		dispClear();
+
+		sendDisplay(0, &DISP_AUTO_LIS);
+		sendDisplay(0, &DISP_AUTO_LIS1);
 		break;
 	}
 
@@ -566,4 +575,59 @@ void dispAutomateLIS(uint8_t LIS_item)
 		sendChar('F');
 		sendChar('F');
 	}
+}
+
+void dispMainMenu(uint8_t position)
+{
+	switch (position)
+	{
+	case 0:
+		mainMenu[0].row = 0;
+		mainMenu[1].row = 1;
+		sendDisplay(0, &mainMenu[0]);
+		sendDisplay(0, &mainMenu[1]);
+		setCursor(0, 19);
+		sendChar(' ');
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 1:
+		mainMenu[1].row = 0;
+		mainMenu[2].row = 1;
+		sendDisplay(0, &mainMenu[1]);
+		sendDisplay(0, &mainMenu[2]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 2:
+		mainMenu[2].row = 0;
+		mainMenu[3].row = 1;
+		sendDisplay(0, &mainMenu[2]);
+		sendDisplay(0, &mainMenu[3]);
+		setCursor(0, 19);
+		//sendChar(ARROW_UP);
+		//setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 3:
+		mainMenu[3].row = 0;
+		sendDisplay(0, &mainMenu[3]);
+		setCursor(1, 0);
+		sendDisplay(1, &DISP_SPACE);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		break;
+	case 4:
+		dispClear();
+		mainMenu[0].row = 0;
+		mainMenu[1].row = 1;
+		sendDisplay(0, &mainMenu[0]);
+		sendDisplay(0, &mainMenu[1]);
+		setCursor(0, 0);
+		sendChar(7);
+		break;
+	}
+
 }
