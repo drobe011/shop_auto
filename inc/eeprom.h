@@ -16,5 +16,6 @@ EEPROM_STATUS getEEPROMdata(void);
 EEPROM_STATUS setEEPROMbyte(uint32_t offset, uint8_t byte);
 EEPROM_STATUS setBootStamp(void);
 EEPROM_STATUS getBootStamp(RTC_TIME_T* boottime);
+EEPROM_STATUS getUserData(uint8_t userid, struct users_S *userdata);
 
 #endif /* EEPROM_H_ */

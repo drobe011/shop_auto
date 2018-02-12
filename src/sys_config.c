@@ -21,7 +21,10 @@ RTC_TIME_T cTime;
 uint8_t DISPLAY_txbuffer[DISPLAY_TXBUFFER_SZ];
 
 struct users_S users[] = { { 0, "System", { KP_0, KP_0, KP_0, KP_0 }, 0 }, { 1, "David", { KP_1, KP_3, KP_1, KP_8 }, 4 }, { 2, "Christa", { KP_0, KP_3,
-KP_1, KP_8 }, 1 }, { 3, "Aaron", { KP_2, KP_3, KP_1, KP_8 }, 1 }, { 4, "Donny", { KP_3, KP_3, KP_1, KP_8 }, 1 } };
+KP_1, KP_8 }, 1 }, { 3, "Aaron", { KP_2, KP_3, KP_1, KP_8 }, 1 }, { 4, "Donny", { KP_3, KP_3, KP_1, KP_8 }, 1 }, { 5, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },
+{ 6, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 }, { 7, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 }, { 8, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },
+{ 9, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 } };
+struct users_S active_user = { 0, "System", { KP_0, KP_0, KP_0, KP_0 }, 0 };
 
 struct users_S *c_user;
 
@@ -387,7 +390,7 @@ void displayNormal(void)
 
 void setUpUsers(void)
 {
-	c_user = &users[0];
+	c_user = &active_user;
 }
 
 uint32_t getKP(uint32_t timeout)

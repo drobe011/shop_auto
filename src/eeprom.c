@@ -1,14 +1,15 @@
 #include <chip.h>
 #include "sys_config.h"
+#include "alarm_settings.h"
 #include <time.h>
 #include "eeprom.h"
 
-#define EEPROM_SIG1 139
+#define EEPROM_SIG1 137
 #define EEPROM_SIG2 201
 
 I2C_XFER_T EEPROMxfer;
-uint8_t eepromTXbuffer[11];
-uint8_t eepromRXbuffer[11];
+uint8_t eepromTXbuffer[20];
+uint8_t eepromRXbuffer[20];
 
 extern uint8_t ARM_DELAY;
 extern uint8_t ENTRY_DELAY;
@@ -17,6 +18,8 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct LIGHT_AUTO_S light_auto[];
+extern struct users_S users[];
+
 
 EEPROM_STATUS initEEPROM(void)
 {
@@ -337,6 +340,37 @@ EEPROM_STATUS setEEPROMdefaults(void)
 			return BAD;
 		}
 	}
+
+	for (uint8_t userid = 0; userid < MAX_USERS; userid++)
+	{
+		tbuffer = eepromTXbuffer;
+		address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET;
+
+		EEPROMxfer.txBuff = tbuffer;
+		EEPROMxfer.rxSz = 0;
+		EEPROMxfer.txSz = USERDATA_PACKET_SIZE + 2;
+
+		tbuffer[0] = (address >> 8) & 0xFF;
+		tbuffer[1] = address & 0xFF;
+		tbuffer[2] = users[userid].id;
+		for (uint8_t name = 0; name < 8; name++)
+		{
+			tbuffer[name+3] = users[userid].name[name];
+		}
+		tbuffer[11] = users[userid].pin[0];
+		tbuffer[12] = users[userid].pin[1];
+		tbuffer[13] = users[userid].pin[2];
+		tbuffer[14] = users[userid].pin[3];
+		tbuffer[15] = users[userid].level;
+
+		EPROM_DELAY();
+
+		Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+		if (EEPROMxfer.txSz > 0)
+		{
+			return BAD;
+		}
+	}
 	return GOOD;
 }
 
@@ -424,5 +458,42 @@ EEPROM_STATUS getBootStamp(RTC_TIME_T* boottime)
 	newYear = ((uint32_t) year0 << 8) + (uint32_t) year1;
 	boottime->time[RTC_TIMETYPE_YEAR] = newYear;
 
+	return GOOD;
+}
+
+EEPROM_STATUS getUserData(uint8_t userid, struct users_S* userdata)
+{
+	uint8_t *rbuffer = eepromRXbuffer;
+	uint8_t *tbuffer = eepromTXbuffer;
+	uint32_t address = 0;
+
+	address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET;
+
+	EEPROMxfer.txBuff = tbuffer;
+	EEPROMxfer.rxBuff = rbuffer;
+	EEPROMxfer.rxSz = USERDATA_PACKET_SIZE;
+	EEPROMxfer.txSz = 2;
+
+	tbuffer[0] = (address >> 8) & 0xFF;
+	tbuffer[1] = address & 0xFF;
+
+
+	EPROM_DELAY();
+
+	Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+	if (EEPROMxfer.rxSz < USERDATA_PACKET_SIZE)
+	{
+		return BAD;
+	}
+	userdata->id = rbuffer[0];
+	for (uint8_t name = 0; name < 8; name++)
+	{
+		userdata->name[name] = rbuffer[name+1];
+	}
+	userdata->pin[0] = rbuffer[9];
+	userdata->pin[1] = rbuffer[10];
+	userdata->pin[2] = rbuffer[11];
+	userdata->pin[3] = rbuffer[12];
+	userdata->level = rbuffer[13];
 	return GOOD;
 }

@@ -13,6 +13,7 @@
 #include "sys_config.h"
 #include "alarm_settings.h"
 #include "menus.h"
+#include "eeprom.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -20,7 +21,8 @@ extern uint32_t systemTick;
 extern uint8_t updateTimeFlag;
 extern uint8_t onPressedFlag;
 extern struct users_S *c_user;
-extern struct users_S users[];
+//extern struct users_S users[];
+extern struct users_S active_user;
 extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
@@ -202,6 +204,7 @@ uint8_t getPIN(void)
 	uint32_t on_pressed_time = systemTick;
 	uint32_t kpData[4] = { 0, 0, 0, 0 };
 	uint8_t match = 0;
+	struct users_S tempUser = { 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 };
 
 	while (ON_PRESSED())
 	{
@@ -238,21 +241,26 @@ uint8_t getPIN(void)
 		}
 	}
 	CURSOR_OFF();
-	for (uint8_t usersLoop = 1; usersLoop < 5; usersLoop++)
+	for (uint8_t usersLoop = 1; usersLoop < MAX_USERS; usersLoop++)
 	{
-		for (uint8_t pinLoop = 0; pinLoop < 4; pinLoop++)
+		getUserData(usersLoop, &tempUser);
+		if (tempUser.level > 0)
 		{
-			if (kpData[pinLoop] == users[usersLoop].pin[pinLoop])
-				match++;
+			for (uint8_t pinLoop = 0; pinLoop < 4; pinLoop++)
+			{
+				if (kpData[pinLoop] == tempUser.pin[pinLoop])
+					match++;
+			}
+			if (match == 4)
+			{
+				//c_user = &users[usersLoop];
+				active_user = tempUser;
+				ALARMSTATE = DISARM;
+				return 2;
+			}
+			else
+				match = 0;
 		}
-		if (match == 4)
-		{
-			c_user = &users[usersLoop];
-			ALARMSTATE = DISARM;
-			return 2;
-		}
-		else
-			match = 0;
 	}
 	ENABLE_ON_PWR();
 	pinAttempts++;
@@ -563,8 +571,9 @@ void subMenu_edit_Outputs(uint8_t sensorid)
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-		if(selection == KP_CE) return;
 		debouncer();
+		if(selection == KP_CE) return;
+
 		switch (selection)
 		{
 		case KP_1:
@@ -608,7 +617,7 @@ void menu_outputStatus(void)
 	selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 	debouncer();
 
-	if (selection[0] == KP_times)
+	if (selection[0] == KP_equal)
 	{
 		subMenu_edit_Outputs(value);
 	}
@@ -641,7 +650,7 @@ void menu_ExtMotionSensorStatus(void)
 
 	selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 	debouncer();
-	if (selection[0] == KP_dec)
+	if (selection[0] == KP_equal)
 	{
 		subMenu_edit_ExtMotionSensor(value);
 	}
@@ -1078,6 +1087,7 @@ void showUpTime(void)
 	dispUpTime();
 
 	getKP(KP_TIMEOUT_SUBMENU_MS);
+	debouncer();
 }
 
 void subMenu_edit_AUTO_LIS(void)
@@ -1249,8 +1259,8 @@ void showInputsMenu(void)
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-		if (selection == KP_CE) return;
 		debouncer();
+		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
@@ -1294,8 +1304,8 @@ void showOutputsMenu(void)
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-		if (selection == KP_CE) return;
 		debouncer();
+		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
@@ -1336,8 +1346,8 @@ void showDelaysMenu(void)
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-		if (selection == KP_CE) return;
 		debouncer();
+		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
@@ -1378,8 +1388,8 @@ void showSystemMenu(void)
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-		if (selection == KP_CE) return;
 		debouncer();
+		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
@@ -1430,8 +1440,8 @@ void showAdminMenu(void)
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-		if (selection == KP_CE) return;
 		debouncer();
+		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
