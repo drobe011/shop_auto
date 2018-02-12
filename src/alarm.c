@@ -1190,7 +1190,7 @@ void subMenu_edit_Auto_LIS_item(uint8_t item)
 void showMainMenu(void)
 {
 	uint32_t selection = 0;
-	uint8_t menuLen = 4;
+	uint8_t menuLen = 5;
 	uint8_t menuItem = 0;
 	uint32_t menuTimer = systemTick;
 	dispMainMenu(menuLen);
@@ -1224,7 +1224,10 @@ void showMainMenu(void)
 				showDelaysMenu();
 				break;
 			case 3:
-				showOutputsMenu();
+				showSystemMenu();
+				break;
+			case 4:
+				showAdminMenu();
 				break;
 			}
 			dispMainMenu(menuLen);

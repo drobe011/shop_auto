@@ -70,7 +70,8 @@ struct MSG_S mainMenu[] = {
 		{0, 1, "Sensors            "},
 		{1, 1, "Lights             "},
 		{0, 1, "Delays             "},
-		{0, 1, "System             "}
+		{0, 1, "System             "},
+		{0, 1, "Admin              "}
 };
 
 struct MSG_S inputsMenu[] = {
@@ -645,7 +646,17 @@ void dispMainMenu(uint8_t position)
 		break;
 	case 3:
 		mainMenu[3].row = 0;
+		mainMenu[4].row = 1;
 		sendDisplay(0, &mainMenu[3]);
+		sendDisplay(0, &mainMenu[4]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 4:
+		mainMenu[4].row = 0;
+		sendDisplay(0, &mainMenu[4]);
 		setCursor(1, 0);
 		sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
@@ -653,7 +664,7 @@ void dispMainMenu(uint8_t position)
 		setCursor(1, 19);
 		sendChar(' ');
 		break;
-	case 4:
+	case 5:
 		dispClear();
 		mainMenu[0].row = 0;
 		mainMenu[1].row = 1;
@@ -661,6 +672,8 @@ void dispMainMenu(uint8_t position)
 		sendDisplay(0, &mainMenu[1]);
 		setCursor(0, 0);
 		sendChar(7);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
 		break;
 	}
 }
@@ -707,6 +720,8 @@ void dispInputsMenu(uint8_t position)
 		sendDisplay(0, &inputsMenu[1]);
 		setCursor(0, 0);
 		sendChar(7);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
 		break;
 	}
 }
@@ -734,7 +749,7 @@ void dispOutputsMenu(uint8_t position)
 		setCursor(0, 19);
 		sendChar(ARROW_UP);
 		setCursor(1, 19);
-		sendChar(ARROW_DOWN);
+		sendChar(' ');
 		break;
 	case 2:
 		dispClear();
@@ -744,6 +759,8 @@ void dispOutputsMenu(uint8_t position)
 		sendDisplay(0, &outputsMenu[1]);
 		setCursor(0, 0);
 		sendChar(7);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
 		break;
 	}
 }
@@ -771,7 +788,7 @@ void dispDelaysMenu(uint8_t position)
 		setCursor(0, 19);
 		sendChar(ARROW_UP);
 		setCursor(1, 19);
-		sendChar(ARROW_DOWN);
+		sendChar(' ');
 		break;
 	case 2:
 		dispClear();
@@ -781,6 +798,8 @@ void dispDelaysMenu(uint8_t position)
 		sendDisplay(0, &delaysMenu[1]);
 		setCursor(0, 0);
 		sendChar(7);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
 		break;
 	}
 }
@@ -847,6 +866,8 @@ void dispSystemMenu(uint8_t position)
 		sendDisplay(0, &systemMenu[1]);
 		setCursor(0, 0);
 		sendChar(7);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
 		break;
 	}
 }
@@ -903,6 +924,8 @@ void dispAdminMenu(uint8_t position)
 		sendDisplay(0, &adminMenu[1]);
 		setCursor(0, 0);
 		sendChar(7);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
 		break;
 	}
 }
