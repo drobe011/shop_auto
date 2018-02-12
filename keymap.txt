@@ -20,10 +20,7 @@ keymap.txt
      		[ - ] = ARM AWAY (NO AUTOMATION)
      		[ = ] = ARM STAY
      		
-     	[MRC] = INTERIOR LIGHT MENU
-     		[ 1 ] = MAIN LIGHTS
-     		[ 2 ] = SUPPLEMENT LIGHTS
-     		[ 3 ] = FAN
+     	[MRC] = MAIN MENU
      	
      	[M-] = EXTERIOR LIGHTS MENU
      		[ 1 ] = SOUTH LIGHT
@@ -60,8 +57,9 @@ keymap.txt
      	[-] = ENTRY DELAY
      		[NUMBERS] = DELAY
      		
- Put in scrollable menu:
- arm delay
- entry delay
- darkness threshold
+ 		[3] = INTERIOR LIGHT MENU
+     		[ 1 ] = MAIN LIGHTS
+     		[ 2 ] = SUPPLEMENT LIGHTS
+     		[ 3 ] = FAN
+     	
  

@@ -128,9 +128,13 @@ void subMenu_ExtMotionSensorAll(void);
 void subMenu_edit_ExtMotionSensor(uint8_t sensorid);
 void subMenu_edit_AUTO_LIS(void);
 void subMenu_edit_Auto_LIS_item(uint8_t item);
+void menu_alarmReset(void);
 void showMainMenu(void);
-void showSensorMenu(void);
-void showLightMenu(void);
+void showInputsMenu(void);
+void showOutputsMenu(void);
+void showDelaysMenu(void);
+void showSystemMenu(void);
+void showAdminMenu(void);
 
 int main(void)
 {
@@ -274,7 +278,7 @@ void checkMenu(void)
 				return;
 			menu_Arm();
 			break;
-		case KP_MRC:
+		case KP_3:
 			menu_Lights_Int();
 			break;
 		case KP_Mminus:
@@ -311,7 +315,7 @@ void checkMenu(void)
 		case KP_p_m:
 			subMenu_edit_AUTO_LIS();
 			break;
-		case KP_3:
+		case KP_MRC:
 			showMainMenu();
 			break;
 		}
@@ -1211,10 +1215,16 @@ void showMainMenu(void)
 			switch (menuItem)
 			{
 			case 0:
-				showSensorMenu();
+				showInputsMenu();
 				break;
 			case 1:
-				showLightMenu();
+				showOutputsMenu();
+				break;
+			case 2:
+				showDelaysMenu();
+				break;
+			case 3:
+				showOutputsMenu();
 				break;
 			}
 			dispMainMenu(menuLen);
@@ -1225,13 +1235,13 @@ void showMainMenu(void)
 	}
 }
 
-void showSensorMenu(void)
+void showInputsMenu(void)
 {
 	uint32_t selection = 0;
 	uint8_t menuLen = 3;
 	uint8_t menuItem = 0;
 	uint32_t menuTimer = systemTick;
-	dispSensorMenu(menuLen);
+	dispInputsMenu(menuLen);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
@@ -1262,21 +1272,21 @@ void showSensorMenu(void)
 				menu_edit_DarkTH();
 				break;
 			}
-			dispSensorMenu(menuLen);
+			dispInputsMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
-		dispSensorMenu(menuItem);
+		dispInputsMenu(menuItem);
 	}
 }
 
-void showLightMenu(void)
+void showOutputsMenu(void)
 {
 	uint32_t selection = 0;
 	uint8_t menuLen = 2;
 	uint8_t menuItem = 0;
 	uint32_t menuTimer = systemTick;
-	dispLightsMenu(menuLen);
+	dispOutputsMenu(menuLen);
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
@@ -1304,10 +1314,166 @@ void showLightMenu(void)
 				menu_Lights_Ext();
 				break;
 			}
-			dispLightsMenu(menuLen);
+			dispOutputsMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
-		dispLightsMenu(menuItem);
+		dispOutputsMenu(menuItem);
 	}
+}
+
+void showDelaysMenu(void)
+{
+	uint32_t selection = 0;
+	uint8_t menuLen = 2;
+	uint8_t menuItem = 0;
+	uint32_t menuTimer = systemTick;
+	dispDelaysMenu(menuLen);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		if (selection == KP_CE) return;
+		debouncer();
+
+		switch (selection)
+		{
+		case KP_plus:
+			if (menuItem < menuLen-1) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		case KP_equal:
+			switch (menuItem)
+			{
+			case 0:
+				menu_edit_ArmDelay();
+				break;
+			case 1:
+				menu_edit_EntryDelay();
+				break;
+			}
+			dispDelaysMenu(menuLen);
+			menuTimer = systemTick;
+			break;
+		}
+		dispDelaysMenu(menuItem);
+	}
+}
+
+void showSystemMenu(void)
+{
+	uint32_t selection = 0;
+	uint8_t menuLen = 5;
+	uint8_t menuItem = 0;
+	uint32_t menuTimer = systemTick;
+	dispSystemMenu(menuLen);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		if (selection == KP_CE) return;
+		debouncer();
+
+		switch (selection)
+		{
+		case KP_plus:
+			if (menuItem < menuLen-1) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		case KP_equal:
+			switch (menuItem)
+			{
+			case 0:
+				menu_edit_IObuffers();
+				break;
+			case 1:
+				menu_outputStatus();
+				break;
+			case 2:
+				showUpTime();
+				break;
+			case 3:
+				menu_changeTime();
+				CURSOR_OFF();
+				break;
+			case 4:
+				menu_alarmReset();
+				break;
+			}
+			dispSystemMenu(menuLen);
+			menuTimer = systemTick;
+			break;
+		}
+		dispSystemMenu(menuItem);
+	}
+}
+
+void showAdminMenu(void)
+{
+	uint32_t selection = 0;
+	uint8_t menuLen = 4;
+	uint8_t menuItem = 0;
+	uint32_t menuTimer = systemTick;
+	dispAdminMenu(menuLen);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		if (selection == KP_CE) return;
+		debouncer();
+
+		switch (selection)
+		{
+		case KP_plus:
+			if (menuItem < menuLen-1) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		case KP_equal:
+			switch (menuItem)
+			{
+			case 0:
+				//menu_changePIN
+				break;
+			case 1:
+				//menu_renameUser
+				break;
+			case 2:
+				if (c_user->level >= ADMIN_LEVEL); //////////dont forget to remove the ';'
+				//menu_addUser
+				break;
+			case 3:
+				if (c_user->level >= ADMIN_LEVEL); //////////dont forget to remove the ';'
+				//menu_deleteUser
+				break;
+			}
+			dispAdminMenu(menuLen);
+			menuTimer = systemTick;
+			break;
+		}
+		dispAdminMenu(menuItem);
+	}
+}
+
+void menu_alarmReset(void)
+{
+	uint32_t selection = 0;
+	dispResetDialog();
+
+	selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+	debouncer();
+	CURSOR_OFF();
+	if (selection == KP_CE) return;
+	if (selection) alarmReset();
 }

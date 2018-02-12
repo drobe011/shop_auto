@@ -64,23 +64,44 @@ struct MSG_S DISP_UPTIME = { 0, 0, "UPTIME: 000:00:00" };
 struct MSG_S DISP_UPTIME1 = { 1, 0, "BOOT: 00/00/00 00:00" };
 struct MSG_S DISP_AUTO_LIS = { 0, 0, "LIS AUTO 1/4" };
 struct MSG_S DISP_AUTO_LIS1 = { 1, 1, "00:00 @ 00min OFF" };
+struct MSG_S DISP_RESET = { 0, 1, "Confirm Reset" };
 
 struct MSG_S mainMenu[] = {
 		{0, 1, "Sensors            "},
 		{1, 1, "Lights             "},
-		{0, 1, "Automation         "},
-		{0, 1, "Delays             "}
+		{0, 1, "Delays             "},
+		{0, 1, "System             "}
 };
 
-struct MSG_S sensorMenu[] = {
+struct MSG_S inputsMenu[] = {
 		{0, 1, "System Inputs      "},
 		{1, 1, "Ext Mtn Sensors    "},
 		{0, 1, "Light Sensor       "}
 };
 
-struct MSG_S lightsMenu[] = {
+struct MSG_S outputsMenu[] = {
 		{0, 1, "Internal           "},
 		{1, 1, "External           "}
+};
+
+struct MSG_S delaysMenu[] = {
+		{0, 1, "Arming Delay       "},
+		{1, 1, "Entry Delay        "},
+};
+
+struct MSG_S systemMenu[] = {
+		{0, 1, "IO Buffers         "},
+		{1, 1, "Output Control     "},
+		{0, 1, "Uptime             "},
+		{1, 1, "Change DTG         "},
+		{1, 1, "Reboot System      "},
+};
+
+struct MSG_S adminMenu[] = {
+		{0, 1, "Change PIN         "},
+		{1, 1, "Rename User        "},
+		{0, 1, "Add User           "},
+		{1, 1, "Delete User        "}
 };
 
 void clearLine(uint8_t row)
@@ -644,33 +665,33 @@ void dispMainMenu(uint8_t position)
 	}
 }
 
-void dispSensorMenu(uint8_t position)
+void dispInputsMenu(uint8_t position)
 {
 	switch (position)
 	{
 	case 0:
-		sensorMenu[0].row = 0;
-		sensorMenu[1].row = 1;
-		sendDisplay(0, &sensorMenu[0]);
-		sendDisplay(0, &sensorMenu[1]);
+		inputsMenu[0].row = 0;
+		inputsMenu[1].row = 1;
+		sendDisplay(0, &inputsMenu[0]);
+		sendDisplay(0, &inputsMenu[1]);
 		setCursor(0, 19);
 		sendChar(' ');
 		setCursor(1, 19);
 		sendChar(ARROW_DOWN);
 		break;
 	case 1:
-		sensorMenu[1].row = 0;
-		sensorMenu[2].row = 1;
-		sendDisplay(0, &sensorMenu[1]);
-		sendDisplay(0, &sensorMenu[2]);
+		inputsMenu[1].row = 0;
+		inputsMenu[2].row = 1;
+		sendDisplay(0, &inputsMenu[1]);
+		sendDisplay(0, &inputsMenu[2]);
 		setCursor(0, 19);
 		sendChar(ARROW_UP);
 		setCursor(1, 19);
 		sendChar(ARROW_DOWN);
 		break;
 	case 2:
-		sensorMenu[2].row = 0;
-		sendDisplay(0, &sensorMenu[2]);
+		inputsMenu[2].row = 0;
+		sendDisplay(0, &inputsMenu[2]);
 		setCursor(1, 0);
 		sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
@@ -680,34 +701,34 @@ void dispSensorMenu(uint8_t position)
 		break;
 	case 3:
 		dispClear();
-		sensorMenu[0].row = 0;
-		sensorMenu[1].row = 1;
-		sendDisplay(0, &sensorMenu[0]);
-		sendDisplay(0, &sensorMenu[1]);
+		inputsMenu[0].row = 0;
+		inputsMenu[1].row = 1;
+		sendDisplay(0, &inputsMenu[0]);
+		sendDisplay(0, &inputsMenu[1]);
 		setCursor(0, 0);
 		sendChar(7);
 		break;
 	}
 }
 
-void dispLightsMenu(uint8_t position)
+void dispOutputsMenu(uint8_t position)
 {
 	switch (position)
 	{
 	case 0:
-		lightsMenu[0].row = 0;
-		lightsMenu[1].row = 1;
-		sendDisplay(0, &lightsMenu[0]);
-		sendDisplay(0, &lightsMenu[1]);
+		outputsMenu[0].row = 0;
+		outputsMenu[1].row = 1;
+		sendDisplay(0, &outputsMenu[0]);
+		sendDisplay(0, &outputsMenu[1]);
 		setCursor(0, 19);
 		sendChar(' ');
 		setCursor(1, 19);
 		sendChar(ARROW_DOWN);
 		break;
 	case 1:
-		lightsMenu[1].row = 0;
-		lightsMenu[2].row = 1;
-		sendDisplay(0, &lightsMenu[1]);
+		outputsMenu[1].row = 0;
+		outputsMenu[2].row = 1;
+		sendDisplay(0, &outputsMenu[1]);
 		setCursor(1, 0);
 		sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
@@ -717,12 +738,180 @@ void dispLightsMenu(uint8_t position)
 		break;
 	case 2:
 		dispClear();
-		lightsMenu[0].row = 0;
-		lightsMenu[1].row = 1;
-		sendDisplay(0, &lightsMenu[0]);
-		sendDisplay(0, &lightsMenu[1]);
+		outputsMenu[0].row = 0;
+		outputsMenu[1].row = 1;
+		sendDisplay(0, &outputsMenu[0]);
+		sendDisplay(0, &outputsMenu[1]);
 		setCursor(0, 0);
 		sendChar(7);
 		break;
 	}
+}
+
+void dispDelaysMenu(uint8_t position)
+{
+	switch (position)
+	{
+	case 0:
+		delaysMenu[0].row = 0;
+		delaysMenu[1].row = 1;
+		sendDisplay(0, &delaysMenu[0]);
+		sendDisplay(0, &delaysMenu[1]);
+		setCursor(0, 19);
+		sendChar(' ');
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 1:
+		delaysMenu[1].row = 0;
+		delaysMenu[2].row = 1;
+		sendDisplay(0, &delaysMenu[1]);
+		setCursor(1, 0);
+		sendDisplay(1, &DISP_SPACE);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 2:
+		dispClear();
+		delaysMenu[0].row = 0;
+		delaysMenu[1].row = 1;
+		sendDisplay(0, &delaysMenu[0]);
+		sendDisplay(0, &delaysMenu[1]);
+		setCursor(0, 0);
+		sendChar(7);
+		break;
+	}
+}
+
+void dispSystemMenu(uint8_t position)
+{
+	switch (position)
+	{
+	case 0:
+		systemMenu[0].row = 0;
+		systemMenu[1].row = 1;
+		sendDisplay(0, &systemMenu[0]);
+		sendDisplay(0, &systemMenu[1]);
+		setCursor(0, 19);
+		sendChar(' ');
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 1:
+		systemMenu[1].row = 0;
+		systemMenu[2].row = 1;
+		sendDisplay(0, &systemMenu[1]);
+		sendDisplay(0, &systemMenu[2]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 2:
+		systemMenu[2].row = 0;
+		systemMenu[3].row = 1;
+		sendDisplay(0, &systemMenu[2]);
+		sendDisplay(0, &systemMenu[3]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 3:
+		systemMenu[3].row = 0;
+		systemMenu[4].row = 1;
+		sendDisplay(0, &systemMenu[3]);
+		sendDisplay(0, &systemMenu[4]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(' ');
+		break;
+	case 4:
+		systemMenu[4].row = 0;
+		sendDisplay(0, &systemMenu[4]);
+		setCursor(1, 0);
+		sendDisplay(1, &DISP_SPACE);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(' ');
+		break;
+	case 5:
+		dispClear();
+		systemMenu[0].row = 0;
+		systemMenu[1].row = 1;
+		sendDisplay(0, &systemMenu[0]);
+		sendDisplay(0, &systemMenu[1]);
+		setCursor(0, 0);
+		sendChar(7);
+		break;
+	}
+}
+
+void dispAdminMenu(uint8_t position)
+{
+	switch (position)
+	{
+	case 0:
+		adminMenu[0].row = 0;
+		adminMenu[1].row = 1;
+		sendDisplay(0, &adminMenu[0]);
+		sendDisplay(0, &adminMenu[1]);
+		setCursor(0, 19);
+		sendChar(' ');
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 1:
+		adminMenu[1].row = 0;
+		adminMenu[2].row = 1;
+		sendDisplay(0, &adminMenu[1]);
+		sendDisplay(0, &adminMenu[2]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 2:
+		adminMenu[2].row = 0;
+		adminMenu[3].row = 1;
+		sendDisplay(0, &adminMenu[2]);
+		sendDisplay(0, &adminMenu[3]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 3:
+		adminMenu[3].row = 0;
+		sendDisplay(0, &adminMenu[3]);
+		setCursor(1, 0);
+		sendDisplay(1, &DISP_SPACE);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(' ');
+		break;
+	case 4:
+		dispClear();
+		adminMenu[0].row = 0;
+		adminMenu[1].row = 1;
+		sendDisplay(0, &adminMenu[0]);
+		sendDisplay(0, &adminMenu[1]);
+		setCursor(0, 0);
+		sendChar(7);
+		break;
+	}
+}
+
+void dispResetDialog(void)
+{
+	dispClear();
+
+	sendDisplay(0, &DISP_RESET);
+	setCursor(0, 15);
+	CURSOR_ON();
 }

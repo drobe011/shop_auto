@@ -21,7 +21,7 @@ RTC_TIME_T cTime;
 uint8_t DISPLAY_txbuffer[DISPLAY_TXBUFFER_SZ];
 
 struct users_S users[] = { { 0, "System", { KP_0, KP_0, KP_0, KP_0 }, 0 }, { 1, "David", { KP_1, KP_3, KP_1, KP_8 }, 4 }, { 2, "Christa", { KP_0, KP_3,
-KP_1, KP_8 }, 1 }, { 3, "Aaron", { KP_2, KP_3, KP_1, KP_8 }, 4 }, { 4, "Donny", { KP_3, KP_3, KP_1, KP_8 }, 4 } };
+KP_1, KP_8 }, 1 }, { 3, "Aaron", { KP_2, KP_3, KP_1, KP_8 }, 1 }, { 4, "Donny", { KP_3, KP_3, KP_1, KP_8 }, 1 } };
 
 struct users_S *c_user;
 
@@ -619,4 +619,17 @@ void TIMER1_IRQHandler(void)
 	timer_timeOutFlag = DISABLE;
 
 	setIOpin(&alarm_system_O[BUZZR], DISABLE);
+}
+
+void alarmReset(void)
+{
+	displayOFF();
+	DISPLAY_RESET_ACTIVE();
+	OUT_BUFF_OFF();
+	IN_BUFF_OFF();
+	setIOpin(&alarm_system_O[ARM_I], DISABLE);
+	setIOpin(&alarm_system_O[SIREN], DISABLE);
+	setIOpin(&alarm_system_O[ERROR_O], DISABLE);
+	pause(100);
+	NVIC_SystemReset();
 }

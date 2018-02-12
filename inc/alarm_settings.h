@@ -1,6 +1,7 @@
 #ifndef ALARM_SETTINGS_H_
 #define ALARM_SETTINGS_H_
 
+#define ADMIN_LEVEL 4
 #define MAIN_STATE_LOOP_FX 25
 #define DIM_OLED_TIME 10000
 #define OFF_OLED_TIME (1000 * 20)

@@ -76,7 +76,7 @@ struct X_LIGHT_AUTO_S
 #define P2 15
 #define ON_ 16
 #define KP_SCAN_RATE_MS 5 ///////was 15
-#define KP_TIMEOUT_DEFAULT_MS 45 ///////was 2000
+#define KP_TIMEOUT_DEFAULT_MS 50 ///////was 2000
 #define KP_TIMEOUT_PIN_MS 3000
 #define KP_TIMEOUT_SUBMENU_MS 4000
 #define KP_MASK_IN ((1 << A2X) | (1 << A3X) | (1 << A4X) | (1 << A5X) | (1 << P2) | (1 << ON_))
@@ -320,6 +320,7 @@ uint8_t isDark(uint8_t mode);
 void saveByte(uint32_t offset, uint8_t ebyte);
 uint32_t bytesToint(uint8_t *bytes);
 void intTobytes(uint8_t *bytes, uint32_t intVal);
+void alarmReset(void);
 
 //
 // END FUNCTION DECLARATIONS
