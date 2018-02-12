@@ -72,6 +72,12 @@ struct MSG_S mainMenu[] = {
 		{0, 1, "Delays             "}
 };
 
+struct MSG_S sensorMenu[] = {
+		{0, 1, "System Inputs"},
+		{1, 1, "Ext Mtn Sensors"},
+		{0, 1, "Light Sensor"}
+};
+
 void clearLine(uint8_t row)
 {
 	setCursor(row, 0);
@@ -631,5 +637,50 @@ void dispMainMenu(uint8_t position)
 		sendChar(7);
 		break;
 	}
+}
 
+void dispSensorMenu(uint8_t position)
+{
+	switch (position)
+	{
+	case 0:
+		sensorMenu[0].row = 0;
+		sensorMenu[1].row = 1;
+		sendDisplay(0, &sensorMenu[0]);
+		sendDisplay(0, &sensorMenu[1]);
+		setCursor(0, 19);
+		sendChar(' ');
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 1:
+		sensorMenu[1].row = 0;
+		sensorMenu[2].row = 1;
+		sendDisplay(0, &sensorMenu[1]);
+		sendDisplay(0, &sensorMenu[2]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 2:
+		sensorMenu[2].row = 0;
+		sensorMenu[3].row = 1;
+		sendDisplay(0, &sensorMenu[2]);
+		sendDisplay(0, &sensorMenu[3]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(' ');
+		break;
+	case 3:
+		dispClear();
+		sensorMenu[0].row = 0;
+		sensorMenu[1].row = 1;
+		sendDisplay(0, &sensorMenu[0]);
+		sendDisplay(0, &sensorMenu[1]);
+		setCursor(0, 0);
+		sendChar(7);
+		break;
+	}
 }

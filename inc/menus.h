@@ -43,5 +43,6 @@ void dispOutputAll(void);
 void dispUpTime(void);
 void dispAutomateLIS(uint8_t LIS_item);
 void dispMainMenu(uint8_t position);
+void dispSensorMenu(uint8_t position);
 
 #endif /* MENUS_H_ */

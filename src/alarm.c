@@ -130,6 +130,7 @@ void subMenu_edit_ExtMotionSensor(uint8_t sensorid);
 void subMenu_edit_AUTO_LIS(void);
 void subMenu_edit_Auto_LIS_item(uint8_t item);
 void showMainMenu(void);
+void showSensorMenu(void);
 
 int main(void)
 {
@@ -1215,5 +1216,49 @@ void showMainMenu(void)
 			break;
 		}
 		dispMainMenu(menuItem);
+	}
+}
+
+void showSensorMenu(void)
+{
+	uint32_t selection = 0;
+	uint8_t menuLen = 3;
+	uint8_t menuItem = 0;
+	uint32_t menuTimer = systemTick;
+	dispSensorMenu(menuLen);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		if (selection == KP_CE) return;
+		debouncer();
+
+		switch (selection)
+		{
+		case KP_plus:
+			if (menuItem < menuLen-1) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		case KP_equal:
+			switch (menuItem)
+			{
+			case 0:
+				menu_inputStatus();
+				break;
+			case 1:
+				menu_ExtMotionSensorStatus();
+				break;
+			case 2:
+				menu_edit_DarkTH();
+				break;
+			}
+			menuTimer = systemTick;
+			break;
+		}
+		dispSensorMenu(menuItem);
 	}
 }
