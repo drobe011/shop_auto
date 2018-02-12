@@ -248,7 +248,7 @@ uint8_t getPIN(void)
 		{
 			for (uint8_t pinLoop = 0; pinLoop < 4; pinLoop++)
 			{
-				if (kpData[pinLoop] == tempUser.pin[pinLoop])
+				if (getDigit(kpData[pinLoop]) == tempUser.pin[pinLoop])
 					match++;
 			}
 			if (match == 4)
@@ -1208,8 +1208,8 @@ void showMainMenu(void)
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
-		if (selection == KP_CE) return;
 		debouncer();
+		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
@@ -1296,7 +1296,7 @@ void showInputsMenu(void)
 void showOutputsMenu(void)
 {
 	uint32_t selection = 0;
-	uint8_t menuLen = 2;
+	uint8_t menuLen = 3;
 	uint8_t menuItem = 0;
 	uint32_t menuTimer = systemTick;
 	dispOutputsMenu(menuLen);
@@ -1325,6 +1325,9 @@ void showOutputsMenu(void)
 				break;
 			case 1:
 				menu_Lights_Ext();
+				break;
+			case 2:
+				subMenu_edit_AUTO_LIS();
 				break;
 			}
 			dispOutputsMenu(menuLen);

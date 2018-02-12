@@ -4,7 +4,7 @@
 #include <time.h>
 #include "eeprom.h"
 
-#define EEPROM_SIG1 137
+#define EEPROM_SIG1 131
 #define EEPROM_SIG2 201
 
 I2C_XFER_T EEPROMxfer;
@@ -357,10 +357,10 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		{
 			tbuffer[name+3] = users[userid].name[name];
 		}
-		tbuffer[11] = users[userid].pin[0];
-		tbuffer[12] = users[userid].pin[1];
-		tbuffer[13] = users[userid].pin[2];
-		tbuffer[14] = users[userid].pin[3];
+		tbuffer[11] = (uint8_t)getDigit(users[userid].pin[0]);
+		tbuffer[12] = (uint8_t)getDigit(users[userid].pin[1]);
+		tbuffer[13] = (uint8_t)getDigit(users[userid].pin[2]);
+		tbuffer[14] = (uint8_t)getDigit(users[userid].pin[3]);
 		tbuffer[15] = users[userid].level;
 
 		EPROM_DELAY();
@@ -481,7 +481,7 @@ EEPROM_STATUS getUserData(uint8_t userid, struct users_S* userdata)
 	EPROM_DELAY();
 
 	Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
-	if (EEPROMxfer.rxSz < USERDATA_PACKET_SIZE)
+	if (EEPROMxfer.rxSz > 0)
 	{
 		return BAD;
 	}

@@ -82,7 +82,8 @@ struct MSG_S inputsMenu[] = {
 
 struct MSG_S outputsMenu[] = {
 		{0, 1, "Internal           "},
-		{1, 1, "External           "}
+		{1, 1, "External           "},
+		{1, 1, "Int Automation     "}
 };
 
 struct MSG_S delaysMenu[] = {
@@ -744,6 +745,15 @@ void dispOutputsMenu(uint8_t position)
 		outputsMenu[1].row = 0;
 		outputsMenu[2].row = 1;
 		sendDisplay(0, &outputsMenu[1]);
+		sendDisplay(0, &outputsMenu[2]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 2:
+		outputsMenu[2].row = 0;
+		sendDisplay(0, &outputsMenu[2]);
 		setCursor(1, 0);
 		sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
@@ -751,7 +761,7 @@ void dispOutputsMenu(uint8_t position)
 		setCursor(1, 19);
 		sendChar(' ');
 		break;
-	case 2:
+	case 3:
 		dispClear();
 		outputsMenu[0].row = 0;
 		outputsMenu[1].row = 1;

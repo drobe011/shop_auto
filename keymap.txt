@@ -36,7 +36,7 @@ keymap.txt
      			
      	[0] = SHOW UPTIME
      	
-     	[2] = EDIT AUTO_LIS
+     	[+/-] = EDIT AUTO_LIS
      			
      	[SQRT] = CHANGE TIME
      	
