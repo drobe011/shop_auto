@@ -73,9 +73,9 @@ struct MSG_S mainMenu[] = {
 };
 
 struct MSG_S sensorMenu[] = {
-		{0, 1, "System Inputs"},
-		{1, 1, "Ext Mtn Sensors"},
-		{0, 1, "Light Sensor"}
+		{0, 1, "System Inputs      "},
+		{1, 1, "Ext Mtn Sensors    "},
+		{0, 1, "Light Sensor       "}
 };
 
 void clearLine(uint8_t row)
@@ -665,9 +665,9 @@ void dispSensorMenu(uint8_t position)
 		break;
 	case 2:
 		sensorMenu[2].row = 0;
-		sensorMenu[3].row = 1;
 		sendDisplay(0, &sensorMenu[2]);
-		sendDisplay(0, &sensorMenu[3]);
+		setCursor(1, 0);
+		sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
 		sendChar(ARROW_UP);
 		setCursor(1, 19);

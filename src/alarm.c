@@ -1210,8 +1210,11 @@ void showMainMenu(void)
 		case KP_equal:
 			switch (menuItem)
 			{
-
+			case 0:
+				showSensorMenu();
+				break;
 			}
+			dispMainMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1256,6 +1259,7 @@ void showSensorMenu(void)
 				menu_edit_DarkTH();
 				break;
 			}
+			dispSensorMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
