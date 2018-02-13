@@ -65,6 +65,7 @@ struct MSG_S DISP_UPTIME1 = { 1, 0, "BOOT: 00/00/00 00:00" };
 struct MSG_S DISP_AUTO_LIS = { 0, 0, "LIS AUTO 1/4" };
 struct MSG_S DISP_AUTO_LIS1 = { 1, 1, "00:00 @ 00min OFF" };
 struct MSG_S DISP_RESET = { 0, 1, "Confirm Reset" };
+struct MSG_S DISP_NEWPIN = { 0, 2, "New PIN:" };
 
 struct MSG_S mainMenu[] = {
 		{0, 1, "Sensors            "},
@@ -947,4 +948,31 @@ void dispResetDialog(void)
 	sendDisplay(0, &DISP_RESET);
 	setCursor(0, 15);
 	CURSOR_ON();
+}
+
+void dispNewPin(uint8_t round)
+{
+	switch (round)
+	{
+	case 0:
+		dispClear();
+		sendDisplay(0, &DISP_NEWPIN);
+		break;
+	case 1:
+		setCursor(1, 2);
+		sendDisplay(1, &DISP_NEWPIN);
+		break;
+	case 2:
+		setCursor(1, 18);
+		sendChar('O');
+		sendChar('K');
+		break;
+	case 3:
+		setCursor(1, 16);
+		sendChar('F');
+		sendChar('a');
+		sendChar('i');
+		sendChar('l');
+		break;
+	}
 }

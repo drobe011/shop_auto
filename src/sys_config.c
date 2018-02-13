@@ -20,10 +20,13 @@ RTC_TIME_T cTime;
 
 uint8_t DISPLAY_txbuffer[DISPLAY_TXBUFFER_SZ];
 
+//ONLY USED TO LOAD DEFAULT VALUES INTO EEPROM
 struct users_S users[] = { { 0, "System", { KP_0, KP_0, KP_0, KP_0 }, 0 }, { 1, "David", { KP_1, KP_3, KP_1, KP_8 }, 4 }, { 2, "Christa", { KP_0, KP_3,
 KP_1, KP_8 }, 1 }, { 3, "Aaron", { KP_2, KP_3, KP_1, KP_8 }, 1 }, { 4, "Donny", { KP_3, KP_3, KP_1, KP_8 }, 1 }, { 5, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },
 { 6, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 }, { 7, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 }, { 8, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },
 { 9, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 } };
+
+//SYSTEM IS DEFAULT USER UPON POWER UP, CANNOT BE SELECTED OTHERWISE
 struct users_S active_user = { 0, "System", { KP_0, KP_0, KP_0, KP_0 }, 0 };
 
 struct users_S *c_user;
@@ -112,6 +115,7 @@ void setUpSystem(void)
 	setUpRTC();
 	if (setUpEEPROM())
 	{
+		//NO REAL REASON TO SET BOOT TIME TO EEPROM TODO: DON'T SAVE BOOTSTAMP TO EEPROM
 		setBootStamp();
 	}
 	setUpUsers();

@@ -463,6 +463,8 @@ EEPROM_STATUS getBootStamp(RTC_TIME_T* boottime)
 
 EEPROM_STATUS getUserData(uint8_t userid, struct users_S* userdata)
 {
+	if (userid == 0) return BAD;
+
 	uint8_t *rbuffer = eepromRXbuffer;
 	uint8_t *tbuffer = eepromTXbuffer;
 	uint32_t address = 0;
@@ -477,10 +479,10 @@ EEPROM_STATUS getUserData(uint8_t userid, struct users_S* userdata)
 	tbuffer[0] = (address >> 8) & 0xFF;
 	tbuffer[1] = address & 0xFF;
 
-
 	EPROM_DELAY();
 
 	Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+
 	if (EEPROMxfer.rxSz > 0)
 	{
 		return BAD;
@@ -495,5 +497,83 @@ EEPROM_STATUS getUserData(uint8_t userid, struct users_S* userdata)
 	userdata->pin[2] = rbuffer[11];
 	userdata->pin[3] = rbuffer[12];
 	userdata->level = rbuffer[13];
+	return GOOD;
+}
+
+EEPROM_STATUS addUser(struct users_S *userdata)
+{
+	struct users_S tempUser;
+
+	for (uint8_t userid = 1; userid < MAX_USERS; userid++)
+	{
+		getUserData(userid, &tempUser);
+		if (tempUser.level == 0)
+		{
+			if (saveNewUser(userid, userdata)) return GOOD;
+			else return BAD;
+		}
+	}
+	return BAD;
+}
+
+EEPROM_STATUS saveNewUser(uint8_t userid, struct users_S *newuser)
+{
+	uint8_t *tbuffer = eepromTXbuffer;
+	uint32_t address = BOOTTIME_OFFSET;
+
+	address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET;
+
+	EEPROMxfer.txBuff = tbuffer;
+	EEPROMxfer.rxSz = 0;
+	EEPROMxfer.txSz = USERDATA_PACKET_SIZE + 2;
+
+	tbuffer[0] = (address >> 8) & 0xFF;
+	tbuffer[1] = address & 0xFF;
+	tbuffer[2] = userid;
+	for (uint8_t name = 0; name < 8; name++)
+	{
+		tbuffer[name+3] = newuser->name[name];
+	}
+	tbuffer[11] = (uint8_t)getDigit(newuser->pin[0]);
+	tbuffer[12] = (uint8_t)getDigit(newuser->pin[1]);
+	tbuffer[13] = (uint8_t)getDigit(newuser->pin[2]);
+	tbuffer[14] = (uint8_t)getDigit(newuser->pin[3]);
+	tbuffer[15] = newuser->level;
+
+	EPROM_DELAY();
+
+	Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+	if (EEPROMxfer.txSz > 0)
+	{
+		return BAD;
+	}
+	return GOOD;
+}
+
+EEPROM_STATUS changePIN(uint8_t userid, uint8_t *newpin)
+{
+	uint8_t *tbuffer = eepromTXbuffer;
+	uint32_t address = BOOTTIME_OFFSET;
+
+	tbuffer = eepromTXbuffer;
+	address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 9;
+
+	EEPROMxfer.txBuff = tbuffer;
+	EEPROMxfer.rxSz = 0;
+	EEPROMxfer.txSz = 4 + 2; //PIN + ADDRESS
+
+	tbuffer[0] = (address >> 8) & 0xFF;
+	tbuffer[1] = address & 0xFF;
+	tbuffer[2] = getDigit(newpin[0]);
+	tbuffer[3] = getDigit(newpin[1]);
+	tbuffer[4] = getDigit(newpin[2]);
+	tbuffer[5] = getDigit(newpin[3]);
+
+	EPROM_DELAY();
+
+	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+	{
+		return BAD;
+	}
 	return GOOD;
 }

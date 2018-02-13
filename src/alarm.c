@@ -137,6 +137,8 @@ void showOutputsMenu(void);
 void showDelaysMenu(void);
 void showSystemMenu(void);
 void showAdminMenu(void);
+void menu_changePIN(void);
+uint8_t pinEntry(uint32_t *kpData);
 
 int main(void)
 {
@@ -199,6 +201,24 @@ int main(void)
 	}
 }
 
+uint8_t pinEntry(uint32_t *kpData)
+{
+	CURSOR_ON();
+	for (uint8_t keys = 0; keys < 4; keys++)
+	{
+		kpData[keys] = getKP(KP_TIMEOUT_PIN_MS);
+		debouncer();
+		if (getDigit(kpData[keys]) > 9 || !kpData[keys])
+		{
+			CURSOR_OFF();
+			return 0;
+		}
+		sendData('*');
+	}
+	CURSOR_OFF();
+	return 1;
+}
+
 uint8_t getPIN(void)
 {
 	uint32_t on_pressed_time = systemTick;
@@ -243,7 +263,7 @@ uint8_t getPIN(void)
 	CURSOR_OFF();
 	for (uint8_t usersLoop = 1; usersLoop < MAX_USERS; usersLoop++)
 	{
-		getUserData(usersLoop, &tempUser);
+		getUserData(usersLoop, &tempUser); //LOAD CURRENT USERDATA FROM EEPROM
 		if (tempUser.level > 0)
 		{
 			for (uint8_t pinLoop = 0; pinLoop < 4; pinLoop++)
@@ -253,7 +273,6 @@ uint8_t getPIN(void)
 			}
 			if (match == 4)
 			{
-				//c_user = &users[usersLoop];
 				active_user = tempUser;
 				ALARMSTATE = DISARM;
 				return 2;
@@ -271,7 +290,6 @@ void checkMenu(void)
 {
 	uint32_t selection = 0;
 
-	/* TODO: Test kptimeout (want it shorter) testing from 2000 to 45*/
 	selection = getKP(KP_TIMEOUT_DEFAULT_MS);
 
 	if (selection)
@@ -1460,7 +1478,7 @@ void showAdminMenu(void)
 			switch (menuItem)
 			{
 			case 0:
-				//menu_changePIN
+				menu_changePIN();
 				break;
 			case 1:
 				//menu_renameUser
@@ -1493,3 +1511,37 @@ void menu_alarmReset(void)
 	if (selection == KP_CE) return;
 	if (selection) alarmReset();
 }
+
+void menu_changePIN(void)
+{
+	uint8_t newpin[] = {0, 0, 0, 0};
+	uint8_t checknewpin[] = {0, 0, 0, 0};
+
+	uint8_t match = 0;
+	uint8_t result = 0;
+
+	dispNewPin(0);
+
+	if (pinEntry(newpin))
+	{
+		if (pinEntry(checknewpin))
+		{
+			result = 1;
+			dispNewPin(1);
+			for (uint8_t key = 0; key < 4; key++)
+			{
+				if (newpin[key] == checknewpin[key]) match++;
+			}
+		}
+	}
+
+	if (result && match == 4)
+	{
+		dispNewPin(2);
+		changePIN(c_user->id, newpin);
+	}
+	else dispNewPin(3);
+
+	pause(1000);
+}
+
