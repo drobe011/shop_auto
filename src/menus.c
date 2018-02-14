@@ -995,3 +995,31 @@ void dispRenameUser(void)
 
 	sendDisplay(0, &DISP_ADDUSER1);
 }
+
+void dispDeleteUser(uint8_t position, uint8_t length)
+{
+	if (!position)
+	{
+		setCursor(0, 19);
+		sendChar(' ');
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+	}
+	else if (position == length)
+	{
+		setCursor(1, 0);
+		sendDisplay(1, &DISP_SPACE);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(' ');
+	}
+	else if (position == 255)
+	{
+		dispClear();
+		setCursor(0, 0);
+		sendChar(7);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+	}
+}

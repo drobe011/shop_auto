@@ -578,6 +578,35 @@ EEPROM_STATUS changePIN(uint8_t userid, uint32_t *newpin)
 	return GOOD;
 }
 
+EEPROM_STATUS changeName(uint8_t userid, uint8_t *newname)
+{
+	uint8_t *tbuffer = eepromTXbuffer;
+	uint32_t address = BOOTTIME_OFFSET;
+
+	tbuffer = eepromTXbuffer;
+	address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 1;
+
+	EEPROMxfer.txBuff = tbuffer;
+	EEPROMxfer.rxSz = 0;
+	EEPROMxfer.txSz = 8 + 2; //NAME + ADDRESS
+
+	tbuffer[0] = (address >> 8) & 0xFF;
+	tbuffer[1] = address & 0xFF;
+	for (uint8_t namechar = 0; namechar < 7; namechar++)
+	{
+		tbuffer[namechar+2] = newname[namechar];
+	}
+	tbuffer[9] = 0; //MAKE SURE LAST VALUE IS '\0'
+
+	EPROM_DELAY();
+
+	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+	{
+		return BAD;
+	}
+	return GOOD;
+}
+
 uint8_t getNumOfUsers(void)
 {
 	uint8_t *rbuffer = eepromRXbuffer;

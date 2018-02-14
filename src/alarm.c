@@ -141,6 +141,7 @@ void menu_changePIN(void);
 void menu_renameUser(void);
 uint8_t pinEntry(uint32_t *kpData);
 void menu_addUser(void);
+void menu_deleteUser(void);
 uint8_t getAlpha(uint8_t cursorpsn, uint8_t startchar);
 
 int main(void)
@@ -1481,10 +1482,10 @@ void showAdminMenu(void)
 			switch (menuItem)
 			{
 			case 0:
-				menu_changePIN();
+				if (c_user->id) menu_changePIN();
 				break;
 			case 1:
-				menu_renameUser();
+				if (c_user->id) menu_renameUser();
 				break;
 			case 2:
 				//if (c_user->level >= ADMIN_LEVEL)
@@ -1492,7 +1493,7 @@ void showAdminMenu(void)
 				break;
 			case 3:
 				//if (c_user->level >= ADMIN_LEVEL); //////////dont forget to remove the ';'
-				//menu_deleteUser
+				menu_deleteUser();
 				break;
 			}
 			dispAdminMenu(menuLen);
@@ -1607,8 +1608,90 @@ void menu_renameUser(void)
 
 	strcpy ((char*) active_user.name, (char*) newname);
 
-	dispNewPin(2);
+	if (changeName(active_user.id, active_user.name)) dispNewPin(2);
+	else dispNewPin(3);
 	pause(2000);
+}
+
+void menu_deleteUser(void)
+{
+	struct users_S activeUsers[] = {{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },
+			{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },
+			{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 },{ 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0 }};
+	struct users_S tempUser = { 0, "       ", { KP_0, KP_0, KP_0, KP_0 }, 0};
+	struct MSG_S msg = {0, 1, "       "};
+	uint8_t blankline[] = "       ";
+	uint8_t activeUserCount = 0;
+
+	for (uint8_t userLoop = 1; userLoop < MAX_USERS; userLoop++) //START AT 1 TO SKIP SYSTEM USER
+	{
+		if (getUserData(userLoop, &tempUser))
+		{
+			if (tempUser.level > 0)
+			{
+				activeUsers[activeUserCount] = tempUser;
+				activeUserCount++;
+			}
+		}
+	}
+	uint32_t selection = 0;
+	uint8_t menuLen = activeUserCount;
+	uint8_t menuItem = 0;
+	uint32_t menuTimer = systemTick;
+	dispDeleteUser(255, 0);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		debouncer();
+		if (selection == KP_CE) return;
+
+		switch (selection)
+		{
+		case KP_plus:
+			if (menuItem < menuLen) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		case KP_equal:
+			switch (menuItem)
+			{
+			case 0:
+
+				break;
+			case 1:
+
+				break;
+			case 2:
+
+				break;
+			case 3:
+
+				break;
+			}
+			strcpy ((char*) msg.msg, (char*) blankline);
+			msg.row = 0;
+			sendDisplay(0, &msg);
+			msg.row = 1;
+			sendDisplay(0, &msg);
+			strcpy ((char*) msg.msg, (char*) activeUsers[menuItem].name);
+			msg.row = 0;
+			sendDisplay(0, &msg);
+			if (menuItem < menuLen)
+			{
+				msg.row = 1;
+				strcpy ((char*) msg.msg, (char*) activeUsers[menuItem+1].name);
+				sendDisplay(0, &msg);
+			}
+			//dispDeleteUser(menuItem, menuLen);
+			menuTimer = systemTick;
+			break;
+		}
+		dispDeleteUser(menuLen, menuItem);
+	}
 }
 
 uint8_t getAlpha(uint8_t cursorpsn, uint8_t startchar)
