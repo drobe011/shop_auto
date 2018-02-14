@@ -550,7 +550,7 @@ EEPROM_STATUS saveNewUser(uint8_t userid, struct users_S *newuser)
 	return GOOD;
 }
 
-EEPROM_STATUS changePIN(uint8_t userid, uint8_t *newpin)
+EEPROM_STATUS changePIN(uint8_t userid, uint32_t *newpin)
 {
 	uint8_t *tbuffer = eepromTXbuffer;
 	uint32_t address = BOOTTIME_OFFSET;
@@ -564,10 +564,10 @@ EEPROM_STATUS changePIN(uint8_t userid, uint8_t *newpin)
 
 	tbuffer[0] = (address >> 8) & 0xFF;
 	tbuffer[1] = address & 0xFF;
-	tbuffer[2] = getDigit(newpin[0]);
-	tbuffer[3] = getDigit(newpin[1]);
-	tbuffer[4] = getDigit(newpin[2]);
-	tbuffer[5] = getDigit(newpin[3]);
+	tbuffer[2] = (uint8_t)getDigit(newpin[0]);
+	tbuffer[3] = (uint8_t)getDigit(newpin[1]);
+	tbuffer[4] = (uint8_t)getDigit(newpin[2]);
+	tbuffer[5] = (uint8_t)getDigit(newpin[3]);
 
 	EPROM_DELAY();
 

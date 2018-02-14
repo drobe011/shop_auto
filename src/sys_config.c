@@ -120,6 +120,7 @@ void setUpSystem(void)
 	}
 	setUpUsers();
 	setUpTimer();
+	//JUST TO DISPLAY BOOT MESSAGE
 	pause(1000);
 }
 
@@ -174,13 +175,6 @@ void setUpGPIO(void)
 	NVIC_ClearPendingIRQ(EINT3_IRQn);
 	NVIC_EnableIRQ(EINT3_IRQn);
 
-	//SET DEFAULT OUTPUT VALUE
-	//Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, K5);
-
-//	setIOpin(&automation_O[L_I_M], 0);
-//	setIOpin(&automation_O[L_I_S], 0);
-//	setIOpin(&automation_O[FAN], 0);
-	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_GPIO);
 }
 
 void setUpRTC(void)

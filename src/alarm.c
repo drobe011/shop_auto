@@ -139,6 +139,8 @@ void showSystemMenu(void);
 void showAdminMenu(void);
 void menu_changePIN(void);
 uint8_t pinEntry(uint32_t *kpData);
+void menu_addUser(void);
+uint8_t getAlpha(void);
 
 int main(void)
 {
@@ -1484,8 +1486,8 @@ void showAdminMenu(void)
 				//menu_renameUser
 				break;
 			case 2:
-				if (c_user->level >= ADMIN_LEVEL); //////////dont forget to remove the ';'
-				//menu_addUser
+				if (c_user->level >= ADMIN_LEVEL)
+				menu_addUser();
 				break;
 			case 3:
 				if (c_user->level >= ADMIN_LEVEL); //////////dont forget to remove the ';'
@@ -1514,8 +1516,8 @@ void menu_alarmReset(void)
 
 void menu_changePIN(void)
 {
-	uint8_t newpin[] = {0, 0, 0, 0};
-	uint8_t checknewpin[] = {0, 0, 0, 0};
+	uint32_t newpin[] = {0, 0, 0, 0};
+	uint32_t checknewpin[] = {0, 0, 0, 0};
 
 	uint8_t match = 0;
 	uint8_t result = 0;
@@ -1545,3 +1547,75 @@ void menu_changePIN(void)
 	pause(1000);
 }
 
+void menu_addUser(void)
+{
+	uint32_t kpPin[4] = { 0, 0, 0, 0 };
+	uint32_t kpName[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	uint8_t level = 0;
+	uint8_t cursorpsn = 11;
+
+	dispNewUser();
+	sendCMD(0x07);
+
+	for (uint8_t pinval = 0; pinval < 7; pinval++)
+	{
+		kpName[pinval] = getAlpha();
+		if (!kpName[pinval]) break;
+		sendChar(kpName[pinval]);
+		setCursor(0, ++cursorpsn);
+	}
+
+	sendCMD(0x06);
+
+	if (!pinEntry(kpPin)) return;
+
+	CURSOR_ON();
+
+	level = getDigit(getKP(KP_TIMEOUT_SUBMENU_MS));
+	debouncer();
+
+	if (level == 0 || level == 10) return;
+
+	CURSOR_OFF();
+
+	dispNewPin(2);
+
+	pause(2000);
+}
+
+uint8_t getAlpha(void)
+{
+	uint32_t selection = 0;
+	uint32_t kpTimer = systemTick;
+
+	uint8_t lowval = 65;
+	uint8_t result = lowval;
+	uint8_t hival = 122;
+
+	while (TIME_WAIT(kpTimer, (KP_TIMEOUT_SUBMENU_MS * 5)))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		debouncer();
+		switch (selection)
+		{
+		case KP_CE:
+			return 0;
+			break;
+		case KP_equal:
+			return result;
+			break;
+		case KP_plus:
+			if (result < hival)
+			{
+				result++;
+			}
+			break;
+		case KP_minus:
+			if (result > lowval)
+			{
+				result--;
+			}
+		}
+	}
+	return 0;
+}

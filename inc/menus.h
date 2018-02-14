@@ -50,5 +50,6 @@ void dispSystemMenu(uint8_t position);
 void dispAdminMenu(uint8_t position);
 void dispResetDialog(void);
 void dispNewPin(uint8_t round);
+void dispNewUser(void);
 
 #endif /* MENUS_H_ */
