@@ -140,7 +140,7 @@ void showAdminMenu(void);
 void menu_changePIN(void);
 uint8_t pinEntry(uint32_t *kpData);
 void menu_addUser(void);
-uint8_t getAlpha(void);
+uint8_t getAlpha(uint8_t cursorpsn);
 
 int main(void)
 {
@@ -1486,7 +1486,7 @@ void showAdminMenu(void)
 				//menu_renameUser
 				break;
 			case 2:
-				if (c_user->level >= ADMIN_LEVEL)
+				//if (c_user->level >= ADMIN_LEVEL)
 				menu_addUser();
 				break;
 			case 3:
@@ -1526,10 +1526,11 @@ void menu_changePIN(void)
 
 	if (pinEntry(newpin))
 	{
+		dispNewPin(1);
 		if (pinEntry(checknewpin))
 		{
 			result = 1;
-			dispNewPin(1);
+
 			for (uint8_t key = 0; key < 4; key++)
 			{
 				if (newpin[key] == checknewpin[key]) match++;
@@ -1550,31 +1551,31 @@ void menu_changePIN(void)
 void menu_addUser(void)
 {
 	uint32_t kpPin[4] = { 0, 0, 0, 0 };
-	uint32_t kpName[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	uint8_t kpName[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 	uint8_t level = 0;
-	uint8_t cursorpsn = 11;
+	//uint8_t cursorpsn = 0;
 
 	dispNewUser();
-	sendCMD(0x07);
 
 	for (uint8_t pinval = 0; pinval < 7; pinval++)
 	{
-		kpName[pinval] = getAlpha();
+		kpName[pinval] = getAlpha(pinval);
 		if (!kpName[pinval]) break;
-		sendChar(kpName[pinval]);
-		setCursor(0, ++cursorpsn);
+		//sendChar(kpName[pinval]);
+		//setCursor(0, ++cursorpsn);
 	}
 
-	sendCMD(0x06);
-
+	setCursor(1, 5);
 	if (!pinEntry(kpPin)) return;
 
 	CURSOR_ON();
 
+	setCursor(1, 16);
 	level = getDigit(getKP(KP_TIMEOUT_SUBMENU_MS));
 	debouncer();
 
 	if (level == 0 || level == 10) return;
+	sendChar(level+48);
 
 	CURSOR_OFF();
 
@@ -1583,19 +1584,27 @@ void menu_addUser(void)
 	pause(2000);
 }
 
-uint8_t getAlpha(void)
+uint8_t getAlpha(uint8_t cursorpsn)
 {
 	uint32_t selection = 0;
 	uint32_t kpTimer = systemTick;
 
 	uint8_t lowval = 65;
-	uint8_t result = lowval;
+	uint8_t result = lowval-1;
 	uint8_t hival = 122;
+	cursorpsn += 11;
 
-	while (TIME_WAIT(kpTimer, (KP_TIMEOUT_SUBMENU_MS * 5)))
+
+	setCursor(0, cursorpsn);
+	sendChar(' ');
+	setCursor(0, cursorpsn);
+
+	while (TIME_WAIT(kpTimer, (KP_TIMEOUT_SUBMENU_MS * 10)))
 	{
-		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS * 5);
 		debouncer();
+		if (!selection) return 0;
+		//result = getDigit(selection);
 		switch (selection)
 		{
 		case KP_CE:
@@ -1608,14 +1617,24 @@ uint8_t getAlpha(void)
 			if (result < hival)
 			{
 				result++;
+				setCursor(0, cursorpsn);
+				sendChar(result);
+				setCursor(0, cursorpsn);
+				kpTimer = systemTick;
 			}
 			break;
 		case KP_minus:
 			if (result > lowval)
 			{
 				result--;
+				setCursor(0, cursorpsn);
+				sendChar(result);
+				setCursor(0, cursorpsn);
+				kpTimer = systemTick;
 			}
+			break;
 		}
+
 	}
 	return 0;
 }

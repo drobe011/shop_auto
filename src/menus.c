@@ -67,7 +67,7 @@ struct MSG_S DISP_AUTO_LIS1 = { 1, 1, "00:00 @ 00min OFF" };
 struct MSG_S DISP_RESET = { 0, 1, "Confirm Reset" };
 struct MSG_S DISP_NEWPIN = { 0, 2, "New PIN:" };
 struct MSG_S DISP_ADDUSER1 = { 0, 0, "User Name:" };
-struct MSG_S DISP_ADDUSER2 = { 1, 0, "PIN:       Level:" };
+struct MSG_S DISP_ADDUSER2 = { 1, 0, "PIN:      Level:" };
 
 struct MSG_S mainMenu[] = {
 		{0, 1, "Sensors            "},
@@ -985,6 +985,6 @@ void dispNewUser(void)
 
 	sendDisplay(0, &DISP_ADDUSER1);
 	sendDisplay(0, &DISP_ADDUSER2);
-	setCursor(0, 10);
+	setCursor(0, 11);
 	CURSOR_ON();
 }
