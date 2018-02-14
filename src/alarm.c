@@ -1487,11 +1487,11 @@ void showAdminMenu(void)
 				menu_renameUser();
 				break;
 			case 2:
-				if (c_user->level >= ADMIN_LEVEL)
+				//if (c_user->level >= ADMIN_LEVEL)
 				menu_addUser();
 				break;
 			case 3:
-				if (c_user->level >= ADMIN_LEVEL); //////////dont forget to remove the ';'
+				//if (c_user->level >= ADMIN_LEVEL); //////////dont forget to remove the ';'
 				//menu_deleteUser
 				break;
 			}
@@ -1592,25 +1592,23 @@ void menu_addUser(void)
 
 void menu_renameUser(void)
 {
-	//char tmpStr[4];
 	uint8_t newname[] = {0, 0, 0, 0, 0, 0, 0, 0};
-	struct MSG_S tmpMSG = {0, 11, ""};
 
 	dispRenameUser();
-	//sprintf(tmpStr, "%02d", hr);
-	strcpy ((char*) tmpMSG.msg, (char*) active_user.name);
-	sendDisplay(0, &tmpMSG);
 	CURSOR_ON();
 
 	for (uint8_t charpsn = 0; charpsn < 7; charpsn++)
 	{
-		newname[charpsn] = getAlpha(charpsn, active_user.name[charpsn]);
+		newname[charpsn] = getAlpha(charpsn, 0);
 		if (!newname[charpsn]) break;
 	}
 
 	CURSOR_OFF();
 
 	strcpy ((char*) active_user.name, (char*) newname);
+
+	dispNewPin(2);
+	pause(2000);
 }
 
 uint8_t getAlpha(uint8_t cursorpsn, uint8_t startchar)
@@ -1625,18 +1623,11 @@ uint8_t getAlpha(uint8_t cursorpsn, uint8_t startchar)
 
 	setCursor(0, cursorpsn);
 
-	if(startchar)
-	{
-		result = startchar;
-		//sendChar(result);
-	}
+	if(startchar) result = startchar;
 
-	//sendChar(' ');
-	//setCursor(0, cursorpsn);
-
-	while (TIME_WAIT(kpTimer, (KP_TIMEOUT_SUBMENU_MS * 10)))
+	while (TIME_WAIT(kpTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
-		selection = getKP(KP_TIMEOUT_SUBMENU_MS * 5);
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
 		if (!selection) return 0;
 		switch (selection)
