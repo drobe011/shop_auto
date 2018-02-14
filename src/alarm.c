@@ -1635,25 +1635,48 @@ void menu_deleteUser(void)
 		}
 	}
 	uint32_t selection = 0;
-	uint8_t menuLen = activeUserCount;
+	uint8_t menuLen = activeUserCount-1;
 	uint8_t menuItem = 0;
 	uint32_t menuTimer = systemTick;
+	uint8_t updatescreen = 0;
+
 	dispDeleteUser(255, 0);
+	strcpy ((char*) msg.msg, (char*) activeUsers[menuItem].name);
+	msg.row = 0;
+	sendDisplay(0, &msg);
+	if (menuItem < menuLen)
+	{
+		msg.row = 1;
+		strcpy ((char*) msg.msg, (char*) activeUsers[menuItem+1].name);
+		sendDisplay(0, &msg);
+	}
 
 	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection == KP_CE) return;
+		if (selection == KP_CE)
+		{
+			dispClear();
+			return;
+		}
 
 		switch (selection)
 		{
 		case KP_plus:
-			if (menuItem < menuLen) menuItem++;
+			if (menuItem < menuLen)
+			{
+				menuItem++;
+				updatescreen++;
+			}
 			menuTimer = systemTick;
 			break;
 		case KP_minus:
-			if (menuItem) menuItem--;
+			if (menuItem)
+			{
+				menuItem--;
+				updatescreen++;
+			}
 			menuTimer = systemTick;
 			break;
 		case KP_equal:
@@ -1672,6 +1695,13 @@ void menu_deleteUser(void)
 
 				break;
 			}
+
+			//dispDeleteUser(menuItem, menuLen);
+			menuTimer = systemTick;
+			break;
+		}
+		if (updatescreen)
+		{
 			strcpy ((char*) msg.msg, (char*) blankline);
 			msg.row = 0;
 			sendDisplay(0, &msg);
@@ -1686,12 +1716,11 @@ void menu_deleteUser(void)
 				strcpy ((char*) msg.msg, (char*) activeUsers[menuItem+1].name);
 				sendDisplay(0, &msg);
 			}
-			//dispDeleteUser(menuItem, menuLen);
-			menuTimer = systemTick;
-			break;
+			dispDeleteUser(menuItem, menuLen);
+			updatescreen = 0;
 		}
-		dispDeleteUser(menuLen, menuItem);
 	}
+	dispClear();
 }
 
 uint8_t getAlpha(uint8_t cursorpsn, uint8_t startchar)

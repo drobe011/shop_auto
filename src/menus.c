@@ -1007,8 +1007,8 @@ void dispDeleteUser(uint8_t position, uint8_t length)
 	}
 	else if (position == length)
 	{
-		setCursor(1, 0);
-		sendDisplay(1, &DISP_SPACE);
+		//setCursor(1, 0);
+		//sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
 		sendChar(ARROW_UP);
 		setCursor(1, 19);
@@ -1021,5 +1021,13 @@ void dispDeleteUser(uint8_t position, uint8_t length)
 		sendChar(7);
 		setCursor(1, 19);
 		sendChar(ARROW_DOWN);
+	}
+	else
+	{
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		//setCursor(1, 19);
 	}
 }
