@@ -138,9 +138,10 @@ void showDelaysMenu(void);
 void showSystemMenu(void);
 void showAdminMenu(void);
 void menu_changePIN(void);
+void menu_renameUser(void);
 uint8_t pinEntry(uint32_t *kpData);
 void menu_addUser(void);
-uint8_t getAlpha(uint8_t cursorpsn);
+uint8_t getAlpha(uint8_t cursorpsn, uint8_t startchar);
 
 int main(void)
 {
@@ -1483,10 +1484,10 @@ void showAdminMenu(void)
 				menu_changePIN();
 				break;
 			case 1:
-				//menu_renameUser
+				menu_renameUser();
 				break;
 			case 2:
-				//if (c_user->level >= ADMIN_LEVEL)
+				if (c_user->level >= ADMIN_LEVEL)
 				menu_addUser();
 				break;
 			case 3:
@@ -1550,41 +1551,69 @@ void menu_changePIN(void)
 
 void menu_addUser(void)
 {
-	uint32_t kpPin[4] = { 0, 0, 0, 0 };
-	uint8_t kpName[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-	uint8_t level = 0;
-	//uint8_t cursorpsn = 0;
+	if (getNumOfUsers() > (MAX_USERS - 2))
+	{
+		dispClear();
+		dispNewPin(3);
+		pause(2000);
+		return;
+	}
+
+	struct users_S newUser = {0, { 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0 }, 0};
 
 	dispNewUser();
 
 	for (uint8_t pinval = 0; pinval < 7; pinval++)
 	{
-		kpName[pinval] = getAlpha(pinval);
-		if (!kpName[pinval]) break;
-		//sendChar(kpName[pinval]);
-		//setCursor(0, ++cursorpsn);
+		newUser.name[pinval] = getAlpha(pinval, 0);
+		if (!newUser.name[pinval]) break;
 	}
 
-	setCursor(1, 5);
-	if (!pinEntry(kpPin)) return;
+	setCursor(1, 4);
+	if (!pinEntry(newUser.pin)) return;
 
 	CURSOR_ON();
 
 	setCursor(1, 16);
-	level = getDigit(getKP(KP_TIMEOUT_SUBMENU_MS));
+	newUser.level = getDigit(getKP(KP_TIMEOUT_SUBMENU_MS));
 	debouncer();
 
-	if (level == 0 || level == 10) return;
-	sendChar(level+48);
+	if (newUser.level == 0 || newUser.level == 10) return;
+	sendChar(newUser.level+48);
 
 	CURSOR_OFF();
+	dispClear();
 
-	dispNewPin(2);
+	if (addUser(&newUser)) dispNewPin(2);
+	else dispNewPin(3);
 
 	pause(2000);
 }
 
-uint8_t getAlpha(uint8_t cursorpsn)
+void menu_renameUser(void)
+{
+	//char tmpStr[4];
+	uint8_t newname[] = {0, 0, 0, 0, 0, 0, 0, 0};
+	struct MSG_S tmpMSG = {0, 11, ""};
+
+	dispRenameUser();
+	//sprintf(tmpStr, "%02d", hr);
+	strcpy ((char*) tmpMSG.msg, (char*) active_user.name);
+	sendDisplay(0, &tmpMSG);
+	CURSOR_ON();
+
+	for (uint8_t charpsn = 0; charpsn < 7; charpsn++)
+	{
+		newname[charpsn] = getAlpha(charpsn, active_user.name[charpsn]);
+		if (!newname[charpsn]) break;
+	}
+
+	CURSOR_OFF();
+
+	strcpy ((char*) active_user.name, (char*) newname);
+}
+
+uint8_t getAlpha(uint8_t cursorpsn, uint8_t startchar)
 {
 	uint32_t selection = 0;
 	uint32_t kpTimer = systemTick;
@@ -1594,17 +1623,22 @@ uint8_t getAlpha(uint8_t cursorpsn)
 	uint8_t hival = 122;
 	cursorpsn += 11;
 
+	setCursor(0, cursorpsn);
 
-	setCursor(0, cursorpsn);
-	sendChar(' ');
-	setCursor(0, cursorpsn);
+	if(startchar)
+	{
+		result = startchar;
+		//sendChar(result);
+	}
+
+	//sendChar(' ');
+	//setCursor(0, cursorpsn);
 
 	while (TIME_WAIT(kpTimer, (KP_TIMEOUT_SUBMENU_MS * 10)))
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS * 5);
 		debouncer();
 		if (!selection) return 0;
-		//result = getDigit(selection);
 		switch (selection)
 		{
 		case KP_CE:
@@ -1634,7 +1668,7 @@ uint8_t getAlpha(uint8_t cursorpsn)
 			}
 			break;
 		}
-
 	}
 	return 0;
 }
+

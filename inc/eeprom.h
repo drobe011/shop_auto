@@ -20,5 +20,6 @@ EEPROM_STATUS getUserData(uint8_t userid, struct users_S *userdata);
 EEPROM_STATUS addUser(struct users_S *userdata);
 EEPROM_STATUS saveNewUser(uint8_t userid, struct users_S *newuser);
 EEPROM_STATUS changePIN(uint8_t userid, uint32_t *newpin);
+uint8_t getNumOfUsers(void);
 
 #endif /* EEPROM_H_ */

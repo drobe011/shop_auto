@@ -65,7 +65,7 @@ struct MSG_S DISP_UPTIME1 = { 1, 0, "BOOT: 00/00/00 00:00" };
 struct MSG_S DISP_AUTO_LIS = { 0, 0, "LIS AUTO 1/4" };
 struct MSG_S DISP_AUTO_LIS1 = { 1, 1, "00:00 @ 00min OFF" };
 struct MSG_S DISP_RESET = { 0, 1, "Confirm Reset" };
-struct MSG_S DISP_NEWPIN = { 0, 2, "New PIN:" };
+struct MSG_S DISP_NEWPIN = { 0, 2, "New PIN: " };
 struct MSG_S DISP_ADDUSER1 = { 0, 0, "User Name:" };
 struct MSG_S DISP_ADDUSER2 = { 1, 0, "PIN:      Level:" };
 
@@ -987,4 +987,11 @@ void dispNewUser(void)
 	sendDisplay(0, &DISP_ADDUSER2);
 	setCursor(0, 11);
 	CURSOR_ON();
+}
+
+void dispRenameUser(void)
+{
+	dispClear();
+
+	sendDisplay(0, &DISP_ADDUSER1);
 }

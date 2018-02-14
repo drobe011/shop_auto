@@ -51,5 +51,6 @@ void dispAdminMenu(uint8_t position);
 void dispResetDialog(void);
 void dispNewPin(uint8_t round);
 void dispNewUser(void);
+void dispRenameUser(void);
 
 #endif /* MENUS_H_ */
