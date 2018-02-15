@@ -18,8 +18,8 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct LIGHT_AUTO_S light_auto[];
+extern struct LIGHT_AUTO_S x_light_auto[];
 extern struct users_S users[];
-
 
 EEPROM_STATUS initEEPROM(void)
 {
@@ -209,6 +209,30 @@ EEPROM_STATUS getEEPROMdata(void)
 		light_auto[sensorid].active = rbuffer[3];
 	}
 
+	for (uint8_t sensorid = 0; sensorid < NUM_OF_X_FLASHES; sensorid++)
+	{
+		tbuffer = eepromTXbuffer;
+		rbuffer = eepromRXbuffer;
+		address = (EPROM_PAGE_SZ * sensorid) + AUTO_X_OFFSET;
+		tbuffer[0] = (address >> 8) & 0xFF;
+		tbuffer[1] = address & 0xFF;
+		EEPROMxfer.txBuff = tbuffer;
+		EEPROMxfer.rxBuff = rbuffer;
+		EEPROMxfer.rxSz = AUTO_X_PACKET_SIZE;
+		EEPROMxfer.txSz = 2;
+
+		EPROM_DELAY();
+
+		if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+		{
+			return BAD;
+		}
+
+		x_light_auto[sensorid].hour = rbuffer[0];
+		x_light_auto[sensorid].min = rbuffer[1];
+		x_light_auto[sensorid].active = rbuffer[2];
+	}
+
 	return GOOD;
 }
 
@@ -371,6 +395,31 @@ EEPROM_STATUS setEEPROMdefaults(void)
 			return BAD;
 		}
 	}
+
+	for (uint8_t sensorid = 0; sensorid < NUM_OF_X_FLASHES; sensorid++)
+	{
+		tbuffer = eepromTXbuffer;
+		address = (EPROM_PAGE_SZ * sensorid) + AUTO_X_OFFSET;
+
+		EEPROMxfer.txBuff = tbuffer;
+		EEPROMxfer.rxSz = 0;
+		EEPROMxfer.txSz = AUTO_X_PACKET_SIZE + 2;
+
+		tbuffer[0] = (address >> 8) & 0xFF;
+		tbuffer[1] = address & 0xFF;
+		tbuffer[2] = light_auto[sensorid].hour;
+		tbuffer[3] = light_auto[sensorid].min;
+		tbuffer[4] = light_auto[sensorid].active;
+
+		EPROM_DELAY();
+
+		Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+		if (EEPROMxfer.txSz > 0)
+		{
+			return BAD;
+		}
+	}
+
 	return GOOD;
 }
 
@@ -397,11 +446,13 @@ EEPROM_STATUS setEEPROMbyte(uint32_t offset, uint8_t ebyte)
 	}
 }
 
+/*
 EEPROM_STATUS setBootStamp(void)
 {
 	RTC_TIME_T bootTime;
 	uint8_t *tbuffer = eepromTXbuffer;
 	uint32_t address = BOOTTIME_OFFSET;
+
 
 	Chip_RTC_GetFullTime(LPC_RTC, &bootTime);
 
@@ -460,7 +511,7 @@ EEPROM_STATUS getBootStamp(RTC_TIME_T* boottime)
 
 	return GOOD;
 }
-
+*/
 EEPROM_STATUS getUserData(uint8_t userid, struct users_S* userdata)
 {
 	if (userid == 0) return BAD;
@@ -519,9 +570,7 @@ EEPROM_STATUS addUser(struct users_S *userdata)
 EEPROM_STATUS saveNewUser(uint8_t userid, struct users_S *newuser)
 {
 	uint8_t *tbuffer = eepromTXbuffer;
-	uint32_t address = BOOTTIME_OFFSET;
-
-	address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET;
+	uint32_t address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET;
 
 	EEPROMxfer.txBuff = tbuffer;
 	EEPROMxfer.rxSz = 0;
@@ -553,11 +602,9 @@ EEPROM_STATUS saveNewUser(uint8_t userid, struct users_S *newuser)
 EEPROM_STATUS changePIN(uint8_t userid, uint32_t *newpin)
 {
 	uint8_t *tbuffer = eepromTXbuffer;
-	uint32_t address = BOOTTIME_OFFSET;
+	uint32_t address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 9;;
 
-	tbuffer = eepromTXbuffer;
-	address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 9;
-
+	//tbuffer = eepromTXbuffer;
 	EEPROMxfer.txBuff = tbuffer;
 	EEPROMxfer.rxSz = 0;
 	EEPROMxfer.txSz = 4 + 2; //PIN + ADDRESS
@@ -581,11 +628,9 @@ EEPROM_STATUS changePIN(uint8_t userid, uint32_t *newpin)
 EEPROM_STATUS changeName(uint8_t userid, uint8_t *newname)
 {
 	uint8_t *tbuffer = eepromTXbuffer;
-	uint32_t address = BOOTTIME_OFFSET;
+	uint32_t address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 1;
 
-	tbuffer = eepromTXbuffer;
-	address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 1;
-
+	//tbuffer = eepromTXbuffer;
 	EEPROMxfer.txBuff = tbuffer;
 	EEPROMxfer.rxSz = 0;
 	EEPROMxfer.txSz = 8 + 2; //NAME + ADDRESS
@@ -637,4 +682,27 @@ uint8_t getNumOfUsers(void)
 		if (rbuffer[0] > 0) numOfUsers++;
 	}
 	return numOfUsers;
+}
+
+EEPROM_STATUS deleteUser(uint8_t userid)
+{
+	uint8_t *tbuffer = eepromTXbuffer;
+	uint32_t address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 13;
+
+	//tbuffer = eepromTXbuffer;
+	EEPROMxfer.txBuff = tbuffer;
+	EEPROMxfer.rxSz = 0;
+	EEPROMxfer.txSz = 1 + 2; //LEVEL + ADDRESS; LEVEL 0 = INACTIVE
+
+	tbuffer[0] = (address >> 8) & 0xFF;
+	tbuffer[1] = address & 0xFF;
+	tbuffer[2] = 0;
+
+	EPROM_DELAY();
+
+	if (Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer) != I2C_STATUS_DONE)
+	{
+		return BAD;
+	}
+	return GOOD;
 }

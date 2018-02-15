@@ -12,19 +12,7 @@
 #define X_LIGHT_ON_TIME 5
 
 //HAVE ONE MORE IN STRUCT
-
-#define turnon1_hr 23
-#define turnon1_min 05
-#define turnon1_dur 5
-#define turnon2_hr 2
-#define turnon2_min 30
-#define turnon2_dur 3
-#define turnon3_hr 4
-#define turnon3_min 15
-#define turnon3_dur 7
-
-//HAVE ONE MORE IN STRUCT
-#define no_of_x_flashes 3  //ee
+#define NUM_OF_X_FLASHES 3  //ee
 #define flash1_hr 1
 #define flash1_min 5
 #define flash2_hr 3

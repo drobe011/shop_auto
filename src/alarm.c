@@ -130,6 +130,8 @@ void subMenu_ExtMotionSensorAll(void);
 void subMenu_edit_ExtMotionSensor(uint8_t sensorid);
 void subMenu_edit_AUTO_LIS(void);
 void subMenu_edit_Auto_LIS_item(uint8_t item);
+void subMenu_edit_X_strobe(void);
+void subMenu_edit_X_strobe_item(uint8_t item);
 void menu_alarmReset(void);
 void showMainMenu(void);
 void showInputsMenu(void);
@@ -997,7 +999,7 @@ uint8_t pollAutomation(void)
 		}
 
 		//check if time to strobe exterior lights
-		for (uint8_t xstrobe = 0; xstrobe < no_of_x_flashes; xstrobe++)
+		for (uint8_t xstrobe = 0; xstrobe < NUM_OF_X_FLASHES; xstrobe++)
 		{
 			if ((uint8_t)checkTime.time[RTC_TIMETYPE_HOUR] == x_light_auto[xstrobe].hour)
 				if ((uint8_t)checkTime.time[RTC_TIMETYPE_MINUTE] == x_light_auto[xstrobe].min)
@@ -1262,7 +1264,7 @@ void showMainMenu(void)
 				showAdminMenu();
 				break;
 			}
-			dispMainMenu(menuLen);
+			//dispMainMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1307,7 +1309,7 @@ void showInputsMenu(void)
 				menu_edit_DarkTH();
 				break;
 			}
-			dispInputsMenu(menuLen);
+			//dispInputsMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1318,7 +1320,7 @@ void showInputsMenu(void)
 void showOutputsMenu(void)
 {
 	uint32_t selection = 0;
-	uint8_t menuLen = 3;
+	uint8_t menuLen = 4;
 	uint8_t menuItem = 0;
 	uint32_t menuTimer = systemTick;
 	dispOutputsMenu(menuLen);
@@ -1351,8 +1353,10 @@ void showOutputsMenu(void)
 			case 2:
 				subMenu_edit_AUTO_LIS();
 				break;
+			case 3:
+				subMenu_edit_X_strobe();
 			}
-			dispOutputsMenu(menuLen);
+			//dispOutputsMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1394,7 +1398,7 @@ void showDelaysMenu(void)
 				menu_edit_EntryDelay();
 				break;
 			}
-			dispDelaysMenu(menuLen);
+			//dispDelaysMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1446,7 +1450,7 @@ void showSystemMenu(void)
 				menu_alarmReset();
 				break;
 			}
-			dispSystemMenu(menuLen);
+			//dispSystemMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1482,21 +1486,19 @@ void showAdminMenu(void)
 			switch (menuItem)
 			{
 			case 0:
-				if (c_user->id) menu_changePIN();
+				if (c_user->id) menu_changePIN(); //TEST TO MAKE SURE NOT SYSTEM USER
 				break;
 			case 1:
-				if (c_user->id) menu_renameUser();
+				if (c_user->id) menu_renameUser(); //TEST TO MAKE SURE NOT SYSTEM USER
 				break;
 			case 2:
-				//if (c_user->level >= ADMIN_LEVEL)
-				menu_addUser();
+				if (c_user->level >= ADMIN_LEVEL) menu_addUser();
 				break;
 			case 3:
-				//if (c_user->level >= ADMIN_LEVEL); //////////dont forget to remove the ';'
-				menu_deleteUser();
+				if (c_user->level >= ADMIN_LEVEL) menu_deleteUser();
 				break;
 			}
-			dispAdminMenu(menuLen);
+			//dispAdminMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1634,6 +1636,7 @@ void menu_deleteUser(void)
 			}
 		}
 	}
+
 	uint32_t selection = 0;
 	uint8_t menuLen = activeUserCount-1;
 	uint8_t menuItem = 0;
@@ -1680,26 +1683,33 @@ void menu_deleteUser(void)
 			menuTimer = systemTick;
 			break;
 		case KP_equal:
-			switch (menuItem)
+			dispConfirmDeleteUser(activeUsers[menuItem].name);
+			selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+			debouncer();
+			if (selection == KP_CE)
 			{
-			case 0:
-
-				break;
-			case 1:
-
-				break;
-			case 2:
-
-				break;
-			case 3:
-
-				break;
+				dispClear();
+				updatescreen++;
 			}
-
-			//dispDeleteUser(menuItem, menuLen);
+			else
+			{
+				if (deleteUser(menuItem))
+				{
+					dispNewPin(2);
+					pause(2000);
+					return;
+				}
+				else
+				{
+					dispNewPin(3);
+					pause(2000);
+					return;
+				}
+			}
 			menuTimer = systemTick;
 			break;
 		}
+
 		if (updatescreen)
 		{
 			strcpy ((char*) msg.msg, (char*) blankline);
@@ -1775,3 +1785,95 @@ uint8_t getAlpha(uint8_t cursorpsn, uint8_t startchar)
 	return 0;
 }
 
+void subMenu_edit_X_strobe(void)
+{
+	uint8_t menuItem = 0;
+	uint32_t selection = 0;
+	uint32_t menuTimer = systemTick;
+
+	dispExtStrobe(3);
+	dispExtStrobe(menuItem);
+
+	while (TIME_WAIT(menuTimer, KP_TIMEOUT_SUBMENU_MS))
+	{
+		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
+		debouncer();
+
+		switch (selection)
+		{
+		case KP_plus:
+			if (menuItem < NUM_OF_X_FLASHES - 1) menuItem++;
+			menuTimer = systemTick;
+			break;
+		case KP_minus:
+			if (menuItem) menuItem--;
+			menuTimer = systemTick;
+			break;
+		case KP_equal:
+			subMenu_edit_X_strobe_item(menuItem);
+			//dispAutomateLIS(menuItem);
+			menuTimer = systemTick;
+			break;
+		}
+		dispExtStrobe(menuItem);
+	}
+}
+
+void subMenu_edit_X_strobe_item(uint8_t item)
+{
+	uint32_t selection[2] = { 0, 0 };
+	uint8_t value = 0;
+	uint8_t value_changed = 0;
+
+	setCursor(1, 1);
+	CURSOR_ON();
+
+	if(getKPInput(selection, 2))
+	{
+		value = (selection[0] * 10) + selection[1];
+		if (value > 23)
+		{
+			CURSOR_OFF();
+			return;
+		}
+		x_light_auto[item].hour = value;
+		value_changed++;
+	}
+
+	setCursor(1, 4);
+	if(getKPInput(selection, 2))
+	{
+		value = (selection[0] * 10) + selection[1];
+		if (value > 59)
+		{
+			CURSOR_OFF();
+			return;
+		}
+		x_light_auto[item].min = value;
+		value_changed++;
+	}
+
+	selection[0] = 0;
+	setCursor(1, 15);
+	selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
+	debouncer();
+	if (!selection[0])
+	{
+		CURSOR_OFF();
+		if (!value_changed) return;
+	}
+	else
+	{
+		x_light_auto[item].active = (x_light_auto[item].active ? 0 : 1);
+		value_changed++;
+	}
+
+	CURSOR_OFF();
+
+	if (value_changed)
+	{
+		saveByte(((EPROM_PAGE_SZ * item) + AUTO_X_OFFSET), x_light_auto[item].hour);
+		saveByte(((EPROM_PAGE_SZ * item) + AUTO_X_OFFSET + 1), x_light_auto[item].min);
+		saveByte(((EPROM_PAGE_SZ * item) + AUTO_X_OFFSET + 3), x_light_auto[item].active);
+	}
+}

@@ -17,6 +17,7 @@ extern uint8_t DARK_THRESHOLD;
 
 I2C_XFER_T DISPLAYxfer;
 RTC_TIME_T cTime;
+RTC_TIME_T bootTime;
 
 uint8_t DISPLAY_txbuffer[DISPLAY_TXBUFFER_SZ];
 
@@ -80,8 +81,8 @@ struct LIGHT_AUTO_S light_auto[] =
 };
 
 struct X_LIGHT_AUTO_S x_light_auto[] = {
-		{ flash1_hr, flash1_min },
-		{ flash2_hr, flash2_min },
+		{ 1, 5, DISABLE },
+		{ 3, 33, DISABLE },
 		{ NONE, NONE, DISABLE },
 };
 
@@ -113,11 +114,13 @@ void setUpSystem(void)
 	initDisplay();
 	dispBoot();
 	setUpRTC();
-	if (setUpEEPROM())
+	setUpEEPROM();
+	/*
 	{
 		//NO REAL REASON TO SET BOOT TIME TO EEPROM TODO: DON'T SAVE BOOTSTAMP TO EEPROM
 		setBootStamp();
 	}
+	*/
 	setUpUsers();
 	setUpTimer();
 	//JUST TO DISPLAY BOOT MESSAGE
@@ -190,6 +193,8 @@ void setUpRTC(void)
 	Chip_RTC_ClearIntPending(LPC_RTC, RTC_INT_COUNTER_INCREASE);
 	NVIC_ClearPendingIRQ(RTC_IRQn);
 	NVIC_EnableIRQ(RTC_IRQn);
+	pause(10);
+	Chip_RTC_GetFullTime(LPC_RTC, &bootTime);
 }
 
 static EEPROM_STATUS setUpEEPROM(void)

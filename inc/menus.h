@@ -53,5 +53,7 @@ void dispNewPin(uint8_t round);
 void dispNewUser(void);
 void dispRenameUser(void);
 void dispDeleteUser(uint8_t position, uint8_t length);
+void dispConfirmDeleteUser(uint8_t *username);
+void dispExtStrobe(uint8_t xlight);
 
 #endif /* MENUS_H_ */

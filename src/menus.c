@@ -17,7 +17,9 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct LIGHT_AUTO_S light_auto[];
+extern struct LIGHT_AUTO_S x_light_auto[];
 extern RTC_TIME_T cTime;
+extern RTC_TIME_T bootTime;
 extern uint8_t readyToArm;
 extern uint8_t DARK_THRESHOLD;
 extern uint8_t ARM_DELAY;
@@ -64,10 +66,13 @@ struct MSG_S DISP_UPTIME = { 0, 0, "UPTIME: 000:00:00" };
 struct MSG_S DISP_UPTIME1 = { 1, 0, "BOOT: 00/00/00 00:00" };
 struct MSG_S DISP_AUTO_LIS = { 0, 0, "LIS AUTO 1/4" };
 struct MSG_S DISP_AUTO_LIS1 = { 1, 1, "00:00 @ 00min OFF" };
+struct MSG_S DISP_AUTO_LX_STROBE1 = { 0, 0, "STROBE 1/3" };
+struct MSG_S DISP_AUTO_LX_STROBE2 = { 1, 1, "00:00  OFF" };
 struct MSG_S DISP_RESET = { 0, 1, "Confirm Reset" };
 struct MSG_S DISP_NEWPIN = { 0, 2, "New PIN: " };
 struct MSG_S DISP_ADDUSER1 = { 0, 0, "User Name:" };
 struct MSG_S DISP_ADDUSER2 = { 1, 0, "PIN:      Level:" };
+struct MSG_S DISP_CONF_DEL = { 0, 0, "Delete"};
 
 struct MSG_S mainMenu[] = {
 		{0, 1, "Sensors            "},
@@ -86,7 +91,8 @@ struct MSG_S inputsMenu[] = {
 struct MSG_S outputsMenu[] = {
 		{0, 1, "Internal           "},
 		{1, 1, "External           "},
-		{1, 1, "Int Automation     "}
+		{1, 1, "Int Automation     "},
+		{1, 1, "Ext Strobe         "}
 };
 
 struct MSG_S delaysMenu[] = {
@@ -456,7 +462,7 @@ void dispOutputAll(void)
 void dispUpTime(void)
 {
 	RTC_TIME_T RTCTime;
-	RTC_TIME_T boot_time_LPC;
+	//RTC_TIME_T boot_time_LPC;
 	struct tm tempRTC_time;
 	struct tm boot_time;
 
@@ -464,7 +470,7 @@ void dispUpTime(void)
 	sendDisplay(0, &DISP_UPTIME);
 
 	Chip_RTC_GetFullTime(LPC_RTC, &RTCTime);
-	if (!getBootStamp(&boot_time_LPC)) return;
+	//if (!getBootStamp(&boot_time_LPC)) return;
 
 	tempRTC_time.tm_year = RTCTime.time[RTC_TIMETYPE_YEAR] - 1900;
 	tempRTC_time.tm_mon = RTCTime.time[RTC_TIMETYPE_MONTH];
@@ -474,12 +480,12 @@ void dispUpTime(void)
 	tempRTC_time.tm_sec = RTCTime.time[RTC_TIMETYPE_SECOND];
 	tempRTC_time.tm_isdst = 0;
 
-	boot_time.tm_year = boot_time_LPC.time[RTC_TIMETYPE_YEAR] - 1900;
-	boot_time.tm_mon = boot_time_LPC.time[RTC_TIMETYPE_MONTH];
-	boot_time.tm_mday = boot_time_LPC.time[RTC_TIMETYPE_DAYOFMONTH];
-	boot_time.tm_hour = boot_time_LPC.time[RTC_TIMETYPE_HOUR];
-	boot_time.tm_min = boot_time_LPC.time[RTC_TIMETYPE_MINUTE];
-	boot_time.tm_sec = boot_time_LPC.time[RTC_TIMETYPE_SECOND];
+	boot_time.tm_year = bootTime.time[RTC_TIMETYPE_YEAR] - 1900;
+	boot_time.tm_mon = bootTime.time[RTC_TIMETYPE_MONTH];
+	boot_time.tm_mday = bootTime.time[RTC_TIMETYPE_DAYOFMONTH];
+	boot_time.tm_hour = bootTime.time[RTC_TIMETYPE_HOUR];
+	boot_time.tm_min = bootTime.time[RTC_TIMETYPE_MINUTE];
+	boot_time.tm_sec = bootTime.time[RTC_TIMETYPE_SECOND];
 	boot_time.tm_isdst = 0;
 
 	time_t bTime = mktime(&boot_time);
@@ -510,29 +516,29 @@ void dispUpTime(void)
 	sendDisplay(0, &min_S);
 	sendDisplay(0, &sec_S);
 
-	sprintf(hrs, "%02d", boot_time_LPC.time[RTC_TIMETYPE_HOUR]);
+	sprintf(hrs, "%02d", bootTime.time[RTC_TIMETYPE_HOUR]);
 	strcpy((char*) hrs_S.msg, (char*) hrs);
 	hrs_S.row = 1;
 	hrs_S.column = 15;
 
-	sprintf(min, "%02d", boot_time_LPC.time[RTC_TIMETYPE_MINUTE]);
+	sprintf(min, "%02d", bootTime.time[RTC_TIMETYPE_MINUTE]);
 	strcpy((char*) min_S.msg, (char*) min);
 	min_S.row = 1;
 	min_S.column = 18;
 
 	char mos[3];
 	struct MSG_S mos_S = {1, 6, ""};
-	sprintf(mos, "%02d", boot_time_LPC.time[RTC_TIMETYPE_MONTH]);
+	sprintf(mos, "%02d", bootTime.time[RTC_TIMETYPE_MONTH]);
 	strcpy((char*) mos_S.msg, (char*) mos);
 
 	char day[3];
 	struct MSG_S day_S = {1, 9, ""};
-	sprintf(day, "%02d", boot_time_LPC.time[RTC_TIMETYPE_DAYOFMONTH]);
+	sprintf(day, "%02d", bootTime.time[RTC_TIMETYPE_DAYOFMONTH]);
 	strcpy((char*) day_S.msg, (char*) day);
 
 	char yr[3];
 	struct MSG_S yr_S = {1, 12, ""};
-	sprintf(yr, "%02d", boot_time_LPC.time[RTC_TIMETYPE_YEAR] - 2000);
+	sprintf(yr, "%02d", bootTime.time[RTC_TIMETYPE_YEAR] - 2000);
 	strcpy((char*) yr_S.msg, (char*) yr);
 
 	sendDisplay(0, &DISP_UPTIME1);
@@ -756,7 +762,17 @@ void dispOutputsMenu(uint8_t position)
 		break;
 	case 2:
 		outputsMenu[2].row = 0;
+		outputsMenu[3].row = 1;
 		sendDisplay(0, &outputsMenu[2]);
+		sendDisplay(0, &outputsMenu[3]);
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 3:
+		outputsMenu[3].row = 0;
+		sendDisplay(0, &outputsMenu[3]);
 		setCursor(1, 0);
 		sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
@@ -764,7 +780,7 @@ void dispOutputsMenu(uint8_t position)
 		setCursor(1, 19);
 		sendChar(' ');
 		break;
-	case 3:
+	case 4:
 		dispClear();
 		outputsMenu[0].row = 0;
 		outputsMenu[1].row = 1;
@@ -1007,8 +1023,6 @@ void dispDeleteUser(uint8_t position, uint8_t length)
 	}
 	else if (position == length)
 	{
-		//setCursor(1, 0);
-		//sendDisplay(1, &DISP_SPACE);
 		setCursor(0, 19);
 		sendChar(ARROW_UP);
 		setCursor(1, 19);
@@ -1028,6 +1042,78 @@ void dispDeleteUser(uint8_t position, uint8_t length)
 		sendChar(ARROW_DOWN);
 		setCursor(0, 19);
 		sendChar(ARROW_UP);
-		//setCursor(1, 19);
 	}
+}
+
+void dispConfirmDeleteUser(uint8_t *username)
+{
+	dispClear();
+
+	sendDisplay(0, &DISP_CONF_DEL);
+}
+
+void dispExtStrobe(uint8_t xlight)
+{
+	uint8_t hr = x_light_auto[xlight].hour;
+	uint8_t min = x_light_auto[xlight].min;
+	uint8_t act = x_light_auto[xlight].active;
+
+	switch (xlight)
+	{
+	case 0:
+		setCursor(0, 19);
+		sendChar(' ');
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 1:
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(ARROW_DOWN);
+		break;
+	case 2:
+		setCursor(0, 19);
+		sendChar(ARROW_UP);
+		setCursor(1, 19);
+		sendChar(' ');
+		break;
+	case 3:
+		dispClear();
+
+		sendDisplay(0, &DISP_AUTO_LX_STROBE1);
+		sendDisplay(0, &DISP_AUTO_LX_STROBE2);
+		break;
+	}
+
+	setCursor(0, 7);
+	sendChar(xlight + 48 + 1);
+
+	char tmpStr[4];
+	struct MSG_S tmpMSG = {0, 0, ""};
+
+	sprintf(tmpStr, "%02d", hr);
+	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+	setCursor(1, 1);
+	sendDisplay(1, &tmpMSG);
+
+	sprintf(tmpStr, "%02d", min);
+	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+	setCursor(1, 4);
+	sendDisplay(1, &tmpMSG);
+
+	setCursor(1, 7);
+	if (act)
+	{
+		sendChar('O');
+		sendChar('N');
+		sendChar(' ');
+	}
+	else
+	{
+		sendChar('O');
+		sendChar('F');
+		sendChar('F');
+	}
+
 }
