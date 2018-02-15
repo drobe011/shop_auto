@@ -193,7 +193,7 @@ void setUpRTC(void)
 	Chip_RTC_ClearIntPending(LPC_RTC, RTC_INT_COUNTER_INCREASE);
 	NVIC_ClearPendingIRQ(RTC_IRQn);
 	NVIC_EnableIRQ(RTC_IRQn);
-	pause(10);
+	//pause(10);
 	Chip_RTC_GetFullTime(LPC_RTC, &bootTime);
 }
 

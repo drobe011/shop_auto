@@ -180,9 +180,9 @@ int main(void)
 				setIOpin(&alarm_system_O[SIREN], DISABLE);
 				RESET_PIN_ATTEMPTS();
 				DISABLE_ON_PWR();
-				dispMainDARD(c_user->name);
 				displayNormal();
 				displayON();
+				dispMainDARD(c_user->name);
 				readyToArm = 2;  //SO IT DISPLAYS AFTER WRONG KEYPRESS
 				ALARMSTATE = DISARMED;
 				break;
@@ -1127,6 +1127,7 @@ void subMenu_edit_AUTO_LIS(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
+		if(selection == KP_CE) return;
 
 		switch (selection)
 		{
@@ -1264,7 +1265,7 @@ void showMainMenu(void)
 				showAdminMenu();
 				break;
 			}
-			//dispMainMenu(menuLen);
+			dispMainMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1309,7 +1310,7 @@ void showInputsMenu(void)
 				menu_edit_DarkTH();
 				break;
 			}
-			//dispInputsMenu(menuLen);
+			dispInputsMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1356,7 +1357,7 @@ void showOutputsMenu(void)
 			case 3:
 				subMenu_edit_X_strobe();
 			}
-			//dispOutputsMenu(menuLen);
+			dispOutputsMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1398,7 +1399,7 @@ void showDelaysMenu(void)
 				menu_edit_EntryDelay();
 				break;
 			}
-			//dispDelaysMenu(menuLen);
+			dispDelaysMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1450,7 +1451,7 @@ void showSystemMenu(void)
 				menu_alarmReset();
 				break;
 			}
-			//dispSystemMenu(menuLen);
+			dispSystemMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1498,7 +1499,7 @@ void showAdminMenu(void)
 				if (c_user->level >= ADMIN_LEVEL) menu_deleteUser();
 				break;
 			}
-			//dispAdminMenu(menuLen);
+			dispAdminMenu(menuLen);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1798,6 +1799,7 @@ void subMenu_edit_X_strobe(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
+		if(selection == KP_CE) return;
 
 		switch (selection)
 		{
@@ -1811,7 +1813,7 @@ void subMenu_edit_X_strobe(void)
 			break;
 		case KP_equal:
 			subMenu_edit_X_strobe_item(menuItem);
-			//dispAutomateLIS(menuItem);
+			dispExtStrobe(menuItem);
 			menuTimer = systemTick;
 			break;
 		}
@@ -1854,7 +1856,7 @@ void subMenu_edit_X_strobe_item(uint8_t item)
 	}
 
 	selection[0] = 0;
-	setCursor(1, 15);
+	setCursor(1, 8);
 	selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 	debouncer();
 	if (!selection[0])
@@ -1874,6 +1876,6 @@ void subMenu_edit_X_strobe_item(uint8_t item)
 	{
 		saveByte(((EPROM_PAGE_SZ * item) + AUTO_X_OFFSET), x_light_auto[item].hour);
 		saveByte(((EPROM_PAGE_SZ * item) + AUTO_X_OFFSET + 1), x_light_auto[item].min);
-		saveByte(((EPROM_PAGE_SZ * item) + AUTO_X_OFFSET + 3), x_light_auto[item].active);
+		saveByte(((EPROM_PAGE_SZ * item) + AUTO_X_OFFSET + 2), x_light_auto[item].active);
 	}
 }

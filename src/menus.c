@@ -17,7 +17,7 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct LIGHT_AUTO_S light_auto[];
-extern struct LIGHT_AUTO_S x_light_auto[];
+extern struct X_LIGHT_AUTO_S x_light_auto[];
 extern RTC_TIME_T cTime;
 extern RTC_TIME_T bootTime;
 extern uint8_t readyToArm;
@@ -551,10 +551,7 @@ void dispUpTime(void)
 
 void dispAutomateLIS(uint8_t LIS_item)
 {
-	uint8_t hr = light_auto[LIS_item].hour;
-	uint8_t min = light_auto[LIS_item].min;
-	uint8_t dur = light_auto[LIS_item].duration;
-	uint8_t act = light_auto[LIS_item].active;
+
 
 	switch (LIS_item)
 	{
@@ -584,39 +581,47 @@ void dispAutomateLIS(uint8_t LIS_item)
 		break;
 	}
 
-	setCursor(0, 9);
-	sendChar(LIS_item + 48 + 1);
-
-	char tmpStr[4];
-	struct MSG_S tmpMSG = {0, 0, ""};
-
-	sprintf(tmpStr, "%02d", hr);
-	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
-	setCursor(1, 1);
-	sendDisplay(1, &tmpMSG);
-
-	sprintf(tmpStr, "%02d", min);
-	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
-	setCursor(1, 4);
-	sendDisplay(1, &tmpMSG);
-
-	sprintf(tmpStr, "%02d", dur);
-	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
-	setCursor(1, 9);
-	sendDisplay(1, &tmpMSG);
-
-	setCursor(1, 15);
-	if (act)
+	if (LIS_item < NUM_OF_AUTO_LIS)
 	{
-		sendChar('O');
-		sendChar('N');
-		sendChar(' ');
-	}
-	else
-	{
-		sendChar('O');
-		sendChar('F');
-		sendChar('F');
+		uint8_t hr = light_auto[LIS_item].hour;
+		uint8_t min = light_auto[LIS_item].min;
+		uint8_t dur = light_auto[LIS_item].duration;
+		uint8_t act = light_auto[LIS_item].active;
+
+		setCursor(0, 9);
+		sendChar(LIS_item + 48 + 1);
+
+		char tmpStr[4];
+		struct MSG_S tmpMSG = {0, 0, ""};
+
+		sprintf(tmpStr, "%02d", hr);
+		strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+		setCursor(1, 1);
+		sendDisplay(1, &tmpMSG);
+
+		sprintf(tmpStr, "%02d", min);
+		strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+		setCursor(1, 4);
+		sendDisplay(1, &tmpMSG);
+
+		sprintf(tmpStr, "%02d", dur);
+		strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+		setCursor(1, 9);
+		sendDisplay(1, &tmpMSG);
+
+		setCursor(1, 15);
+		if (act)
+		{
+			sendChar('O');
+			sendChar('N');
+			sendChar(' ');
+		}
+		else
+		{
+			sendChar('O');
+			sendChar('F');
+			sendChar('F');
+		}
 	}
 }
 
@@ -1054,10 +1059,6 @@ void dispConfirmDeleteUser(uint8_t *username)
 
 void dispExtStrobe(uint8_t xlight)
 {
-	uint8_t hr = x_light_auto[xlight].hour;
-	uint8_t min = x_light_auto[xlight].min;
-	uint8_t act = x_light_auto[xlight].active;
-
 	switch (xlight)
 	{
 	case 0:
@@ -1086,34 +1087,40 @@ void dispExtStrobe(uint8_t xlight)
 		break;
 	}
 
-	setCursor(0, 7);
-	sendChar(xlight + 48 + 1);
-
-	char tmpStr[4];
-	struct MSG_S tmpMSG = {0, 0, ""};
-
-	sprintf(tmpStr, "%02d", hr);
-	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
-	setCursor(1, 1);
-	sendDisplay(1, &tmpMSG);
-
-	sprintf(tmpStr, "%02d", min);
-	strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
-	setCursor(1, 4);
-	sendDisplay(1, &tmpMSG);
-
-	setCursor(1, 7);
-	if (act)
+	if (xlight < NUM_OF_X_FLASHES)
 	{
-		sendChar('O');
-		sendChar('N');
-		sendChar(' ');
-	}
-	else
-	{
-		sendChar('O');
-		sendChar('F');
-		sendChar('F');
-	}
+		uint8_t hr = x_light_auto[xlight].hour;
+		uint8_t min = x_light_auto[xlight].min;
+		uint8_t act = x_light_auto[xlight].active;
 
+		setCursor(0, 7);
+		sendChar(xlight + 48 + 1);
+
+		char tmpStr[4];
+		struct MSG_S tmpMSG = {0, 0, "       "};
+
+		sprintf(tmpStr, "%02d", hr);
+		strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+		setCursor(1, 1);
+		sendDisplay(1, &tmpMSG);
+
+		sprintf(tmpStr, "%02d", min);
+		strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
+		setCursor(1, 4);
+		sendDisplay(1, &tmpMSG);
+
+		setCursor(1, 8);
+		if (act)
+		{
+			sendChar('O');
+			sendChar('N');
+			sendChar(' ');
+		}
+		else
+		{
+			sendChar('O');
+			sendChar('F');
+			sendChar('F');
+		}
+	}
 }

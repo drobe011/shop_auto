@@ -4,7 +4,7 @@
 #include <time.h>
 #include "eeprom.h"
 
-#define EEPROM_SIG1 131
+#define EEPROM_SIG1 117
 #define EEPROM_SIG2 201
 
 I2C_XFER_T EEPROMxfer;
@@ -18,7 +18,7 @@ extern struct ALARM_SYSTEM_S alarm_system_I[];
 extern struct ALARM_SYSTEM_S motion_lights[];
 extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct LIGHT_AUTO_S light_auto[];
-extern struct LIGHT_AUTO_S x_light_auto[];
+extern struct X_LIGHT_AUTO_S x_light_auto[];
 extern struct users_S users[];
 
 EEPROM_STATUS initEEPROM(void)
@@ -407,9 +407,9 @@ EEPROM_STATUS setEEPROMdefaults(void)
 
 		tbuffer[0] = (address >> 8) & 0xFF;
 		tbuffer[1] = address & 0xFF;
-		tbuffer[2] = light_auto[sensorid].hour;
-		tbuffer[3] = light_auto[sensorid].min;
-		tbuffer[4] = light_auto[sensorid].active;
+		tbuffer[2] = x_light_auto[sensorid].hour;
+		tbuffer[3] = x_light_auto[sensorid].min;
+		tbuffer[4] = x_light_auto[sensorid].active;
 
 		EPROM_DELAY();
 
