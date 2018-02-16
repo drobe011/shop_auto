@@ -348,7 +348,7 @@ void displayPIN(void)
 void dispDarkTH(void)
 {
 	char THStr[4];
-	char currentADCvalStr[3];
+	char currentADCvalStr[4];
 	uint8_t lightVal = isDark(0);
 
 	dispClear();
