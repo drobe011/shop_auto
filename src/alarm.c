@@ -21,7 +21,6 @@ extern uint32_t systemTick;
 extern uint8_t updateTimeFlag;
 extern uint8_t onPressedFlag;
 extern struct users_S *c_user;
-//extern struct users_S users[];
 extern struct users_S active_user;
 extern struct ALARM_SYSTEM_S alarm_system_O[];
 extern struct ALARM_SYSTEM_S alarm_system_I[];
@@ -93,7 +92,6 @@ STATIC INLINE void flashARMLED()
 	updateTimeFlag = 0;
 }
 
-//Not really good debounce, however keypad has consistent behavior
 STATIC INLINE void debouncer(void)
 {
 	while (getKP(100))
@@ -306,8 +304,7 @@ void checkMenu(void)
 		switch (selection)
 		{
 		case KP_Mplus:
-			if (!readyToArm || !OE_INPUT_ON())
-				return;
+			if (!readyToArm || !OE_INPUT_ON()) return;
 			menu_Arm();
 			break;
 		case KP_3:
@@ -396,11 +393,13 @@ void menu_Lights_Int(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if(selection == KP_CE) return;
 		if (selection)
 		{
 			switch (selection)
 			{
+			case KP_CE:
+				return;
+				break;
 			case KP_1: //MAIN LIGHTS TOGGLE
 				setIOpin(&alarm_system_O[L_I_M], (getIOpin(&alarm_system_I[LIM]) ^ 1));
 				break;
@@ -427,11 +426,13 @@ void menu_Lights_Ext(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if(selection == KP_CE) return;
 		if (selection)
 		{
 			switch (selection)
 			{
+			case KP_CE:
+				return;
+				break;
 			case KP_1: //SOUTH LIGHT TOGGLE
 				setIOpin(&alarm_system_O[L_X_S], (getIOpin(&alarm_system_O[L_X_S]) ^ 1));
 				break;
@@ -542,9 +543,11 @@ void subMenu_edit_Inputs(uint8_t sensorid)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if(selection[0] == KP_CE) return;
 		switch (selection[0])
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_1:
 			alarm_system_I[sensorid].active = (alarm_system_I[sensorid].active ? 0 : 1);
 			saveByte((EPROM_PAGE_SZ * sensorid) + ASI_OFFSET + 1, alarm_system_I[sensorid].active);
@@ -596,10 +599,12 @@ void subMenu_edit_Outputs(uint8_t sensorid)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if(selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_1:
 			alarm_system_O[sensorid].active = (alarm_system_O[sensorid].active ? 0 : 1);
 			saveByte((EPROM_PAGE_SZ * sensorid) + OUTPUT_OFFSET + 1, alarm_system_O[sensorid].active);
@@ -693,9 +698,11 @@ void subMenu_edit_ExtMotionSensor(uint8_t sensorid)
 	{
 		selection[0] = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if(selection[0] == KP_CE) return;
 		switch (selection[0])
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_1:
 			motion_lights[sensorid].active = (motion_lights[sensorid].active ? 0 : 1);
 			saveByte(((EPROM_PAGE_SZ * sensorid) + MS_OFFSET + 1), motion_lights[sensorid].active);
@@ -826,10 +833,11 @@ void menu_edit_IObuffers(void)
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
 
-		if (selection == KP_CE) return;
-
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_1:
 			OE_INPUT_ON() ? IN_BUFF_OFF() : IN_BUFF_ON();
 			break;
@@ -1127,10 +1135,12 @@ void subMenu_edit_AUTO_LIS(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if(selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_plus:
 			if (menuItem < NUM_OF_AUTO_LIS - 1) menuItem++;
 			menuTimer = systemTick;
@@ -1234,10 +1244,12 @@ void showMainMenu(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_plus:
 			if (menuItem < menuLen-1) menuItem++;
 			menuTimer = systemTick;
@@ -1285,10 +1297,12 @@ void showInputsMenu(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_plus:
 			if (menuItem < menuLen-1) menuItem++;
 			menuTimer = systemTick;
@@ -1330,10 +1344,12 @@ void showOutputsMenu(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_plus:
 			if (menuItem < menuLen-1) menuItem++;
 			menuTimer = systemTick;
@@ -1377,10 +1393,12 @@ void showDelaysMenu(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_plus:
 			if (menuItem < menuLen-1) menuItem++;
 			menuTimer = systemTick;
@@ -1419,10 +1437,12 @@ void showSystemMenu(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_plus:
 			if (menuItem < menuLen-1) menuItem++;
 			menuTimer = systemTick;
@@ -1471,10 +1491,12 @@ void showAdminMenu(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if (selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_plus:
 			if (menuItem < menuLen-1) menuItem++;
 			menuTimer = systemTick;
@@ -1659,6 +1681,7 @@ void menu_deleteUser(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
+		/* TODO: CHECK IF THIS IS SPECIAL CASE */
 		if (selection == KP_CE)
 		{
 			dispClear();
@@ -1799,10 +1822,12 @@ void subMenu_edit_X_strobe(void)
 	{
 		selection = getKP(KP_TIMEOUT_SUBMENU_MS);
 		debouncer();
-		if(selection == KP_CE) return;
 
 		switch (selection)
 		{
+		case KP_CE:
+			return;
+			break;
 		case KP_plus:
 			if (menuItem < NUM_OF_X_FLASHES - 1) menuItem++;
 			menuTimer = systemTick;

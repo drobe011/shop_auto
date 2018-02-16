@@ -1,7 +1,6 @@
 #ifndef ALARM_SETTINGS_H_
 #define ALARM_SETTINGS_H_
 
-//#define MAX_USERS 10
 #define ADMIN_LEVEL 4
 #define MAIN_STATE_LOOP_FX 25
 #define DIM_OLED_TIME 10000

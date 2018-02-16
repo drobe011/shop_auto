@@ -115,12 +115,6 @@ void setUpSystem(void)
 	dispBoot();
 	setUpRTC();
 	setUpEEPROM();
-	/*
-	{
-		//NO REAL REASON TO SET BOOT TIME TO EEPROM TODO: DON'T SAVE BOOTSTAMP TO EEPROM
-		setBootStamp();
-	}
-	*/
 	setUpUsers();
 	setUpTimer();
 	//JUST TO DISPLAY BOOT MESSAGE
@@ -177,7 +171,6 @@ void setUpGPIO(void)
 	LPC_GPIOINT->IO0.ENR |= (1 << ON_));
 	NVIC_ClearPendingIRQ(EINT3_IRQn);
 	NVIC_EnableIRQ(EINT3_IRQn);
-
 }
 
 void setUpRTC(void)
@@ -193,7 +186,6 @@ void setUpRTC(void)
 	Chip_RTC_ClearIntPending(LPC_RTC, RTC_INT_COUNTER_INCREASE);
 	NVIC_ClearPendingIRQ(RTC_IRQn);
 	NVIC_EnableIRQ(RTC_IRQn);
-	//pause(10);
 	Chip_RTC_GetFullTime(LPC_RTC, &bootTime);
 }
 
@@ -313,14 +305,14 @@ uint8_t initDisplay(void)
 
 	pause(PAUSE_AFTER_RESET);
 
-	sendCMD(0x22 | 0x08); //0x2A);				//function set (extended command set)
+	sendCMD(0x22 | 0x08); 		//function set (extended command set)
 	sendCMD(0x71);				//disable internal VDD regulator
 	sendData(0x00);
-	sendCMD(0x20 | 0x08);				//0x28);				//function set (fundamental command set)
+	sendCMD(0x20 | 0x08);		//function set (fundamental command set)
 	sendCMD(0x08);				//display off, cursor off, blink off
-	sendCMD(0x22 | 0x08);				//0x2A);				//function set (extended command set)
+	sendCMD(0x22 | 0x08);		//function set (extended command set)
 	sendCMD(0x79);				//OLED command set enabled
-	sendCMD(0xD5);		//set display clock divide ratio/oscillator frequency
+	sendCMD(0xD5);				//set display clock divide ratio/oscillator frequency
 	sendCMD(0x70);
 	sendCMD(0x78);				//OLED command set disabled
 	sendCMD(0x08);				//extended function set (2-lines) ?????
@@ -340,7 +332,7 @@ uint8_t initDisplay(void)
 	sendCMD(0xDB);				//set VCOMH deselect level
 	sendCMD(0x40);
 	sendCMD(0x78);				//OLED command set disabled
-	sendCMD(0x20 | 0x08);				//0x28);				//function set (fundamental command set)
+	sendCMD(0x20 | 0x08);		//function set (fundamental command set)
 	sendCMD(0x01);				//clear display
 	pause(2);
 	sendCMD(0x80);				//set DDRAM address to 0x00
@@ -540,7 +532,8 @@ uint8_t getIOpin(struct ALARM_SYSTEM_S *sys)
 
 uint8_t isDark(uint8_t mode)
 {
-	uint8_t lightLevel = 0;
+	uint8_t lightLevel[10] = {0,0,0,0,0,0,0,0,0,0};
+	uint8_t lightLevel_avg = 0;
 
 	Chip_ADC_SetStartMode(LPC_ADC, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
 
@@ -549,14 +542,25 @@ uint8_t isDark(uint8_t mode)
 		__NOP();
 	}
 
-	Chip_ADC_ReadByte(LPC_ADC, ADC_CH7, &lightLevel);
+	for (uint8_t adcreads = 0; adcreads < 10; adcreads++)
+	{
+		pause(5);
+		Chip_ADC_ReadByte(LPC_ADC, ADC_CH7, &lightLevel[adcreads]);
+	}
+
+	for (uint8_t adcreads = 0; adcreads < 10; adcreads++)
+	{
+		lightLevel_avg += lightLevel[adcreads];
+	}
+
+	lightLevel_avg /= 10;
 
 	if (mode)
 	{
-		if (lightLevel >= DARK_THRESHOLD) return 1;
+		if (lightLevel_avg >= DARK_THRESHOLD) return 1;
 		else return 0;
 	}
-	else return lightLevel;
+	else return lightLevel_avg;
 }
 
 void saveByte(uint32_t offset, uint8_t ebyte)

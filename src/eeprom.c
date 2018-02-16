@@ -283,6 +283,7 @@ EEPROM_STATUS setEEPROMdefaults(void)
 		EPROM_DELAY();
 
 		Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+
 		if (EEPROMxfer.txSz > 0)
 		{
 			return BAD;
@@ -317,6 +318,7 @@ EEPROM_STATUS setEEPROMdefaults(void)
 			return BAD;
 		}
 	}
+
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_O; sensorid++)
 	{
 		tbuffer = eepromTXbuffer;
@@ -340,6 +342,7 @@ EEPROM_STATUS setEEPROMdefaults(void)
 			return BAD;
 		}
 	}
+
 	for (uint8_t sensorid = 0; sensorid < NUM_OF_AUTO_LIS; sensorid++)
 	{
 		tbuffer = eepromTXbuffer;
@@ -512,6 +515,7 @@ EEPROM_STATUS getBootStamp(RTC_TIME_T* boottime)
 	return GOOD;
 }
 */
+
 EEPROM_STATUS getUserData(uint8_t userid, struct users_S* userdata)
 {
 	if (userid == 0) return BAD;
@@ -538,11 +542,14 @@ EEPROM_STATUS getUserData(uint8_t userid, struct users_S* userdata)
 	{
 		return BAD;
 	}
+
 	userdata->id = rbuffer[0];
+
 	for (uint8_t name = 0; name < 8; name++)
 	{
 		userdata->name[name] = rbuffer[name+1];
 	}
+
 	userdata->pin[0] = rbuffer[9];
 	userdata->pin[1] = rbuffer[10];
 	userdata->pin[2] = rbuffer[11];
@@ -564,6 +571,7 @@ EEPROM_STATUS addUser(struct users_S *userdata)
 			else return BAD;
 		}
 	}
+
 	return BAD;
 }
 
@@ -579,10 +587,12 @@ EEPROM_STATUS saveNewUser(uint8_t userid, struct users_S *newuser)
 	tbuffer[0] = (address >> 8) & 0xFF;
 	tbuffer[1] = address & 0xFF;
 	tbuffer[2] = userid;
+
 	for (uint8_t name = 0; name < 8; name++)
 	{
 		tbuffer[name+3] = newuser->name[name];
 	}
+
 	tbuffer[11] = (uint8_t)getDigit(newuser->pin[0]);
 	tbuffer[12] = (uint8_t)getDigit(newuser->pin[1]);
 	tbuffer[13] = (uint8_t)getDigit(newuser->pin[2]);
@@ -592,10 +602,12 @@ EEPROM_STATUS saveNewUser(uint8_t userid, struct users_S *newuser)
 	EPROM_DELAY();
 
 	Chip_I2C_MasterTransfer(EEPROM_DEV, &EEPROMxfer);
+
 	if (EEPROMxfer.txSz > 0)
 	{
 		return BAD;
 	}
+
 	return GOOD;
 }
 
@@ -604,7 +616,6 @@ EEPROM_STATUS changePIN(uint8_t userid, uint32_t *newpin)
 	uint8_t *tbuffer = eepromTXbuffer;
 	uint32_t address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 9;;
 
-	//tbuffer = eepromTXbuffer;
 	EEPROMxfer.txBuff = tbuffer;
 	EEPROMxfer.rxSz = 0;
 	EEPROMxfer.txSz = 4 + 2; //PIN + ADDRESS
@@ -622,6 +633,7 @@ EEPROM_STATUS changePIN(uint8_t userid, uint32_t *newpin)
 	{
 		return BAD;
 	}
+
 	return GOOD;
 }
 
@@ -630,17 +642,18 @@ EEPROM_STATUS changeName(uint8_t userid, uint8_t *newname)
 	uint8_t *tbuffer = eepromTXbuffer;
 	uint32_t address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 1;
 
-	//tbuffer = eepromTXbuffer;
 	EEPROMxfer.txBuff = tbuffer;
 	EEPROMxfer.rxSz = 0;
 	EEPROMxfer.txSz = 8 + 2; //NAME + ADDRESS
 
 	tbuffer[0] = (address >> 8) & 0xFF;
 	tbuffer[1] = address & 0xFF;
+
 	for (uint8_t namechar = 0; namechar < 7; namechar++)
 	{
 		tbuffer[namechar+2] = newname[namechar];
 	}
+
 	tbuffer[9] = 0; //MAKE SURE LAST VALUE IS '\0'
 
 	EPROM_DELAY();
@@ -649,6 +662,7 @@ EEPROM_STATUS changeName(uint8_t userid, uint8_t *newname)
 	{
 		return BAD;
 	}
+
 	return GOOD;
 }
 
@@ -679,8 +693,10 @@ uint8_t getNumOfUsers(void)
 		{
 			return 255;
 		}
+
 		if (rbuffer[0] > 0) numOfUsers++;
 	}
+
 	return numOfUsers;
 }
 
@@ -689,7 +705,6 @@ EEPROM_STATUS deleteUser(uint8_t userid)
 	uint8_t *tbuffer = eepromTXbuffer;
 	uint32_t address = (EPROM_PAGE_SZ * userid) + USERDATA_OFFSET + 13;
 
-	//tbuffer = eepromTXbuffer;
 	EEPROMxfer.txBuff = tbuffer;
 	EEPROMxfer.rxSz = 0;
 	EEPROMxfer.txSz = 1 + 2; //LEVEL + ADDRESS; LEVEL 0 = INACTIVE
@@ -704,5 +719,6 @@ EEPROM_STATUS deleteUser(uint8_t userid)
 	{
 		return BAD;
 	}
+
 	return GOOD;
 }

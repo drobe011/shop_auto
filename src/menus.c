@@ -462,7 +462,6 @@ void dispOutputAll(void)
 void dispUpTime(void)
 {
 	RTC_TIME_T RTCTime;
-	//RTC_TIME_T boot_time_LPC;
 	struct tm tempRTC_time;
 	struct tm boot_time;
 
@@ -470,7 +469,6 @@ void dispUpTime(void)
 	sendDisplay(0, &DISP_UPTIME);
 
 	Chip_RTC_GetFullTime(LPC_RTC, &RTCTime);
-	//if (!getBootStamp(&boot_time_LPC)) return;
 
 	tempRTC_time.tm_year = RTCTime.time[RTC_TIMETYPE_YEAR] - 1900;
 	tempRTC_time.tm_mon = RTCTime.time[RTC_TIMETYPE_MONTH];
@@ -551,8 +549,6 @@ void dispUpTime(void)
 
 void dispAutomateLIS(uint8_t LIS_item)
 {
-
-
 	switch (LIS_item)
 	{
 	case 0:
@@ -1108,8 +1104,8 @@ void dispExtStrobe(uint8_t xlight)
 		strcpy ((char*) tmpMSG.msg, (char*) tmpStr);
 		setCursor(1, 4);
 		sendDisplay(1, &tmpMSG);
-
 		setCursor(1, 8);
+
 		if (act)
 		{
 			sendChar('O');
