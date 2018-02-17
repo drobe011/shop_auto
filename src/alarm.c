@@ -747,7 +747,7 @@ void menu_edit_DarkTH(void)
 
 	dispDarkTH();
 	CURSOR_ON();
-	if (!getKPInput(selection, 3))
+	if (!getKPInput(selection, 4))
 	{
 		CURSOR_OFF();
 		return;
@@ -763,8 +763,8 @@ void menu_edit_DarkTH(void)
 		return;
 
 	DARK_THRESHOLD = (uint16_t) thValue;
-	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD & 0xFF);
-	saveByte(DARK_THRESHOLD_OFFSET+1, (DARK_THRESHOLD >> 8 ) & 0xFF);
+	saveByte(DARK_THRESHOLD_OFFSET, (DARK_THRESHOLD >> 8 ) & 0xFF);
+	saveByte(DARK_THRESHOLD_OFFSET+1, DARK_THRESHOLD & 0xFF);
 }
 
 void menu_edit_ArmDelay(void)

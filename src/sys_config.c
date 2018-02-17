@@ -13,7 +13,7 @@ volatile uint8_t onPressedFlag;
 
 extern uint8_t dispDimmed;
 extern uint32_t dimTimer;
-extern uint8_t DARK_THRESHOLD;
+extern uint16_t DARK_THRESHOLD;
 
 I2C_XFER_T DISPLAYxfer;
 RTC_TIME_T cTime;

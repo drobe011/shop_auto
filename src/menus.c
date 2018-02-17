@@ -21,7 +21,7 @@ extern struct X_LIGHT_AUTO_S x_light_auto[];
 extern RTC_TIME_T cTime;
 extern RTC_TIME_T bootTime;
 extern uint8_t readyToArm;
-extern uint8_t DARK_THRESHOLD;
+extern uint16_t DARK_THRESHOLD;
 extern uint8_t ARM_DELAY;
 extern uint8_t ENTRY_DELAY;
 
@@ -52,6 +52,7 @@ struct MSG_S DISP_RDY_ARM = { 1, 9, { 42, '\0' } };
 struct MSG_S DISP_NOTRDY_ARM = { 1, 9, { 219, '\0' } };
 struct MSG_S DISP_ARMING = { 0, 0, { "ARMING...." } };
 struct MSG_S DISP_PIN = { 0, 0, "ENTER PIN: " };
+struct MSG_S DISP_DELAY = { 0, 0, "[0-255]" };
 struct MSG_S DISP_DARK1 = { 0, 0, "[0-4095]" };
 struct MSG_S DISP_DARK2 = { 1, 0, "Dark TH [0000]:" };
 struct MSG_S DISP_ARM_DELAY = { 1, 0, "Arm Delay [   ]:" };
@@ -354,13 +355,13 @@ void dispDarkTH(void)
 	dispClear();
 	sendDisplay(0, &DISP_DARK1);
 	sendDisplay(0, &DISP_DARK2);
-	sprintf(THStr, "%03d", DARK_THRESHOLD);
+	sprintf(THStr, "%04d", DARK_THRESHOLD);
 	struct MSG_S darkth_tmp = { 1, 9, "" };
 	strcpy((char*) darkth_tmp.msg, (char*) THStr);
 	sendDisplay(0, &darkth_tmp);
 
-	struct MSG_S adcval_tmp = { 0, 17, "" };
-	sprintf(currentADCvalStr, "%03d", (char) lightVal);
+	struct MSG_S adcval_tmp = { 0, 16, "" };
+	sprintf(currentADCvalStr, "%04d", lightVal);
 	strcpy((char*) adcval_tmp.msg, (char*) currentADCvalStr);
 	sendDisplay(0, &adcval_tmp);
 	setCursor(1, 15);
@@ -418,7 +419,7 @@ void dispArmDelay(void)
 	char ADStr[4];
 
 	dispClear();
-	sendDisplay(0, &DISP_DARK1);
+	sendDisplay(0, &DISP_DELAY);
 	sendDisplay(0, &DISP_ARM_DELAY);
 	sprintf(ADStr, "%03d", ARM_DELAY);
 	struct MSG_S armdelay_tmp = { 1, 11, "" };
@@ -432,7 +433,7 @@ void dispEntryDelay(void)
 	char EDStr[4];
 
 	dispClear();
-	sendDisplay(0, &DISP_DARK1);
+	sendDisplay(0, &DISP_DELAY);
 	sendDisplay(0, &DISP_ENTRY_DELAY);
 	sprintf(EDStr, "%03d", ENTRY_DELAY);
 	struct MSG_S entrydelay_tmp = { 1, 11, "" };
