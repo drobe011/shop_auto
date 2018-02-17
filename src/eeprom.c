@@ -4,7 +4,7 @@
 #include <time.h>
 #include "eeprom.h"
 
-#define EEPROM_SIG1 117
+#define EEPROM_SIG1 115
 #define EEPROM_SIG2 201
 
 I2C_XFER_T EEPROMxfer;
@@ -64,7 +64,7 @@ EEPROM_STATUS getEEPROMdata(void)
 
 	EEPROMxfer.txBuff = tbuffer;
 	EEPROMxfer.rxBuff = rbuffer;
-	EEPROMxfer.rxSz = 3;
+	EEPROMxfer.rxSz = 4;
 	EEPROMxfer.txSz = 2;
 	tbuffer[0] = 0;
 	tbuffer[1] = ARM_DELAY_OFFSET;
@@ -76,6 +76,7 @@ EEPROM_STATUS getEEPROMdata(void)
 		ARM_DELAY = rbuffer[0];
 		ENTRY_DELAY = rbuffer[1];
 		DARK_THRESHOLD = rbuffer[2];
+		DARK_THRESHOLD += (uint16_t) rbuffer[3] << 8;
 	}
 	else
 	{
@@ -248,10 +249,11 @@ EEPROM_STATUS setEEPROMdefaults(void)
 	tbuffer[3] = EEPROM_SIG2;
 	tbuffer[4] = ARM_DELAY;
 	tbuffer[5] = ENTRY_DELAY;
-	tbuffer[6] = DARK_THRESHOLD;
+	tbuffer[6] = DARK_THRESHOLD & 0xFF;
+	tbuffer[7] = (DARK_THRESHOLD >> 8 ) & 0xFF;
 
 	EEPROMxfer.rxSz = 0;
-	EEPROMxfer.txSz = 7;
+	EEPROMxfer.txSz = 8;
 	EEPROMxfer.txBuff = tbuffer;
 
 	EPROM_DELAY();

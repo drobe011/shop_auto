@@ -42,7 +42,7 @@ enum ARMEDSTATE_T
 
 uint8_t ARM_DELAY = ARM_DELAY_D;  //ee
 uint8_t ENTRY_DELAY = ENTRY_DELAY_D;  //ee
-uint8_t DARK_THRESHOLD = DARK_THRESHOLD_D; //ee
+uint16_t DARK_THRESHOLD = DARK_THRESHOLD_D; //ee
 
 enum ALARMSTATE_T ALARMSTATE = DISARM;
 enum ARMEDSTATE_T ARMEDSTATE = STAY;
@@ -742,7 +742,7 @@ void subMenu_edit_ExtMotionSensor(uint8_t sensorid)
 
 void menu_edit_DarkTH(void)
 {
-	uint32_t selection[3];
+	uint32_t selection[4];
 	uint32_t thValue = 0;
 
 	dispDarkTH();
@@ -754,15 +754,17 @@ void menu_edit_DarkTH(void)
 	}
 
 	CURSOR_OFF();
-	thValue = selection[0] * 100;
-	thValue += selection[1] * 10;
-	thValue += selection[2];
+	thValue = selection[0] * 1000;
+	thValue += selection[1] * 100;
+	thValue += selection[2] * 10;
+	thValue += selection[3];
 
-	if (thValue > 255)
+	if (thValue > 4095)
 		return;
 
-	DARK_THRESHOLD = (uint8_t) thValue;
-	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD);
+	DARK_THRESHOLD = (uint16_t) thValue;
+	saveByte(DARK_THRESHOLD_OFFSET, DARK_THRESHOLD & 0xFF);
+	saveByte(DARK_THRESHOLD_OFFSET+1, (DARK_THRESHOLD >> 8 ) & 0xFF);
 }
 
 void menu_edit_ArmDelay(void)

@@ -11,6 +11,6 @@
 
 #define ARM_DELAY_D 1  //ee
 #define ENTRY_DELAY_D 30  //ee
-#define DARK_THRESHOLD_D 127 //ee
+#define DARK_THRESHOLD_D 2047 //ee
 
 #endif

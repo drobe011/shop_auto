@@ -530,12 +530,21 @@ uint8_t getIOpin(struct ALARM_SYSTEM_S *sys)
 	return 255;
 }
 
-uint8_t isDark(uint8_t mode)
+uint16_t isDark(uint8_t mode)
 {
 	uint16_t lightLevel[10] = {0,0,0,0,0,0,0,0,0,0};
 	uint16_t lightLevel_avg = 0;
 
+	//THROW THIS ONE AWAY
+	Chip_ADC_SetStartMode(LPC_ADC, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
 
+	while (Chip_ADC_ReadStatus(LPC_ADC, ADC_CH7, ADC_DR_DONE_STAT) != SET)
+	{
+		__NOP();
+	}
+	Chip_ADC_ReadValue(LPC_ADC, ADC_CH7, &lightLevel_avg);
+
+	lightLevel_avg = 0;
 
 	for (uint8_t adcreads = 0; adcreads < 10; adcreads++)
 	{

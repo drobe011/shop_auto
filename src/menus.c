@@ -52,8 +52,8 @@ struct MSG_S DISP_RDY_ARM = { 1, 9, { 42, '\0' } };
 struct MSG_S DISP_NOTRDY_ARM = { 1, 9, { 219, '\0' } };
 struct MSG_S DISP_ARMING = { 0, 0, { "ARMING...." } };
 struct MSG_S DISP_PIN = { 0, 0, "ENTER PIN: " };
-struct MSG_S DISP_DARK1 = { 0, 0, "[0-255]" };
-struct MSG_S DISP_DARK2 = { 1, 0, "Dark TH [   ]:" };
+struct MSG_S DISP_DARK1 = { 0, 0, "[0-4095]" };
+struct MSG_S DISP_DARK2 = { 1, 0, "Dark TH [0000]:" };
 struct MSG_S DISP_ARM_DELAY = { 1, 0, "Arm Delay [   ]:" };
 struct MSG_S DISP_SENS_EDIT = { 1, 0, "[1] [2] [3] [4] [5]" };
 struct MSG_S DISP_AUTO_O_EDIT = { 1, 4, "[1]  [2]" };
@@ -347,9 +347,9 @@ void displayPIN(void)
 
 void dispDarkTH(void)
 {
-	char THStr[4];
-	char currentADCvalStr[4];
-	uint8_t lightVal = isDark(0);
+	char THStr[5];
+	char currentADCvalStr[5];
+	uint16_t lightVal = isDark(0);
 
 	dispClear();
 	sendDisplay(0, &DISP_DARK1);
